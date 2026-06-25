@@ -351,7 +351,7 @@ if mode == "Heatmap":
 # CALENDRIER SUIVIS (FIX COULEURS + MULTI-COULEURS)
 # =========================
 
-elif show_calendar:
+if show_calendar:
 
     st.subheader("📅 Calendrier annuel des suivis")
 
@@ -477,7 +477,7 @@ elif show_calendar:
 # SCORE GLOBAL
 # =========================
 
-elif mode == "Score global":
+if mode == "Score global":
     st.subheader("Score moyen global")
 
     score = resample_series(score_global)
