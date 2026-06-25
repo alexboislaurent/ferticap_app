@@ -344,7 +344,6 @@ if mode == "Heatmap":
     )
 
     ax.set_xticklabels(
-        [pd.to_datetime(t.get_text()).strftime("%d/%m/%y") for t in ax.get_xticklabels()],
         rotation=45,
         ha="right"
     )
