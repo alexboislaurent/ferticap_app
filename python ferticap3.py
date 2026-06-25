@@ -359,9 +359,9 @@ if show_calendar:
 
     year = df["Date"].dt.year.max()
 
-    # -------------------------
-    # 1. Construire table propre Date -> Suivis
-    # -------------------------
+    # =========================
+    # 1. DATA SUIVIS PAR DATE
+    # =========================
 
     suivi_cols = ["Suivi 1", "Suivi 2", "Suivi 3", "Suivi 4"]
     existing_cols = [c for c in suivi_cols if c in df.columns]
@@ -376,16 +376,15 @@ if show_calendar:
     df_suivi["Suivi"] = df_suivi["Suivi"].astype(str).str.strip()
     df_suivi = df_suivi[df_suivi["Suivi"] != ""]
 
-    # regroupement par date
     daily = (
         df_suivi.groupby("Date")["Suivi"]
         .apply(lambda x: list(set(x)))
         .reset_index()
     )
 
-    # -------------------------
-    # 2. couleur par type
-    # -------------------------
+    # =========================
+    # 2. TA LOGIQUE COULEURS
+    # =========================
 
     def get_color(suivis):
         if not isinstance(suivis, list):
@@ -400,16 +399,35 @@ if show_calendar:
             return "orange"
         return "white"
 
-    # mapping date -> couleur
+    # =========================
+    # 3. MAP DATE -> LISTE COULEURS
+    # =========================
+
     color_map = {}
 
     for _, row in daily.iterrows():
         d = row["Date"].date()
-        color_map[d] = get_color(row["Suivi"])
+        suivis = row["Suivi"]
 
-    # -------------------------
-    # 3. FIGURE calendrier mensuel
-    # -------------------------
+        # si mix FCO + LNCR → split visuel
+        if isinstance(suivis, list):
+            colors = []
+
+            for s in suivis:
+                if s == "FCO":
+                    colors.append("red")
+                elif s == "LNCR":
+                    colors.append("blue")
+                else:
+                    colors.append("orange")
+
+            color_map[d] = list(set(colors))
+        else:
+            color_map[d] = ["white"]
+
+    # =========================
+    # 4. FIGURE CALENDRIER
+    # =========================
 
     fig, axes = plt.subplots(3, 4, figsize=(18, 10))
     axes = axes.flatten()
@@ -417,8 +435,8 @@ if show_calendar:
     for month in range(1, 13):
 
         ax = axes[month - 1]
-        ax.set_title(calendar.month_name[month], fontsize=12)
-        ax.set_axis_off()
+        ax.set_title(cal.month_name[month])
+        ax.axis("off")
 
         month_matrix = cal.monthcalendar(year, month)
 
@@ -428,29 +446,53 @@ if show_calendar:
                 if day == 0:
                     continue
 
-                date_obj = pd.Timestamp(year, month, day).date()
-                color = color_map.get(date_obj, "white")
+                d = pd.Timestamp(year, month, day).date()
+                colors = color_map.get(d, ["white"])
 
-                ax.add_patch(
-                    plt.Rectangle(
-                        (j, -i),
-                        1,
-                        1,
-                        facecolor=color,
-                        edgecolor="black",
-                        lw=0.4
+                # =========================
+                # CASE SIMPLE
+                # =========================
+                if len(colors) <= 1:
+                    ax.add_patch(
+                        plt.Rectangle(
+                            (j, -i),
+                            1,
+                            1,
+                            facecolor=colors[0],
+                            edgecolor="black",
+                            lw=0.4
+                        )
                     )
-                )
 
-                # numéro du jour
-                ax.text(
-                    j + 0.5,
-                    -i + 0.5,
-                    str(day),
-                    ha="center",
-                    va="center",
-                    fontsize=7
-                )
+                # =========================
+                # CASE MULTI COULEURS
+                # =========================
+                else:
+                    # fond blanc
+                    ax.add_patch(
+                        plt.Rectangle(
+                            (j, -i),
+                            1,
+                            1,
+                            facecolor="white",
+                            edgecolor="black",
+                            lw=0.4
+                        )
+                    )
+
+                    # split vertical
+                    step = 1 / len(colors[:3])  # max 3 segments
+
+                    for k, c in enumerate(colors[:3]):
+                        ax.add_patch(
+                            plt.Rectangle(
+                                (j + k * step, -i),
+                                step,
+                                1,
+                                facecolor=c,
+                                edgecolor="none"
+                            )
+                        )
 
         ax.set_xlim(0, 7)
         ax.set_ylim(-6, 1)
@@ -555,6 +597,27 @@ elif mode == "Variables biologiques":
     fig.autofmt_xdate(rotation=45)
 
     st.pyplot(fig)
+
+st.markdown("### Légende des suivis")
+
+legend_items = {
+    "FCO": "red",
+    "LNCR": "blue",
+    "Pesée": "purple",
+    "CS": "orange",
+    "Aucun suivi": "white"
+}
+
+cols = st.columns(len(legend_items))
+
+for col, (label, color) in zip(cols, legend_items.items()):
+    with col:
+        st.markdown(
+            f"<div style='display:flex;align-items:center;'>"
+            f"<div style='width:18px;height:18px;background:{color};border:1px solid black;margin-right:6px'></div>"
+            f"{label}</div>",
+            unsafe_allow_html=True
+        )
 
 
 # =========================
