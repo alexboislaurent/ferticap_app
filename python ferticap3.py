@@ -566,13 +566,8 @@ elif mode == "📅 Calendrier":
 
         for s in suivis:
             s = normalize(s)
+            colors.append(COLOR_MAP.get(s, "gray"))
 
-            if s in COLOR_MAP:
-                colors.append(COLOR_MAP[s])
-            else:
-                colors.append("gray")
-
-        # enlever doublons consécutifs
         cleaned = []
         for c in colors:
             if c not in cleaned:
@@ -605,26 +600,9 @@ elif mode == "📅 Calendrier":
     }
 
     # =========================
-    # LÉGENDE
-    # =========================
-
-    st.markdown("### Légende")
-
-    cols = st.columns(len(COLOR_MAP))
-
-    for col, (label, color) in zip(cols, COLOR_MAP.items()):
-        with col:
-            st.markdown(
-                f"<div style='display:flex;align-items:center;'>"
-                f"<div style='width:18px;height:18px;background:{color};"
-                f"border:1px solid black;margin-right:6px'></div>"
-                f"{label}</div>",
-                unsafe_allow_html=True
-            )
-
-    # =========================
     # FIGURE CALENDRIER
     # =========================
+
     year = df["Date"].dt.year.max()
 
     fig, axes = plt.subplots(3, 4, figsize=(18, 10))
@@ -632,68 +610,60 @@ elif mode == "📅 Calendrier":
 
     highlight_months = {1, 4, 5, 8, 9, 12}
 
-   for month in range(1, 13):
+    for month in range(1, 13):
 
-    ax = axes[month - 1]
-    ax.set_title(cal.month_name[month])
-    ax.axis("off")
+        ax = axes[month - 1]
+        ax.set_title(cal.month_name[month])
+        ax.axis("off")
 
-    # =========================
-    # DESSIN CALENDRIER (TOUJOURS)
-    # =========================
+        month_matrix = cal.monthcalendar(year, month)
 
-    month_matrix = cal.monthcalendar(year, month)
+        for i, week in enumerate(month_matrix):
+            for j, day in enumerate(week):
 
-    for i, week in enumerate(month_matrix):
-        for j, day in enumerate(week):
+                if day == 0:
+                    continue
 
-            if day == 0:
-                continue
+                d = pd.Timestamp(year, month, day).date()
+                colors = color_map.get(d, ["white"])
 
-            d = pd.Timestamp(year, month, day).date()
-            colors = color_map.get(d, ["white"])
-
-            if len(colors) == 1:
-                ax.add_patch(plt.Rectangle(
-                    (j, -i), 1, 1,
-                    facecolor=colors[0],
-                    edgecolor="black",
-                    lw=0.4
-                ))
-            else:
-                ax.add_patch(plt.Rectangle(
-                    (j, -i), 1, 1,
-                    facecolor="white",
-                    edgecolor="black",
-                    lw=0.4
-                ))
-
-                step = 1 / len(colors[:4])
-
-                for k, c in enumerate(colors[:4]):
+                if len(colors) == 1:
                     ax.add_patch(plt.Rectangle(
-                        (j + k * step, -i),
-                        step, 1,
-                        facecolor=c,
-                        edgecolor="none"
+                        (j, -i), 1, 1,
+                        facecolor=colors[0],
+                        edgecolor="black",
+                        lw=0.4
+                    ))
+                else:
+                    ax.add_patch(plt.Rectangle(
+                        (j, -i), 1, 1,
+                        facecolor="white",
+                        edgecolor="black",
+                        lw=0.4
                     ))
 
-    ax.set_xlim(0, 7)
-    ax.set_ylim(-6, 1)
+                    step = 1 / len(colors[:4])
 
-    # =========================
-    # HIGHLIGHT (SEULEMENT VISUEL)
-    # =========================
+                    for k, c in enumerate(colors[:4]):
+                        ax.add_patch(plt.Rectangle(
+                            (j + k * step, -i),
+                            step, 1,
+                            facecolor=c,
+                            edgecolor="none"
+                        ))
 
-    if month in highlight_months:
-        ax.add_patch(
-            plt.Rectangle(
-                (0, -6), 7, 7,
-                fill=False,
-                edgecolor="yellow",
-                linewidth=3
+        ax.set_xlim(0, 7)
+        ax.set_ylim(-6, 1)
+
+        if month in highlight_months:
+            ax.add_patch(
+                plt.Rectangle(
+                    (0, -6), 7, 7,
+                    fill=False,
+                    edgecolor="yellow",
+                    linewidth=3
+                )
             )
-        )
 
-plt.tight_layout()
-st.pyplot(fig)
+    plt.tight_layout()
+    st.pyplot(fig)
