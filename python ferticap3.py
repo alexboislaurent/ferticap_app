@@ -425,23 +425,33 @@ if show_calendar:
     # =========================================================
     # 5. LÉGENDE PROPRE
     # =========================================================
-    st.markdown("### Légende")
+# =========================
+# LÉGENDE (UNIQUEMENT SI CALENDRIER)
+# =========================
+if show_calendar:
 
-    legend = {
+    st.markdown("### Légende des suivis")
+
+    legend_items = {
         "FCO": "red",
         "LNCR": "blue",
-        "Autres suivis": "orange",
+        "Pesée": "purple",
+        "CS": "orange",
         "Aucun suivi": "white"
     }
 
-    cols = st.columns(len(legend))
+    cols = st.columns(len(legend_items))
 
-    for col, (label, color) in zip(cols, legend.items()):
+    for col, (label, color) in zip(cols, legend_items.items()):
         with col:
             st.markdown(
-                f"<div style='display:flex;align-items:center;'>"
-                f"<div style='width:18px;height:18px;background:{color};border:1px solid black;margin-right:6px'></div>"
-                f"{label}</div>",
+                f"""
+                <div style='display:flex;align-items:center;'>
+                    <div style='width:18px;height:18px;background:{color};
+                    border:1px solid black;margin-right:6px'></div>
+                    {label}
+                </div>
+                """,
                 unsafe_allow_html=True
             )
 # =========================
