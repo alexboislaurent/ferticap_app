@@ -167,42 +167,23 @@ df_filtered = df[
 ]
 
 # =========================
-# RANKING BOUCS (ROBUSTE)
+# RANKING BOUCS (10 DERNIÈRES COLLECTES) ✔ FIXÉ
 # =========================
 
-df_filtered["Date"] = pd.to_datetime(df_filtered["Date"])
+last_10_dates = sorted(df_filtered["Date"].dropna().unique())[-10:]
 
-df_filtered = df_filtered.dropna(subset=["Score", "Code animal", "Date"])
+df_last10 = df_filtered[df_filtered["Date"].isin(last_10_dates)]
 
-last_10_dates = (
-    df_filtered["Date"]
-    .sort_values()
-    .dropna()
-    .unique()
+ranking_df = (
+    df_last10.groupby("Code animal", as_index=False)["Score"]
+    .mean()
+    .sort_values("Score", ascending=False)
 )
 
-last_10_dates = last_10_dates[-10:]
-
-df_last10 = df_filtered[
-    df_filtered["Date"].isin(last_10_dates)
-]
-
-# sécurité anti-vide
-if df_last10.empty:
-    st.warning("Aucune donnée pour les 10 dernières collectes")
-    ranking_df = pd.DataFrame(columns=["Boucs", "Score moyen (10 dernières)"])
-else:
-    ranking_df = (
-        df_last10.groupby("Code animal")["Score"]
-        .mean()
-        .reset_index()
-        .sort_values("Score", ascending=False)
-    )
-
-    ranking_df = ranking_df.rename(columns={
-        "Code animal": "Boucs",
-        "Score": "Score moyen (10 dernières)"
-    })
+ranking_df = ranking_df.rename(columns={
+    "Code animal": "Boucs",
+    "Score": "Score moyen (10 dernières)"
+})
 
 # =========================
 # BOUCS AUTO DERNIÈRE COLLECTE
@@ -470,6 +451,96 @@ elif mode == "Variables biologiques":
 # RANKING BOUCS
 # =========================
 
+elif mode == "🏆 Ranking boucs":
+
+    # --------------------------------------------------
+    # 10 dernières collectes
+    # --------------------------------------------------
+
+    st.subheader("🏆 Performance des boucs - 10 dernières collectes")
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    ax.barh(
+        ranking_last10.index,
+        ranking_last10["Score_moyen"]
+    )
+
+    for i, (_, row) in enumerate(ranking_last10.iterrows()):
+        ax.text(
+            row["Score_moyen"] + 0.1,
+            i,
+            f'{row["Taux_reussite"]:.0f}% ({int(row["Nb_succes"])}/{int(row["Nb_total"])})',
+            va="center"
+        )
+
+    ax.invert_yaxis()
+    ax.set_xlabel("Score moyen")
+    ax.set_title("10 dernières collectes")
+    ax.grid(True)
+
+    st.pyplot(fig)
+
+    # --------------------------------------------------
+    # Année en cours
+    # --------------------------------------------------
+
+    st.subheader(f"📅 Performance des boucs - {current_year}")
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    ax.barh(
+        ranking_year.index,
+        ranking_year["Score_moyen"]
+    )
+
+    for i, (_, row) in enumerate(ranking_year.iterrows()):
+        ax.text(
+            row["Score_moyen"] + 0.1,
+            i,
+            f'{row["Taux_reussite"]:.0f}% ({int(row["Nb_succes"])}/{int(row["Nb_total"])})',
+            va="center"
+        )
+
+    ax.invert_yaxis()
+    ax.set_xlabel("Score moyen")
+    ax.set_title(f"Année {current_year}")
+    ax.grid(True)
+
+    st.pyplot(fig)
+
+    # --------------------------------------------------
+    # Historique complet
+    # --------------------------------------------------
+
+    st.subheader("📈 Performance des boucs - All Time")
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    ax.barh(
+        ranking_alltime.index,
+        ranking_alltime["Score_moyen"]
+    )
+
+    for i, (_, row) in enumerate(ranking_alltime.iterrows()):
+        ax.text(
+            row["Score_moyen"] + 0.1,
+            i,
+            f'{row["Taux_reussite"]:.0f}% ({int(row["Nb_succes"])}/{int(row["Nb_total"])})',
+            va="center"
+        )
+
+    ax.invert_yaxis()
+    ax.set_xlabel("Score moyen")
+    ax.set_title("Historique complet")
+    ax.grid(True)
+
+    st.pyplot(fig)
+
+# =========================
+# CALENDRIER
+# =========================
+
 elif mode == "📅 Calendrier":
 
     st.subheader("📅 Calendrier annuel des suivis")
@@ -479,7 +550,7 @@ elif mode == "📅 Calendrier":
     # =========================
     # MAP COULEURS FIXES
     # =========================
-
+        
     COLOR_MAP = {
         "FCO": "blue",
         "LNCR": "red",
@@ -495,20 +566,34 @@ elif mode == "📅 Calendrier":
 
         for s in suivis:
             s = normalize(s)
+            colors.append(COLOR_MAP.get(s, "gray"))
 
-            if s in COLOR_MAP:
-                colors.append(COLOR_MAP[s])
-            else:
-                colors.append("gray")
-
-        # enlever doublons consécutifs
         cleaned = []
         for c in colors:
             if c not in cleaned:
                 cleaned.append(c)
 
         return cleaned if cleaned else ["white"]
+# =========================
+# LÉGENDE
+# =========================
 
+st.markdown("### Légende")
+
+cols = st.columns(len(COLOR_MAP))
+
+for col, (label, color) in zip(cols, COLOR_MAP.items()):
+    with col:
+        st.markdown(
+            f"""
+            <div style='display:flex;align-items:center;gap:6px;'>
+                <div style='width:18px;height:18px;background:{color};
+                border:1px solid black;'></div>
+                {label}
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
     # =========================
     # DATA CLEAN
     # =========================
@@ -534,102 +619,70 @@ elif mode == "📅 Calendrier":
     }
 
     # =========================
-    # LÉGENDE (IDENTIQUE À TON CODE)
+    # FIGURE CALENDRIER
     # =========================
 
-    st.markdown("### Légende")
+    year = df["Date"].dt.year.max()
 
-    cols = st.columns(len(COLOR_MAP))
-
-    for col, (label, color) in zip(cols, COLOR_MAP.items()):
-        with col:
-            st.markdown(
-                f"""
-                <div style='display:flex;align-items:center;'>
-                    <div style='width:18px;height:18px;background:{color};
-                    border:1px solid black;margin-right:6px'></div>
-                    {label}
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-
-    # =========================
-    # ANNÉE BASE
-    # =========================
-
-    base_year = df["Date"].dt.year.max()
-    years = [base_year - 1, base_year, base_year + 1]
+    fig, axes = plt.subplots(3, 4, figsize=(18, 10))
+    axes = axes.flatten()
 
     highlight_months = {1, 4, 5, 8, 9, 12}
 
-    # =========================
-    # FIGURES PAR ANNÉE
-    # =========================
+    for month in range(1, 13):
 
-    for year in years:
+        ax = axes[month - 1]
+        ax.set_title(cal.month_name[month])
+        ax.axis("off")
 
-        st.markdown(f"### 📅 Année {year}")
+        month_matrix = cal.monthcalendar(year, month)
 
-        fig, axes = plt.subplots(3, 4, figsize=(18, 10))
-        axes = axes.flatten()
+        for i, week in enumerate(month_matrix):
+            for j, day in enumerate(week):
 
-        for month in range(1, 13):
+                if day == 0:
+                    continue
 
-            ax = axes[month - 1]
-            ax.set_title(cal.month_name[month])
-            ax.axis("off")
+                d = pd.Timestamp(year, month, day).date()
+                colors = color_map.get(d, ["white"])
 
-            month_matrix = cal.monthcalendar(year, month)
+                if len(colors) == 1:
+                    ax.add_patch(plt.Rectangle(
+                        (j, -i), 1, 1,
+                        facecolor=colors[0],
+                        edgecolor="black",
+                        lw=0.4
+                    ))
+                else:
+                    ax.add_patch(plt.Rectangle(
+                        (j, -i), 1, 1,
+                        facecolor="white",
+                        edgecolor="black",
+                        lw=0.4
+                    ))
 
-            for i, week in enumerate(month_matrix):
-                for j, day in enumerate(week):
+                    step = 1 / len(colors[:4])
 
-                    if day == 0:
-                        continue
-
-                    d = pd.Timestamp(year, month, day).date()
-                    colors = color_map.get(d, ["white"])
-
-                    # case simple
-                    if len(colors) == 1:
+                    for k, c in enumerate(colors[:4]):
                         ax.add_patch(plt.Rectangle(
-                            (j, -i), 1, 1,
-                            facecolor=colors[0],
-                            edgecolor="black",
-                            lw=0.4
+                            (j + k * step, -i),
+                            step, 1,
+                            facecolor=c,
+                            edgecolor="none"
                         ))
 
-                    # multi couleurs
-                    else:
-                        ax.add_patch(plt.Rectangle(
-                            (j, -i), 1, 1,
-                            facecolor="white",
-                            edgecolor="black",
-                            lw=0.4
-                        ))
+        ax.set_xlim(0, 7)
+        ax.set_ylim(-6, 1)
 
-                        step = 1 / len(colors[:4])
-
-                        for k, c in enumerate(colors[:4]):
-                            ax.add_patch(plt.Rectangle(
-                                (j + k * step, -i),
-                                step, 1,
-                                facecolor=c,
-                                edgecolor="none"
-                            ))
-
-            ax.set_xlim(0, 7)
-            ax.set_ylim(-6, 1)
-
-            if month in highlight_months:
-                ax.add_patch(plt.Rectangle(
+        if month in highlight_months:
+            ax.add_patch(
+                plt.Rectangle(
                     (0, -6), 7, 7,
                     fill=False,
                     edgecolor="yellow",
                     linewidth=3
-                ))
+                )
+            )
 
-        plt.tight_layout()
-        st.pyplot(fig)
-        plt.close(fig)
+    plt.tight_layout()
+    st.pyplot(fig)
