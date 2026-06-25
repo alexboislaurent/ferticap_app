@@ -550,26 +550,6 @@ elif mode == "📅 Calendrier":
     # =========================
     # MAP COULEURS FIXES
     # =========================
-# =========================
-# LÉGENDE
-# =========================
-
-st.markdown("### Légende")
-
-cols = st.columns(len(COLOR_MAP))
-
-for col, (label, color) in zip(cols, COLOR_MAP.items()):
-    with col:
-        st.markdown(
-            f"""
-            <div style='display:flex;align-items:center;gap:6px;'>
-                <div style='width:18px;height:18px;background:{color};
-                border:1px solid black;'></div>
-                {label}
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
         
     COLOR_MAP = {
         "FCO": "blue",
@@ -594,7 +574,26 @@ for col, (label, color) in zip(cols, COLOR_MAP.items()):
                 cleaned.append(c)
 
         return cleaned if cleaned else ["white"]
+# =========================
+# LÉGENDE
+# =========================
 
+st.markdown("### Légende")
+
+cols = st.columns(len(COLOR_MAP))
+
+for col, (label, color) in zip(cols, COLOR_MAP.items()):
+    with col:
+        st.markdown(
+            f"""
+            <div style='display:flex;align-items:center;gap:6px;'>
+                <div style='width:18px;height:18px;background:{color};
+                border:1px solid black;'></div>
+                {label}
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
     # =========================
     # DATA CLEAN
     # =========================
