@@ -625,14 +625,14 @@ elif mode == "📅 Calendrier":
     # =========================
     # FIGURE CALENDRIER
     # =========================
-year = df["Date"].dt.year.max()
+    year = df["Date"].dt.year.max()
 
-fig, axes = plt.subplots(3, 4, figsize=(18, 10))
-axes = axes.flatten()
+    fig, axes = plt.subplots(3, 4, figsize=(18, 10))
+    axes = axes.flatten()
 
-highlight_months = {1, 4, 5, 8, 9, 12}
+    highlight_months = {1, 4, 5, 8, 9, 12}
 
-for month in range(1, 13):
+    for month in range(1, 13):
 
     ax = axes[month - 1]
     ax.set_title(cal.month_name[month])
