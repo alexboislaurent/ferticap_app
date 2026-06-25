@@ -329,7 +329,7 @@ def get_color(suivis):
 # HEATMAP
 # =========================
 
-if mode == "Heatmap":
+elif mode == "Heatmap":
     st.subheader("Heatmap succès")
 
     fig, ax = plt.subplots(figsize=(16, 6))
