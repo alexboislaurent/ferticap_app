@@ -671,7 +671,7 @@ elif mode == "🏆 Ranking boucs":
 # CALENDRIER (INDEPENDANT UNIQUE)
 # =========================
 
-elif show_calendar:
+if show_calendar:
 
     st.markdown("---")
 
