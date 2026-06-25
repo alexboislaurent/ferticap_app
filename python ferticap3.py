@@ -625,11 +625,10 @@ elif mode == "📅 Calendrier":
     # =========================
     # FIGURE CALENDRIER
     # =========================
+year = df["Date"].dt.year.max()
 
-    year = df["Date"].dt.year.max()
-
-    fig, axes = plt.subplots(3, 4, figsize=(18, 10))
-    axes = axes.flatten()
+fig, axes = plt.subplots(3, 4, figsize=(18, 10))
+axes = axes.flatten()
 
 highlight_months = {1, 4, 5, 8, 9, 12}
 
@@ -640,7 +639,7 @@ for month in range(1, 13):
     ax.axis("off")
 
     # =========================
-    # DESSIN DU CALENDRIER (TOUJOURS)
+    # DESSIN CALENDRIER (TOUJOURS)
     # =========================
 
     month_matrix = cal.monthcalendar(year, month)
@@ -683,8 +682,9 @@ for month in range(1, 13):
     ax.set_ylim(-6, 1)
 
     # =========================
-    # HIGHLIGHT MOIS (SEPARÉ)
+    # HIGHLIGHT (SEULEMENT VISUEL)
     # =========================
+
     if month in highlight_months:
         ax.add_patch(
             plt.Rectangle(
@@ -695,47 +695,5 @@ for month in range(1, 13):
             )
         )
 
-        month_matrix = cal.monthcalendar(year, month)
-
-        for i, week in enumerate(month_matrix):
-            for j, day in enumerate(week):
-
-                if day == 0:
-                    continue
-
-                d = pd.Timestamp(year, month, day).date()
-                colors = color_map.get(d, ["white"])
-
-                # case simple
-                if len(colors) == 1:
-                    ax.add_patch(plt.Rectangle(
-                        (j, -i), 1, 1,
-                        facecolor=colors[0],
-                        edgecolor="black",
-                        lw=0.4
-                    ))
-
-                # multi couleurs
-                else:
-                    ax.add_patch(plt.Rectangle(
-                        (j, -i), 1, 1,
-                        facecolor="white",
-                        edgecolor="black",
-                        lw=0.4
-                    ))
-
-                    step = 1 / len(colors[:4])
-
-                    for k, c in enumerate(colors[:4]):
-                        ax.add_patch(plt.Rectangle(
-                            (j + k * step, -i),
-                            step, 1,
-                            facecolor=c,
-                            edgecolor="none"
-                        ))
-
-        ax.set_xlim(0, 7)
-        ax.set_ylim(-6, 1)
-
-    plt.tight_layout()
-    st.pyplot(fig)
+plt.tight_layout()
+st.pyplot(fig)
