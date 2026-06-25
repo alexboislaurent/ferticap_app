@@ -356,7 +356,7 @@ if mode == "Heatmap":
     # CALENDRIER (PROPRE)
     # =========================
 
-   if show_calendar:
+if show_calendar:
 
     st.subheader("📅 Calendrier des suivis (vue annuelle)")
 
