@@ -550,6 +550,15 @@ elif mode == "📅 Calendrier":
     # =========================
     # MAP COULEURS FIXES
     # =========================
+  elif mode == "📅 Calendrier":
+
+    st.subheader("📅 Calendrier annuel des suivis")
+
+    import calendar as cal
+
+    # =========================
+    # COULEURS DES SUIVIS
+    # =========================
 
     COLOR_MAP = {
         "FCO": "blue",
@@ -581,7 +590,7 @@ elif mode == "📅 Calendrier":
         return cleaned if cleaned else ["white"]
 
     # =========================
-    # DATA CLEAN
+    # DATA CLEAN SUIVIS
     # =========================
 
     suivi_cols = ["Suivi 1", "Suivi 2", "Suivi 3", "Suivi 4"]
@@ -597,7 +606,11 @@ elif mode == "📅 Calendrier":
     df_suivi = df_suivi[df_suivi["Suivi"].notna()]
     df_suivi = df_suivi[df_suivi["Suivi"] != ""]
 
-    daily = df_suivi.groupby("Date")["Suivi"].apply(list).reset_index()
+    daily = (
+        df_suivi.groupby("Date")["Suivi"]
+        .apply(list)
+        .reset_index()
+    )
 
     color_map = {
         row["Date"].date(): get_color_list(row["Suivi"])
@@ -605,22 +618,48 @@ elif mode == "📅 Calendrier":
     }
 
     # =========================
+    # JOURS LONG
+    # =========================
+
+    long_days = set(
+        df[df["Jour"].astype(str).str.strip() == "Long"]["Date"]
+        .dt.date
+        .unique()
+    )
+
+    # =========================
     # LÉGENDE
     # =========================
 
     st.markdown("### Légende")
 
-    cols = st.columns(len(COLOR_MAP))
+    legend_cols = st.columns(len(COLOR_MAP) + 1)
 
-    for col, (label, color) in zip(cols, COLOR_MAP.items()):
+    for col, (label, color) in zip(legend_cols, COLOR_MAP.items()):
         with col:
             st.markdown(
-                f"<div style='display:flex;align-items:center;'>"
-                f"<div style='width:18px;height:18px;background:{color};"
-                f"border:1px solid black;margin-right:6px'></div>"
-                f"{label}</div>",
+                f"""
+                <div style="display:flex;align-items:center;">
+                    <div style="width:18px;height:18px;background:{color};
+                                border:1px solid black;margin-right:6px"></div>
+                    {label}
+                </div>
+                """,
                 unsafe_allow_html=True
             )
+
+    # ajout LONG
+    with legend_cols[-1]:
+        st.markdown(
+            """
+            <div style="display:flex;align-items:center;">
+                <div style="width:18px;height:18px;background:yellow;
+                            border:1px solid black;margin-right:6px"></div>
+                Long
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
     # =========================
     # FIGURE CALENDRIER
@@ -646,35 +685,63 @@ elif mode == "📅 Calendrier":
                     continue
 
                 d = pd.Timestamp(year, month, day).date()
-                colors = color_map.get(d, ["white"])
 
-                # case simple
-                if len(colors) == 1:
+                colors = color_map.get(d, None)
+                is_long = d in long_days
+
+                # =========================
+                # PRIORITÉ 1 : SUIVIS
+                # =========================
+                if colors and colors != ["white"]:
+
+                    if len(colors) == 1:
+                        ax.add_patch(plt.Rectangle(
+                            (j, -i), 1, 1,
+                            facecolor=colors[0],
+                            edgecolor="black",
+                            lw=0.4
+                        ))
+                    else:
+                        ax.add_patch(plt.Rectangle(
+                            (j, -i), 1, 1,
+                            facecolor="white",
+                            edgecolor="black",
+                            lw=0.4
+                        ))
+
+                        step = 1 / len(colors[:4])
+
+                        for k, c in enumerate(colors[:4]):
+                            ax.add_patch(plt.Rectangle(
+                                (j + k * step, -i),
+                                step, 1,
+                                facecolor=c,
+                                edgecolor="none"
+                            ))
+
+                # =========================
+                # PRIORITÉ 2 : LONG
+                # =========================
+                elif is_long:
+
                     ax.add_patch(plt.Rectangle(
                         (j, -i), 1, 1,
-                        facecolor=colors[0],
+                        facecolor="yellow",
                         edgecolor="black",
                         lw=0.4
                     ))
 
-                # multi couleurs
+                # =========================
+                # DEFAULT
+                # =========================
                 else:
+
                     ax.add_patch(plt.Rectangle(
                         (j, -i), 1, 1,
                         facecolor="white",
                         edgecolor="black",
                         lw=0.4
                     ))
-
-                    step = 1 / len(colors[:4])
-
-                    for k, c in enumerate(colors[:4]):
-                        ax.add_patch(plt.Rectangle(
-                            (j + k * step, -i),
-                            step, 1,
-                            facecolor=c,
-                            edgecolor="none"
-                        ))
 
         ax.set_xlim(0, 7)
         ax.set_ylim(-6, 1)
