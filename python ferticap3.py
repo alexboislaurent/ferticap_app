@@ -94,7 +94,7 @@ mode = st.sidebar.radio(
         "Score global",
         "Score par bouc",
         "Variables biologiques",
-        "🏆 Ranking boucs"
+        "🏆 Ranking boucs",
         "📅 Calendrier"
     ]
 )
