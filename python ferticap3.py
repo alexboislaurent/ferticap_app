@@ -225,18 +225,44 @@ score_par_bouc = df_filtered.pivot_table(
 # DONNÉES RANKING BOUCS
 # =========================
 
+def calc_ranking_with_success(data):
+
+    tmp = data.copy()
+
+    tmp = tmp[tmp["Comportement"].notna()]
+
+    tmp["Succes"] = tmp["Comportement"].isin([2, 3, 4])
+
+    result = (
+        tmp.groupby("Code animal")
+        .agg(
+            Score_moyen=("Score", "mean"),
+            Nb_succes=("Succes", "sum"),
+            Nb_total=("Succes", "count")
+        )
+    )
+
+    result["Taux_reussite"] = (
+        result["Nb_succes"] /
+        result["Nb_total"] * 100
+    )
+
+    result = result.sort_values(
+        "Score_moyen",
+        ascending=False
+    )
+
+    return result
+
+
 # 10 dernières collectes
-last_10_dates = sorted(df_filtered["Date"].dropna().unique())[-10:]
+last_10_dates = sorted(
+    df_filtered["Date"].dropna().unique()
+)[-10:]
 
 df_last10 = df_filtered[
     df_filtered["Date"].isin(last_10_dates)
 ]
-
-ranking_last10 = (
-    df_last10.groupby("Code animal")["Score"]
-    .mean()
-    .sort_values(ascending=False)
-)
 
 # Année en cours
 current_year = pd.Timestamp.today().year
@@ -245,18 +271,9 @@ df_year = df_filtered[
     df_filtered["Date"].dt.year == current_year
 ]
 
-ranking_year = (
-    df_year.groupby("Code animal")["Score"]
-    .mean()
-    .sort_values(ascending=False)
-)
-
-# Historique complet
-ranking_alltime = (
-    df.groupby("Code animal")["Score"]
-    .mean()
-    .sort_values(ascending=False)
-)
+ranking_last10 = calc_ranking_with_success(df_last10)
+ranking_year = calc_ranking_with_success(df_year)
+ranking_alltime = calc_ranking_with_success(df)
 
 # =========================
 # RESAMPLE
@@ -426,8 +443,16 @@ elif mode == "🏆 Ranking boucs":
 
     ax.barh(
         ranking_last10.index,
-        ranking_last10.values
+        ranking_last10["Score_moyen"]
     )
+
+    for i, (_, row) in enumerate(ranking_last10.iterrows()):
+        ax.text(
+            row["Score_moyen"] + 0.1,
+            i,
+            f'{row["Taux_reussite"]:.0f}% ({int(row["Nb_succes"])}/{int(row["Nb_total"])})',
+            va="center"
+        )
 
     ax.invert_yaxis()
     ax.set_xlabel("Score moyen")
@@ -446,8 +471,16 @@ elif mode == "🏆 Ranking boucs":
 
     ax.barh(
         ranking_year.index,
-        ranking_year.values
+        ranking_year["Score_moyen"]
     )
+
+    for i, (_, row) in enumerate(ranking_year.iterrows()):
+        ax.text(
+            row["Score_moyen"] + 0.1,
+            i,
+            f'{row["Taux_reussite"]:.0f}% ({int(row["Nb_succes"])}/{int(row["Nb_total"])})',
+            va="center"
+        )
 
     ax.invert_yaxis()
     ax.set_xlabel("Score moyen")
@@ -466,8 +499,16 @@ elif mode == "🏆 Ranking boucs":
 
     ax.barh(
         ranking_alltime.index,
-        ranking_alltime.values
+        ranking_alltime["Score_moyen"]
     )
+
+    for i, (_, row) in enumerate(ranking_alltime.iterrows()):
+        ax.text(
+            row["Score_moyen"] + 0.1,
+            i,
+            f'{row["Taux_reussite"]:.0f}% ({int(row["Nb_succes"])}/{int(row["Nb_total"])})',
+            va="center"
+        )
 
     ax.invert_yaxis()
     ax.set_xlabel("Score moyen")
