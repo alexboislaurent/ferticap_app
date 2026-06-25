@@ -358,74 +358,58 @@ if mode == "Heatmap":
 
 if show_calendar:
 
-    st.subheader("📅 Calendrier des suivis (vue annuelle)")
+    st.subheader("📅 Calendrier annuel des suivis")
 
-    # =========================
-    # ANNÉE COURANTE
-    # =========================
     year = df["Date"].dt.year.max()
 
-    df_year = daily[daily["Date"].dt.year == year].copy()
+    cal = calendar.Calendar(firstweekday=0)
 
-    # =========================
-    # COULEURS
-    # =========================
-    df_year["color"] = df_year["Suivi"].apply(get_color)
-    df_year["day"] = df_year["Date"].dt.dayofyear
+    # dictionnaire date -> couleur (multi-suivi simplifié)
+    df_suivi = daily.copy()
+    df_suivi["color"] = df_suivi["Suivi"].apply(get_color)
+    df_suivi["date"] = df_suivi["Date"].dt.date
 
-    # =========================
-    # BASE CALENDRIER
-    # =========================
-    calendar_df = pd.DataFrame({"day": range(1, 367)})
+    color_map = dict(zip(df_suivi["date"], df_suivi["color"]))
 
-    calendar_df = calendar_df.merge(
-        df_year[["day", "color"]],
-        on="day",
-        how="left"
-    )
+    fig, axes = plt.subplots(3, 4, figsize=(18, 10))
+    axes = axes.flatten()
 
-    # =========================
-    # GRID 7 JOURS / SEMAINE
-    # =========================
-    colors = calendar_df["color"].to_numpy()
+    for month in range(1, 13):
 
-    # padding pour compléter la grille
-    pad_size = (-len(colors)) % 7
-    colors = np.concatenate([colors, np.array([None] * pad_size)])
+        ax = axes[month - 1]
 
-    grid = colors.reshape(-1, 7)
+        month_days = calendar.monthcalendar(year, month)
 
-    # =========================
-    # FIGURE
-    # =========================
-    fig2, ax2 = plt.subplots(figsize=(12, 4))
+        ax.set_title(calendar.month_name[month], fontsize=12)
 
-    cmap = {
-        None: "white",
-        np.nan: "white",
-        "red": "red",
-        "blue": "blue",
-        "purple": "purple",
-        "gray": "lightgray"
-    }
+        ax.axis("off")
 
-    for i in range(grid.shape[0]):
-        for j in range(grid.shape[1]):
+        for i, week in enumerate(month_days):
+            for j, day in enumerate(week):
 
-            ax2.add_patch(
-                plt.Rectangle(
-                    (j, -i),
-                    1,
-                    1,
-                    color=cmap.get(grid[i][j], "white"),
-                    ec="black",
-                    lw=0.2
+                if day == 0:
+                    continue
+
+                date_obj = pd.to_datetime(f"{year}-{month}-{day}").date()
+
+                color = color_map.get(date_obj, "white")
+
+                ax.add_patch(
+                    plt.Rectangle(
+                        (j, -i),
+                        1,
+                        1,
+                        facecolor=color,
+                        edgecolor="black",
+                        lw=0.3
+                    )
                 )
-            )
 
-    ax2.set_xlim(0, 7)
-    ax2.set_ylim(-grid.shape[0], 0)
-    ax2.axis("off")
+        ax.set_xlim(0, 7)
+        ax.set_ylim(-6, 1)
+
+    plt.tight_layout()
+    st.pyplot(fig)
 
     st.pyplot(fig2)
     
