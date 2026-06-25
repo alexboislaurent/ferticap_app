@@ -352,7 +352,7 @@ if mode == "Heatmap":
 # CALENDRIER SUIVIS (FIX COULEURS + MULTI-COULEURS)
 # =========================
 
-elif show_calendar:
+elif mode == "📅 Calendrier":
 
     st.subheader("📅 Calendrier annuel des suivis")
 
