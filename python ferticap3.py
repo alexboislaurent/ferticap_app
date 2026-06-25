@@ -167,12 +167,24 @@ df_filtered = df[
 ]
 
 # =========================
-# RANKING BOUCS (10 DERNIÈRES COLLECTES) ✔ FIXÉ
+# RANKING BOUCS
 # =========================
 
-last_10_dates = sorted(df_filtered["Date"].dropna().unique())[-10:]
 
-df_last10 = df_filtered[df_filtered["Date"].isin(last_10_dates)]
+df_filtered["Date"] = pd.to_datetime(df_filtered["Date"])
+
+last_10_dates = (
+    df_filtered["Date"]
+    .dropna()
+    .sort_values()
+    .unique()
+)
+
+last_10_dates = last_10_dates[-10:]
+
+df_last10 = df_filtered[
+    df_filtered["Date"].isin(pd.to_datetime(last_10_dates))
+]
 
 ranking_df = (
     df_last10.groupby("Code animal", as_index=False)["Score"]
