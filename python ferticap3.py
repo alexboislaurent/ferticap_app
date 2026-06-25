@@ -139,8 +139,9 @@ df_suivi = df.melt(
 )
 
 daily = (
-    df_suivi.groupby("Date")["Suivi"]
-    .apply(lambda x: list(set(x)))
+    df_suivi.dropna(subset=["Suivi"])
+    .groupby("Date")["Suivi"]
+    .apply(list)
     .reset_index()
 )
 
@@ -353,8 +354,8 @@ if mode == "Heatmap":
     st.pyplot(fig)
 
     # =========================
-    # CALENDRIER (PROPRE)
-    # =========================
+# CALENDRIER SUIVIS (PROPRE)
+# =========================
 
 if show_calendar:
 
@@ -362,37 +363,35 @@ if show_calendar:
 
     year = df["Date"].dt.year.max()
 
-    cal = calendar.Calendar(firstweekday=0)
-
-    # dictionnaire date -> couleur (multi-suivi simplifié)
+    # mapping des suivis
     df_suivi = daily.copy()
-    df_suivi["color"] = df_suivi["Suivi"].apply(get_color)
     df_suivi["date"] = df_suivi["Date"].dt.date
+    df_suivi["color"] = df_suivi["Suivi"].apply(get_color)
 
     color_map = dict(zip(df_suivi["date"], df_suivi["color"]))
 
-    fig, axes = plt.subplots(3, 4, figsize=(18, 10))
+    fig_cal, axes = plt.subplots(3, 4, figsize=(18, 10))
     axes = axes.flatten()
+
+    import calendar
 
     for month in range(1, 13):
 
         ax = axes[month - 1]
-
-        month_days = calendar.monthcalendar(year, month)
-
-        ax.set_title(calendar.month_name[month], fontsize=12)
-
+        ax.set_title(calendar.month_name[month])
         ax.axis("off")
 
-        for i, week in enumerate(month_days):
+        month_matrix = calendar.monthcalendar(year, month)
+
+        for i, week in enumerate(month_matrix):
             for j, day in enumerate(week):
 
                 if day == 0:
                     continue
 
-                date_obj = pd.to_datetime(f"{year}-{month}-{day}").date()
+                d = pd.to_datetime(f"{year}-{month}-{day}").date()
 
-                color = color_map.get(date_obj, "white")
+                color = color_map.get(d, "white")
 
                 ax.add_patch(
                     plt.Rectangle(
@@ -409,9 +408,7 @@ if show_calendar:
         ax.set_ylim(-6, 1)
 
     plt.tight_layout()
-    st.pyplot(fig)
-
-    st.pyplot(fig2)
+    st.pyplot(fig_cal)
     
     # =========================
     # FORMAT DES DATES
