@@ -219,7 +219,44 @@ score_par_bouc = df_filtered.pivot_table(
     columns="Code animal",
     values="Score",
     aggfunc="mean"
-).sort_index()
+).sort_index
+
+# =========================
+# DONNÉES RANKING BOUCS
+# =========================
+
+# 10 dernières collectes
+last_10_dates = sorted(df_filtered["Date"].dropna().unique())[-10:]
+
+df_last10 = df_filtered[
+    df_filtered["Date"].isin(last_10_dates)
+]
+
+ranking_last10 = (
+    df_last10.groupby("Code animal")["Score"]
+    .mean()
+    .sort_values(ascending=False)
+)
+
+# Année en cours
+current_year = pd.Timestamp.today().year
+
+df_year = df_filtered[
+    df_filtered["Date"].dt.year == current_year
+]
+
+ranking_year = (
+    df_year.groupby("Code animal")["Score"]
+    .mean()
+    .sort_values(ascending=False)
+)
+
+# Historique complet
+ranking_alltime = (
+    df.groupby("Code animal")["Score"]
+    .mean()
+    .sort_values(ascending=False)
+)
 
 # =========================
 # RESAMPLE
@@ -372,42 +409,6 @@ elif mode == "Variables biologiques":
 
     st.pyplot(fig)
 
-# =========================
-# DONNÉES RANKING BOUCS
-# =========================
-
-# 10 dernières collectes
-last_10_dates = sorted(df_filtered["Date"].dropna().unique())[-10:]
-
-df_last10 = df_filtered[
-    df_filtered["Date"].isin(last_10_dates)
-]
-
-ranking_last10 = (
-    df_last10.groupby("Code animal")["Score"]
-    .mean()
-    .sort_values(ascending=False)
-)
-
-# Année en cours
-current_year = pd.Timestamp.today().year
-
-df_year = df_filtered[
-    df_filtered["Date"].dt.year == current_year
-]
-
-ranking_year = (
-    df_year.groupby("Code animal")["Score"]
-    .mean()
-    .sort_values(ascending=False)
-)
-
-# Historique complet
-ranking_alltime = (
-    df.groupby("Code animal")["Score"]
-    .mean()
-    .sort_values(ascending=False)
-)
 
 # =========================
 # RANKING BOUCS
