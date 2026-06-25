@@ -219,7 +219,7 @@ score_par_bouc = df_filtered.pivot_table(
     columns="Code animal",
     values="Score",
     aggfunc="mean"
-).sort_index
+).sort_index()
 
 # =========================
 # DONNÉES RANKING BOUCS
