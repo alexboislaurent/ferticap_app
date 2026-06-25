@@ -347,35 +347,80 @@ if mode == "Heatmap":
 
     st.pyplot(fig)
 
-    # =========================
-# CALENDRIER SUIVIS (PROPRE)
+ # =========================
+# CALENDRIER SUIVIS (VERSION PROPRE)
 # =========================
 
 if show_calendar:
 
     st.subheader("📅 Calendrier annuel des suivis")
 
+    import calendar as cal
+
     year = df["Date"].dt.year.max()
 
-    # mapping des suivis
-    df_suivi = daily.copy()
-    df_suivi["date"] = df_suivi["Date"].dt.date
-    df_suivi["color"] = df_suivi["Suivi"].apply(get_color)
+    # -------------------------
+    # 1. Construire table propre Date -> Suivis
+    # -------------------------
 
-    color_map = dict(zip(df_suivi["date"], df_suivi["color"]))
+    suivi_cols = ["Suivi 1", "Suivi 2", "Suivi 3", "Suivi 4"]
+    existing_cols = [c for c in suivi_cols if c in df.columns]
 
-    fig_cal, axes = plt.subplots(3, 4, figsize=(18, 10))
+    df_suivi = df.melt(
+        id_vars=["Date"],
+        value_vars=existing_cols,
+        value_name="Suivi"
+    )
+
+    df_suivi = df_suivi.dropna(subset=["Suivi"])
+    df_suivi["Suivi"] = df_suivi["Suivi"].astype(str).str.strip()
+    df_suivi = df_suivi[df_suivi["Suivi"] != ""]
+
+    # regroupement par date
+    daily = (
+        df_suivi.groupby("Date")["Suivi"]
+        .apply(lambda x: list(set(x)))
+        .reset_index()
+    )
+
+    # -------------------------
+    # 2. couleur par type
+    # -------------------------
+
+    def get_color(suivis):
+        if not isinstance(suivis, list):
+            return "white"
+        if "FCO" in suivis and "LNCR" in suivis:
+            return "purple"
+        if "FCO" in suivis:
+            return "red"
+        if "LNCR" in suivis:
+            return "blue"
+        if len(suivis) > 0:
+            return "orange"
+        return "white"
+
+    # mapping date -> couleur
+    color_map = {}
+
+    for _, row in daily.iterrows():
+        d = row["Date"].date()
+        color_map[d] = get_color(row["Suivi"])
+
+    # -------------------------
+    # 3. FIGURE calendrier mensuel
+    # -------------------------
+
+    fig, axes = plt.subplots(3, 4, figsize=(18, 10))
     axes = axes.flatten()
-
-    import calendar
 
     for month in range(1, 13):
 
         ax = axes[month - 1]
-        ax.set_title(calendar.month_name[month])
-        ax.axis("off")
+        ax.set_title(calendar.month_name[month], fontsize=12)
+        ax.set_axis_off()
 
-        month_matrix = calendar.monthcalendar(year, month)
+        month_matrix = cal.monthcalendar(year, month)
 
         for i, week in enumerate(month_matrix):
             for j, day in enumerate(week):
@@ -383,9 +428,8 @@ if show_calendar:
                 if day == 0:
                     continue
 
-                d = pd.to_datetime(f"{year}-{month}-{day}").date()
-
-                color = color_map.get(d, "white")
+                date_obj = pd.Timestamp(year, month, day).date()
+                color = color_map.get(date_obj, "white")
 
                 ax.add_patch(
                     plt.Rectangle(
@@ -394,15 +438,25 @@ if show_calendar:
                         1,
                         facecolor=color,
                         edgecolor="black",
-                        lw=0.3
+                        lw=0.4
                     )
+                )
+
+                # numéro du jour
+                ax.text(
+                    j + 0.5,
+                    -i + 0.5,
+                    str(day),
+                    ha="center",
+                    va="center",
+                    fontsize=7
                 )
 
         ax.set_xlim(0, 7)
         ax.set_ylim(-6, 1)
 
     plt.tight_layout()
-    st.pyplot(fig_cal)
+    st.pyplot(fig)
     
     # =========================
     # FORMAT DES DATES
