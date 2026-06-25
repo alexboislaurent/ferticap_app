@@ -348,63 +348,49 @@ if mode == "Heatmap":
     st.pyplot(fig)
 
  # =========================
-# CALENDRIER SUIVIS (VERSION PROPRE)
+# CALENDRIER (INDEPENDANT)
 # =========================
 
 if show_calendar:
+    st.subheader("📅 Calendrier annuel des suivis")
 
     import calendar as cal
-    import matplotlib.patches as mpatches
-
-    st.subheader("📅 Calendrier annuel des suivis")
 
     year = df["Date"].dt.year.max()
 
-    # =========================================================
-    # 1. BASE DATA (UNE SEULE FOIS — PAS DE DUPLICATION)
-    # =========================================================
+    def get_color(suivis):
+        if not isinstance(suivis, list):
+            return "white"
+        if "FCO" in suivis and "LNCR" in suivis:
+            return "purple"
+        if "FCO" in suivis:
+            return "red"
+        if "LNCR" in suivis:
+            return "blue"
+        if len(suivis) > 0:
+            return "orange"
+        return "white"
+
     df_suivi = df.melt(
         id_vars=["Date"],
-        value_vars=existing_cols,
+        value_vars=[c for c in ["Suivi 1","Suivi 2","Suivi 3","Suivi 4"] if c in df.columns],
         value_name="Suivi"
     )
 
     df_suivi = df_suivi.dropna(subset=["Suivi"])
     df_suivi["Suivi"] = df_suivi["Suivi"].astype(str).str.strip()
-    df_suivi = df_suivi[df_suivi["Suivi"] != ""]
 
-    daily = (
-        df_suivi.groupby("Date")["Suivi"]
-        .apply(list)
-        .reset_index()
-    )
+    daily = df_suivi.groupby("Date")["Suivi"].apply(list).reset_index()
 
-    # =========================================================
-    # 2. COULEURS
-    # =========================================================
-    def get_color(s):
-        if s == "FCO":
-            return "red"
-        if s == "LNCR":
-            return "blue"
-        return "orange"
-
-    # =========================================================
-    # 3. MAP DATE -> LISTE DE SUIVIS
-    # =========================================================
     color_map = {
-        row["Date"].date(): row["Suivi"]
+        row["Date"].date(): get_color(row["Suivi"])
         for _, row in daily.iterrows()
     }
 
-    # =========================================================
-    # 4. FIGURE CALENDRIER
-    # =========================================================
     fig, axes = plt.subplots(3, 4, figsize=(18, 10))
     axes = axes.flatten()
 
     for month in range(1, 13):
-
         ax = axes[month - 1]
         ax.set_title(cal.month_name[month])
         ax.axis("off")
@@ -413,49 +399,18 @@ if show_calendar:
 
         for i, week in enumerate(month_matrix):
             for j, day in enumerate(week):
-
                 if day == 0:
                     continue
 
                 d = pd.Timestamp(year, month, day).date()
-                suivis = color_map.get(d, [])
+                color = color_map.get(d, "white")
 
-                # CASE VIDE
-                if not suivis:
-                    ax.add_patch(
-                        plt.Rectangle(
-                            (j, -i),
-                            1, 1,
-                            facecolor="white",
-                            edgecolor="black",
-                            lw=0.4
-                        )
-                    )
-                    continue
-
-                # =================================================
-                # MULTI SUIVIS → SPLIT VISUEL
-                # =================================================
-                n = len(suivis)
-
-                for k, s in enumerate(suivis):
-
-                    ax.add_patch(
-                        plt.Rectangle(
-                            (j + k / n, -i),
-                            1 / n,
-                            1,
-                            facecolor=get_color(s),
-                            edgecolor="none"
-                        )
-                    )
-
-                # contour
                 ax.add_patch(
                     plt.Rectangle(
                         (j, -i),
-                        1, 1,
-                        fill=False,
+                        1,
+                        1,
+                        facecolor=color,
                         edgecolor="black",
                         lw=0.4
                     )
@@ -466,7 +421,7 @@ if show_calendar:
 
     plt.tight_layout()
     st.pyplot(fig)
-
+    
     # =========================================================
     # 5. LÉGENDE PROPRE
     # =========================================================
