@@ -343,11 +343,6 @@ if mode == "Heatmap":
         linecolor="black"
     )
 
-    ax.set_xticklabels(
-        rotation=45,
-        ha="right"
-    )
-
     ax.set_yticklabels(ax.get_yticklabels(), rotation=0)
 
     st.pyplot(fig)
