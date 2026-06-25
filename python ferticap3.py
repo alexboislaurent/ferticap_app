@@ -664,11 +664,7 @@ elif mode == "🏆 Ranking boucs":
     st.pyplot(fig)
 
 # =========================
-# CALENDRIER (INDEPENDANT)
-# =========================
-
-# =========================
-# CALENDRIER (INDEPENDANT UNIQUE)
+# CALENDRIER
 # =========================
 
 elif mode == "📅 Calendrier":
