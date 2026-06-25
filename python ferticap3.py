@@ -548,8 +548,9 @@ elif mode == "📅 Calendrier":
     import calendar as cal
 
     # =========================
-    # COULEURS FIXES
+    # MAP COULEURS FIXES
     # =========================
+
     COLOR_MAP = {
         "FCO": "blue",
         "LNCR": "red",
@@ -557,77 +558,74 @@ elif mode == "📅 Calendrier":
         "Pesée": "pink"
     }
 
+    def normalize(x):
+        return str(x).strip()
+
+    def get_color_list(suivis):
+        colors = []
+
+        for s in suivis:
+            s = normalize(s)
+
+            if s in COLOR_MAP:
+                colors.append(COLOR_MAP[s])
+            else:
+                colors.append("gray")
+
+        # enlever doublons consécutifs
+        cleaned = []
+        for c in colors:
+            if c not in cleaned:
+                cleaned.append(c)
+
+        return cleaned if cleaned else ["white"]
+
     # =========================
-    # PREPARATION DONNÉES SUIVIS
+    # DATA CLEAN
     # =========================
+
     suivi_cols = ["Suivi 1", "Suivi 2", "Suivi 3", "Suivi 4"]
     existing_cols = [c for c in suivi_cols if c in df.columns]
 
     df_suivi = df.melt(
         id_vars=["Date"],
-        value_vars=existing_cols + ["Jour"],
-        value_name="Value"
+        value_vars=existing_cols,
+        value_name="Suivi"
     )
 
-    # séparation suivis vs jour
-    df_suivi["Suivi"] = df_suivi["Value"].where(df_suivi["Value"].isin(COLOR_MAP.keys()))
-    df_suivi["Jour_flag"] = df_suivi["Value"].where(df_suivi["Value"].isin(["Long"]))
+    df_suivi["Suivi"] = df_suivi["Suivi"].astype(str).str.strip()
+    df_suivi = df_suivi[df_suivi["Suivi"].notna()]
+    df_suivi = df_suivi[df_suivi["Suivi"] != ""]
 
-    df_suivi["Suivi"] = df_suivi["Suivi"].astype(str)
-    df_suivi["Jour_flag"] = df_suivi["Jour_flag"].astype(str)
-
-    # agrégation suivis par date
-    suivis_par_jour = (
-        df_suivi.dropna(subset=["Suivi"])
-        .groupby("Date")["Suivi"]
-        .apply(lambda x: [v for v in x if v in COLOR_MAP])
-        .reset_index()
-    )
-
-    # flag "Long" par date
-    long_days = (
-        df_suivi[df_suivi["Jour_flag"] == "Long"]
-        .groupby("Date")
-        .size()
-        .reset_index(name="is_long")
-    )
-
-    long_set = set(long_days["Date"].dt.date)
-
-    # =========================
-    # MAP DATE -> COULEURS
-    # =========================
-    def get_color_list(suivis):
-        return [COLOR_MAP[s] for s in suivis if s in COLOR_MAP]
+    daily = df_suivi.groupby("Date")["Suivi"].apply(list).reset_index()
 
     color_map = {
         row["Date"].date(): get_color_list(row["Suivi"])
-        for _, row in suivis_par_jour.iterrows()
+        for _, row in daily.iterrows()
     }
 
     # =========================
     # LÉGENDE
     # =========================
+
     st.markdown("### Légende")
 
-    legend_cols = st.columns(len(COLOR_MAP))
+    cols = st.columns(len(COLOR_MAP))
 
-    for col, (label, color) in zip(legend_cols, COLOR_MAP.items()):
+    for col, (label, color) in zip(cols, COLOR_MAP.items()):
         with col:
             st.markdown(
-                f"""
-                <div style="display:flex;align-items:center;">
-                    <div style="width:18px;height:18px;background:{color};
-                                border:1px solid black;margin-right:6px"></div>
-                    {label}
-                </div>
-                """,
+                f"<div style='display:flex;align-items:center;'>"
+                f"<div style='width:18px;height:18px;background:{color};"
+                f"border:1px solid black;margin-right:6px'></div>"
+                f"{label}</div>",
                 unsafe_allow_html=True
             )
 
     # =========================
-    # CALENDRIER
+    # FIGURE CALENDRIER
     # =========================
+
     year = df["Date"].dt.year.max()
 
     fig, axes = plt.subplots(3, 4, figsize=(18, 10))
@@ -648,64 +646,35 @@ elif mode == "📅 Calendrier":
                     continue
 
                 d = pd.Timestamp(year, month, day).date()
+                colors = color_map.get(d, ["white"])
 
-                colors = color_map.get(d, [])
+                # case simple
+                if len(colors) == 1:
+                    ax.add_patch(plt.Rectangle(
+                        (j, -i), 1, 1,
+                        facecolor=colors[0],
+                        edgecolor="black",
+                        lw=0.4
+                    ))
 
-                # =========================
-                # PRIORITÉ 1 : SUIVIS
-                # =========================
-                if len(colors) > 0:
-
-                    ax.add_patch(
-                        plt.Rectangle(
-                            (j, -i),
-                            1,
-                            1,
-                            facecolor="white",
-                            edgecolor="black",
-                            lw=0.4
-                        )
-                    )
+                # multi couleurs
+                else:
+                    ax.add_patch(plt.Rectangle(
+                        (j, -i), 1, 1,
+                        facecolor="white",
+                        edgecolor="black",
+                        lw=0.4
+                    ))
 
                     step = 1 / len(colors[:4])
 
                     for k, c in enumerate(colors[:4]):
-                        ax.add_patch(
-                            plt.Rectangle(
-                                (j + k * step, -i),
-                                step,
-                                1,
-                                facecolor=c,
-                                edgecolor="none"
-                            )
-                        )
-
-                # =========================
-                # PRIORITÉ 2 : JOUR "LONG"
-                # =========================
-                else:
-                    if d in long_set:
-                        ax.add_patch(
-                            plt.Rectangle(
-                                (j, -i),
-                                1,
-                                1,
-                                facecolor="yellow",
-                                edgecolor="black",
-                                lw=0.4
-                            )
-                        )
-                    else:
-                        ax.add_patch(
-                            plt.Rectangle(
-                                (j, -i),
-                                1,
-                                1,
-                                facecolor="white",
-                                edgecolor="black",
-                                lw=0.4
-                            )
-                        )
+                        ax.add_patch(plt.Rectangle(
+                            (j + k * step, -i),
+                            step, 1,
+                            facecolor=c,
+                            edgecolor="none"
+                        ))
 
         ax.set_xlim(0, 7)
         ax.set_ylim(-6, 1)
