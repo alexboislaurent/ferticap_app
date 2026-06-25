@@ -555,7 +555,8 @@ elif mode == "📅 Calendrier":
         "FCO": "blue",
         "LNCR": "red",
         "CS": "green",
-        "Pesée": "pink"
+        "Pesée": "pink",
+        "TUB": "yellow"
     }
 
     def normalize(x):
