@@ -571,27 +571,6 @@ elif mode == "Variables biologiques":
 
     st.pyplot(fig)
 
-st.markdown("### Légende des suivis")
-
-legend_items = {
-    "FCO": "red",
-    "LNCR": "blue",
-    "Pesée": "purple",
-    "CS": "orange",
-    "Aucun suivi": "white"
-}
-
-cols = st.columns(len(legend_items))
-
-for col, (label, color) in zip(cols, legend_items.items()):
-    with col:
-        st.markdown(
-            f"<div style='display:flex;align-items:center;'>"
-            f"<div style='width:18px;height:18px;background:{color};border:1px solid black;margin-right:6px'></div>"
-            f"{label}</div>",
-            unsafe_allow_html=True
-        )
-
 
 # =========================
 # RANKING BOUCS
@@ -682,3 +661,24 @@ elif mode == "🏆 Ranking boucs":
     ax.grid(True)
 
     st.pyplot(fig)
+
+st.markdown("### Légende des suivis")
+
+legend_items = {
+    "FCO": "red",
+    "LNCR": "blue",
+    "Pesée": "purple",
+    "CS": "orange",
+    "Aucun suivi": "white"
+}
+
+cols = st.columns(len(legend_items))
+
+for col, (label, color) in zip(cols, legend_items.items()):
+    with col:
+        st.markdown(
+            f"<div style='display:flex;align-items:center;'>"
+            f"<div style='width:18px;height:18px;background:{color};border:1px solid black;margin-right:6px'></div>"
+            f"{label}</div>",
+            unsafe_allow_html=True
+        )
