@@ -805,5 +805,5 @@ elif mode == "📅 Calendrier":
         ax.set_xlim(0, 7)
         ax.set_ylim(-6, 1)
 
-    plt.tight_layout()
+    
     st.pyplot(fig)
