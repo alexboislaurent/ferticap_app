@@ -668,12 +668,36 @@ elif mode == "🏆 Ranking boucs":
 # =========================
 
 elif mode == "📅 Calendrier":
-    st.markdown("---")
- 
 
-    import calendar as cal
+    st.markdown("### 📅 Calendrier annuel des suivis")
 
-    year = df["Date"].dt.year.max()
+    # =========================
+    # COULEURS OFFICIELLES
+    # =========================
+
+    COLOR_MAP = {
+        "FCO": "blue",
+        "LNCR": "red",
+        "CS": "green",
+        "Pesée": "pink"
+    }
+
+    def get_color_list(suivis):
+        colors = []
+
+        for s in suivis:
+            s = str(s).strip()
+
+            if s in COLOR_MAP:
+                colors.append(COLOR_MAP[s])
+            else:
+                colors.append("orange")  # fallback debug
+
+        return colors if colors else ["white"]
+
+    # =========================
+    # DATA SUIVIS
+    # =========================
 
     suivi_cols = ["Suivi 1", "Suivi 2", "Suivi 3", "Suivi 4"]
     existing_cols = [c for c in suivi_cols if c in df.columns]
@@ -694,26 +718,54 @@ elif mode == "📅 Calendrier":
         .reset_index()
     )
 
-    def get_color_list(suivis):
-        colors = []
-        for s in suivis:
-            if s == "FCO":
-                colors.append("red")
-            elif s == "LNCR":
-                colors.append("blue")
-            else:
-                colors.append("orange")
-        return colors if colors else ["white"]
+    # =========================
+    # MAP DATE -> COULEURS
+    # =========================
 
     color_map = {
         row["Date"].date(): get_color_list(row["Suivi"])
         for _, row in daily.iterrows()
     }
 
+    # =========================
+    # LÉGENDE STREAMLIT
+    # =========================
+
+    st.markdown("#### 🧾 Légende")
+
+    legend_items = {
+        "FCO": "blue",
+        "LNCR": "red",
+        "CS": "green",
+        "Pesée": "pink"
+    }
+
+    cols = st.columns(len(legend_items))
+
+    for col, (label, color) in zip(cols, legend_items.items()):
+        with col:
+            st.markdown(
+                f"""
+                <div style="display:flex;align-items:center;gap:8px">
+                    <div style="width:18px;height:18px;background:{color};
+                                border:1px solid black"></div>
+                    <b>{label}</b>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+    # =========================
+    # FIGURE CALENDRIER
+    # =========================
+
+    year = df["Date"].dt.year.max()
+
     fig, axes = plt.subplots(3, 4, figsize=(18, 10))
     axes = axes.flatten()
 
     for month in range(1, 13):
+
         ax = axes[month - 1]
         ax.set_title(cal.month_name[month])
         ax.axis("off")
@@ -722,28 +774,52 @@ elif mode == "📅 Calendrier":
 
         for i, week in enumerate(month_matrix):
             for j, day in enumerate(week):
+
                 if day == 0:
                     continue
 
                 d = pd.Timestamp(year, month, day).date()
                 colors = color_map.get(d, ["white"])
 
+                # CASE SIMPLE
                 if len(colors) == 1:
-                    ax.add_patch(plt.Rectangle(
-                        (j, -i), 1, 1,
-                        facecolor=colors[0],
-                        edgecolor="black",
-                        lw=0.4
-                    ))
+                    ax.add_patch(
+                        plt.Rectangle(
+                            (j, -i),
+                            1,
+                            1,
+                            facecolor=colors[0],
+                            edgecolor="black",
+                            lw=0.4
+                        )
+                    )
+
+                # CASE MULTI-COULEURS
                 else:
-                    step = 1 / len(colors[:3])
-                    for k, c in enumerate(colors[:3]):
-                        ax.add_patch(plt.Rectangle(
-                            (j + k * step, -i),
-                            step, 1,
-                            facecolor=c,
-                            edgecolor="none"
-                        ))
+                    ax.add_patch(
+                        plt.Rectangle(
+                            (j, -i),
+                            1,
+                            1,
+                            facecolor="white",
+                            edgecolor="black",
+                            lw=0.4
+                        )
+                    )
+
+                    colors = colors[:4]  # sécurité visuelle
+                    step = 1 / len(colors)
+
+                    for k, c in enumerate(colors):
+                        ax.add_patch(
+                            plt.Rectangle(
+                                (j + k * step, -i),
+                                step,
+                                1,
+                                facecolor=c,
+                                edgecolor="none"
+                            )
+                        )
 
         ax.set_xlim(0, 7)
         ax.set_ylim(-6, 1)
