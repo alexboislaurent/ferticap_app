@@ -632,7 +632,7 @@ elif mode == "📅 Calendrier":
 
     highlight_months = {1, 4, 5, 8, 9, 12}
 
-    for month in range(1, 13):
+   for month in range(1, 13):
 
     ax = axes[month - 1]
     ax.set_title(cal.month_name[month])
