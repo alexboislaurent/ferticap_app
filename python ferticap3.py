@@ -167,35 +167,42 @@ df_filtered = df[
 ]
 
 # =========================
-# RANKING BOUCS
+# RANKING BOUCS (ROBUSTE)
 # =========================
-
 
 df_filtered["Date"] = pd.to_datetime(df_filtered["Date"])
 
+df_filtered = df_filtered.dropna(subset=["Score", "Code animal", "Date"])
+
 last_10_dates = (
     df_filtered["Date"]
-    .dropna()
     .sort_values()
+    .dropna()
     .unique()
 )
 
 last_10_dates = last_10_dates[-10:]
 
 df_last10 = df_filtered[
-    df_filtered["Date"].isin(pd.to_datetime(last_10_dates))
+    df_filtered["Date"].isin(last_10_dates)
 ]
 
-ranking_df = (
-    df_last10.groupby("Code animal", as_index=False)["Score"]
-    .mean()
-    .sort_values("Score", ascending=False)
-)
+# sécurité anti-vide
+if df_last10.empty:
+    st.warning("Aucune donnée pour les 10 dernières collectes")
+    ranking_df = pd.DataFrame(columns=["Boucs", "Score moyen (10 dernières)"])
+else:
+    ranking_df = (
+        df_last10.groupby("Code animal")["Score"]
+        .mean()
+        .reset_index()
+        .sort_values("Score", ascending=False)
+    )
 
-ranking_df = ranking_df.rename(columns={
-    "Code animal": "Boucs",
-    "Score": "Score moyen (10 dernières)"
-})
+    ranking_df = ranking_df.rename(columns={
+        "Code animal": "Boucs",
+        "Score": "Score moyen (10 dernières)"
+    })
 
 # =========================
 # BOUCS AUTO DERNIÈRE COLLECTE
