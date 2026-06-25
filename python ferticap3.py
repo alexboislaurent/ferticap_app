@@ -663,23 +663,90 @@ elif mode == "🏆 Ranking boucs":
 
     st.pyplot(fig)
 
-st.markdown("### Légende des suivis")
+# =========================
+# CALENDRIER (INDEPENDANT)
+# =========================
 
-legend_items = {
-    "FCO": "red",
-    "LNCR": "blue",
-    "Pesée": "purple",
-    "CS": "orange",
-    "Aucun suivi": "white"
-}
+if show_calendar:
+    st.markdown("---")
+    st.subheader("📅 Calendrier annuel des suivis")
 
-cols = st.columns(len(legend_items))
+    import calendar as cal
 
-for col, (label, color) in zip(cols, legend_items.items()):
-    with col:
-        st.markdown(
-            f"<div style='display:flex;align-items:center;'>"
-            f"<div style='width:18px;height:18px;background:{color};border:1px solid black;margin-right:6px'></div>"
-            f"{label}</div>",
-            unsafe_allow_html=True
-        )
+    year = df["Date"].dt.year.max()
+
+    suivi_cols = ["Suivi 1", "Suivi 2", "Suivi 3", "Suivi 4"]
+    existing_cols = [c for c in suivi_cols if c in df.columns]
+
+    df_suivi = df.melt(
+        id_vars=["Date"],
+        value_vars=existing_cols,
+        value_name="Suivi"
+    )
+
+    df_suivi = df_suivi.dropna(subset=["Suivi"])
+    df_suivi["Suivi"] = df_suivi["Suivi"].astype(str).str.strip()
+    df_suivi = df_suivi[df_suivi["Suivi"] != ""]
+
+    daily = (
+        df_suivi.groupby("Date")["Suivi"]
+        .apply(list)
+        .reset_index()
+    )
+
+    def get_color_list(suivis):
+        colors = []
+        for s in suivis:
+            if s == "FCO":
+                colors.append("red")
+            elif s == "LNCR":
+                colors.append("blue")
+            else:
+                colors.append("orange")
+        return colors if colors else ["white"]
+
+    color_map = {
+        row["Date"].date(): get_color_list(row["Suivi"])
+        for _, row in daily.iterrows()
+    }
+
+    fig, axes = plt.subplots(3, 4, figsize=(18, 10))
+    axes = axes.flatten()
+
+    for month in range(1, 13):
+        ax = axes[month - 1]
+        ax.set_title(cal.month_name[month])
+        ax.axis("off")
+
+        month_matrix = cal.monthcalendar(year, month)
+
+        for i, week in enumerate(month_matrix):
+            for j, day in enumerate(week):
+                if day == 0:
+                    continue
+
+                d = pd.Timestamp(year, month, day).date()
+                colors = color_map.get(d, ["white"])
+
+                if len(colors) == 1:
+                    ax.add_patch(plt.Rectangle(
+                        (j, -i), 1, 1,
+                        facecolor=colors[0],
+                        edgecolor="black",
+                        lw=0.4
+                    ))
+                else:
+                    step = 1 / len(colors[:3])
+                    for k, c in enumerate(colors[:3]):
+                        ax.add_patch(plt.Rectangle(
+                            (j + k * step, -i),
+                            step, 1,
+                            facecolor=c,
+                            edgecolor="none"
+                        ))
+
+        ax.set_xlim(0, 7)
+        ax.set_ylim(-6, 1)
+
+    plt.tight_layout()
+    st.pyplot(fig)
