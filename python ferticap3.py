@@ -329,7 +329,7 @@ def get_color(suivis):
 # HEATMAP
 # =========================
 
-elif mode == "Heatmap":
+if mode == "Heatmap":
     st.subheader("Heatmap succès")
 
     fig, ax = plt.subplots(figsize=(16, 6))
@@ -351,7 +351,7 @@ elif mode == "Heatmap":
 # CALENDRIER SUIVIS (FIX COULEURS + MULTI-COULEURS)
 # =========================
 
-if show_calendar:
+elif show_calendar:
 
     st.subheader("📅 Calendrier annuel des suivis")
 
