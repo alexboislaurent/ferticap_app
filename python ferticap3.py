@@ -347,50 +347,73 @@ if mode == "Heatmap":
 
     st.pyplot(fig)
 
- # =========================
-# CALENDRIER (INDEPENDANT)
+# =========================
+# CALENDRIER SUIVIS (FIX COULEURS + MULTI-COULEURS)
 # =========================
 
 if show_calendar:
+
     st.subheader("📅 Calendrier annuel des suivis")
 
     import calendar as cal
 
     year = df["Date"].dt.year.max()
 
-    def get_color(suivis):
-        if not isinstance(suivis, list):
-            return "white"
-        if "FCO" in suivis and "LNCR" in suivis:
-            return "purple"
-        if "FCO" in suivis:
-            return "red"
-        if "LNCR" in suivis:
-            return "blue"
-        if len(suivis) > 0:
-            return "orange"
-        return "white"
+    # =========================
+    # DATA PAR DATE
+    # =========================
+
+    suivi_cols = ["Suivi 1", "Suivi 2", "Suivi 3", "Suivi 4"]
+    existing_cols = [c for c in suivi_cols if c in df.columns]
 
     df_suivi = df.melt(
         id_vars=["Date"],
-        value_vars=[c for c in ["Suivi 1","Suivi 2","Suivi 3","Suivi 4"] if c in df.columns],
+        value_vars=existing_cols,
         value_name="Suivi"
     )
 
     df_suivi = df_suivi.dropna(subset=["Suivi"])
     df_suivi["Suivi"] = df_suivi["Suivi"].astype(str).str.strip()
+    df_suivi = df_suivi[df_suivi["Suivi"] != ""]
 
-    daily = df_suivi.groupby("Date")["Suivi"].apply(list).reset_index()
+    daily = (
+        df_suivi.groupby("Date")["Suivi"]
+        .apply(list)
+        .reset_index()
+    )
 
-    color_map = {
-        row["Date"].date(): get_color(row["Suivi"])
-        for _, row in daily.iterrows()
-    }
+    # =========================
+    # MAP DATE -> LISTE DE COULEURS
+    # =========================
+
+    def get_color_list(suivis):
+        colors = []
+
+        for s in suivis:
+            if s == "FCO":
+                colors.append("red")
+            elif s == "LNCR":
+                colors.append("blue")
+            else:
+                colors.append("orange")
+
+        return colors if colors else ["white"]
+
+    color_map = {}
+
+    for _, row in daily.iterrows():
+        d = row["Date"].date()
+        color_map[d] = get_color_list(row["Suivi"])
+
+    # =========================
+    # FIGURE CALENDRIER
+    # =========================
 
     fig, axes = plt.subplots(3, 4, figsize=(18, 10))
     axes = axes.flatten()
 
     for month in range(1, 13):
+
         ax = axes[month - 1]
         ax.set_title(cal.month_name[month])
         ax.axis("off")
@@ -399,61 +422,57 @@ if show_calendar:
 
         for i, week in enumerate(month_matrix):
             for j, day in enumerate(week):
+
                 if day == 0:
                     continue
 
                 d = pd.Timestamp(year, month, day).date()
-                color = color_map.get(d, "white")
+                colors = color_map.get(d, ["white"])
 
-                ax.add_patch(
-                    plt.Rectangle(
-                        (j, -i),
-                        1,
-                        1,
-                        facecolor=color,
-                        edgecolor="black",
-                        lw=0.4
+                # CASE SIMPLE
+                if len(colors) == 1:
+                    ax.add_patch(
+                        plt.Rectangle(
+                            (j, -i),
+                            1,
+                            1,
+                            facecolor=colors[0],
+                            edgecolor="black",
+                            lw=0.4
+                        )
                     )
-                )
+
+                # CASE MULTI COULEURS (SPLIT HORIZONTAL)
+                else:
+                    ax.add_patch(
+                        plt.Rectangle(
+                            (j, -i),
+                            1,
+                            1,
+                            facecolor="white",
+                            edgecolor="black",
+                            lw=0.4
+                        )
+                    )
+
+                    step = 1 / len(colors[:3])
+
+                    for k, c in enumerate(colors[:3]):
+                        ax.add_patch(
+                            plt.Rectangle(
+                                (j + k * step, -i),
+                                step,
+                                1,
+                                facecolor=c,
+                                edgecolor="none"
+                            )
+                        )
 
         ax.set_xlim(0, 7)
         ax.set_ylim(-6, 1)
 
     plt.tight_layout()
     st.pyplot(fig)
-    
-    # =========================================================
-    # 5. LÉGENDE PROPRE
-    # =========================================================
-# =========================
-# LÉGENDE (UNIQUEMENT SI CALENDRIER)
-# =========================
-if show_calendar:
-
-    st.markdown("### Légende des suivis")
-
-    legend_items = {
-        "FCO": "red",
-        "LNCR": "blue",
-        "Pesée": "purple",
-        "CS": "orange",
-        "Aucun suivi": "white"
-    }
-
-    cols = st.columns(len(legend_items))
-
-    for col, (label, color) in zip(cols, legend_items.items()):
-        with col:
-            st.markdown(
-                f"""
-                <div style='display:flex;align-items:center;'>
-                    <div style='width:18px;height:18px;background:{color};
-                    border:1px solid black;margin-right:6px'></div>
-                    {label}
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
 # =========================
 # SCORE GLOBAL
 # =========================
