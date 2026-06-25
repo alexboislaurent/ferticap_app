@@ -85,7 +85,6 @@ for col in variables_map.values():
 # =========================
 
 st.sidebar.header("📌 Options")
-show_calendar = st.sidebar.checkbox("📅 Calendrier annuel des suivis")
 
 mode = st.sidebar.radio(
     "Graph à afficher",
@@ -94,7 +93,9 @@ mode = st.sidebar.radio(
         "Score global",
         "Score par bouc",
         "Variables biologiques",
-        "🏆 Ranking boucs"
+        "🏆 Ranking boucs",
+        "📅 Calendrier"
+        
     ]
 )
 
