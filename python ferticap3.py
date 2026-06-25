@@ -667,9 +667,9 @@ elif mode == "🏆 Ranking boucs":
 # CALENDRIER (INDEPENDANT)
 # =========================
 
-if show_calendar:
+elif mode == "📅 Calendrier":
     st.markdown("---")
-    st.subheader("📅 Calendrier annuel des suivis")
+ 
 
     import calendar as cal
 
