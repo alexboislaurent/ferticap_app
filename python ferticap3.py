@@ -108,8 +108,8 @@ Le score est calculé à partir d’un éjaculat selon la formule suivante :
 ### ⚠️ Règle spécifique
 - Si la motilité ≤ 2,5 → le score est plafonné à **0,99**
 
-### 📌 Interprétation
-- La concentration et le volume représentent la quantité totale de spermatozoïdes
+### 📌 Prend en compte :
+- Concentration*Volume = Total spz dans l'éjaculat en (M/ml)
 - La mobilité pondère la proportion de spermatozoïdes mobiles
 - La motilité ajuste la qualité du mouvement
 
@@ -373,23 +373,104 @@ elif mode == "Variables biologiques":
     st.pyplot(fig)
 
 # =========================
+# DONNÉES RANKING BOUCS
+# =========================
+
+# 10 dernières collectes
+last_10_dates = sorted(df_filtered["Date"].dropna().unique())[-10:]
+
+df_last10 = df_filtered[
+    df_filtered["Date"].isin(last_10_dates)
+]
+
+ranking_last10 = (
+    df_last10.groupby("Code animal")["Score"]
+    .mean()
+    .sort_values(ascending=False)
+)
+
+# Année en cours
+current_year = pd.Timestamp.today().year
+
+df_year = df_filtered[
+    df_filtered["Date"].dt.year == current_year
+]
+
+ranking_year = (
+    df_year.groupby("Code animal")["Score"]
+    .mean()
+    .sort_values(ascending=False)
+)
+
+# Historique complet
+ranking_alltime = (
+    df.groupby("Code animal")["Score"]
+    .mean()
+    .sort_values(ascending=False)
+)
+
+# =========================
 # RANKING BOUCS
 # =========================
 
 elif mode == "🏆 Ranking boucs":
-    st.subheader("🏆 Classement des boucs (10 dernières collectes)")
 
-    st.dataframe(ranking_df)
+    # --------------------------------------------------
+    # 10 dernières collectes
+    # --------------------------------------------------
 
-    fig, ax = plt.subplots(figsize=(10, 5))
+    st.subheader("🏆 Performance des boucs - 10 dernières collectes")
+
+    fig, ax = plt.subplots(figsize=(10, 6))
 
     ax.barh(
-        ranking_df["Boucs"],
-        ranking_df["Score moyen (10 dernières)"]
+        ranking_last10.index,
+        ranking_last10.values
     )
 
     ax.invert_yaxis()
-    ax.set_title("Performance des boucs (10 dernières collectes)")
+    ax.set_xlabel("Score moyen")
+    ax.set_title("10 dernières collectes")
+    ax.grid(True)
+
+    st.pyplot(fig)
+
+    # --------------------------------------------------
+    # Année en cours
+    # --------------------------------------------------
+
+    st.subheader(f"📅 Performance des boucs - {current_year}")
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    ax.barh(
+        ranking_year.index,
+        ranking_year.values
+    )
+
+    ax.invert_yaxis()
+    ax.set_xlabel("Score moyen")
+    ax.set_title(f"Année {current_year}")
+    ax.grid(True)
+
+    st.pyplot(fig)
+
+    # --------------------------------------------------
+    # Historique complet
+    # --------------------------------------------------
+
+    st.subheader("📈 Performance des boucs - All Time")
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    ax.barh(
+        ranking_alltime.index,
+        ranking_alltime.values
+    )
+
+    ax.invert_yaxis()
+    ax.set_xlabel("Score moyen")
+    ax.set_title("Historique complet")
     ax.grid(True)
 
     st.pyplot(fig)
