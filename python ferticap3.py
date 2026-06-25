@@ -95,6 +95,7 @@ mode = st.sidebar.radio(
         "Score par bouc",
         "Variables biologiques",
         "🏆 Ranking boucs"
+        "📅 Calendrier"
     ]
 )
 
@@ -351,7 +352,7 @@ if mode == "Heatmap":
 # CALENDRIER SUIVIS (FIX COULEURS + MULTI-COULEURS)
 # =========================
 
-if show_calendar:
+elif show_calendar:
 
     st.subheader("📅 Calendrier annuel des suivis")
 
