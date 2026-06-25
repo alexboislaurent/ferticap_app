@@ -457,25 +457,6 @@ if show_calendar:
 
     plt.tight_layout()
     st.pyplot(fig)
-    
-    # =========================
-    # FORMAT DES DATES
-    # =========================
-
-    # X axis
-    ax.set_xticklabels(
-        [pd.to_datetime(t.get_text()).strftime("%d/%m/%y") for t in ax.get_xticklabels()],
-        rotation=45,
-        ha="right"
-    )
-
-    # Y axis (si besoin)
-    ax.set_yticklabels(
-        ax.get_yticklabels(),
-        rotation=0
-    )
-
-    st.pyplot(fig)
 
 # =========================
 # SCORE GLOBAL
