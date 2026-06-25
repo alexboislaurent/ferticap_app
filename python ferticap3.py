@@ -633,9 +633,21 @@ elif mode == "📅 Calendrier":
 
     for month in range(1, 13):
 
-        ax = axes[month - 1]
-        ax.set_title(cal.month_name[month])
-        ax.axis("off")
+    ax = axes[month - 1]
+    ax.set_title(cal.month_name[month])
+    ax.axis("off")
+
+    highlight_months = {1, 4, 5, 8, 9, 12}
+
+    if month in highlight_months:
+    ax.add_patch(
+        plt.Rectangle(
+            (0, -6), 7, 7,
+            fill=False,
+            edgecolor="yellow",
+            linewidth=3
+        )
+    )
 
         month_matrix = cal.monthcalendar(year, month)
 
