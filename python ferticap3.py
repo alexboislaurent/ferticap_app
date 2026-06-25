@@ -667,12 +667,16 @@ elif mode == "🏆 Ranking boucs":
 # CALENDRIER (INDEPENDANT)
 # =========================
 
-elif mode == "📅 Calendrier":
+# =========================
+# CALENDRIER (INDEPENDANT UNIQUE)
+# =========================
 
-    st.markdown("### 📅 Calendrier annuel des suivis")
+elif show_calendar:
+
+    st.markdown("---")
 
     # =========================
-    # COULEURS OFFICIELLES
+    # COULEURS FIXES
     # =========================
 
     COLOR_MAP = {
@@ -683,6 +687,7 @@ elif mode == "📅 Calendrier":
     }
 
     def get_color_list(suivis):
+        """Retourne une liste de couleurs pour un jour donné"""
         colors = []
 
         for s in suivis:
@@ -691,12 +696,12 @@ elif mode == "📅 Calendrier":
             if s in COLOR_MAP:
                 colors.append(COLOR_MAP[s])
             else:
-                colors.append("orange")  # fallback debug
+                colors.append("gray")
 
         return colors if colors else ["white"]
 
     # =========================
-    # DATA SUIVIS
+    # AGRÉGATION PAR JOUR
     # =========================
 
     suivi_cols = ["Suivi 1", "Suivi 2", "Suivi 3", "Suivi 4"]
@@ -718,38 +723,27 @@ elif mode == "📅 Calendrier":
         .reset_index()
     )
 
-    # =========================
-    # MAP DATE -> COULEURS
-    # =========================
-
     color_map = {
         row["Date"].date(): get_color_list(row["Suivi"])
         for _, row in daily.iterrows()
     }
 
     # =========================
-    # LÉGENDE STREAMLIT
+    # LÉGENDE
     # =========================
 
-    st.markdown("#### 🧾 Légende")
+    st.markdown("### Légende")
 
-    legend_items = {
-        "FCO": "blue",
-        "LNCR": "red",
-        "CS": "green",
-        "Pesée": "pink"
-    }
+    legend_cols = st.columns(len(COLOR_MAP))
 
-    cols = st.columns(len(legend_items))
-
-    for col, (label, color) in zip(cols, legend_items.items()):
+    for col, (label, color) in zip(legend_cols, COLOR_MAP.items()):
         with col:
             st.markdown(
                 f"""
-                <div style="display:flex;align-items:center;gap:8px">
+                <div style="display:flex;align-items:center;">
                     <div style="width:18px;height:18px;background:{color};
-                                border:1px solid black"></div>
-                    <b>{label}</b>
+                                border:1px solid black;margin-right:6px"></div>
+                    {label}
                 </div>
                 """,
                 unsafe_allow_html=True
@@ -794,7 +788,7 @@ elif mode == "📅 Calendrier":
                         )
                     )
 
-                # CASE MULTI-COULEURS
+                # CASE MULTI-COULEURS (split horizontal)
                 else:
                     ax.add_patch(
                         plt.Rectangle(
@@ -807,10 +801,9 @@ elif mode == "📅 Calendrier":
                         )
                     )
 
-                    colors = colors[:4]  # sécurité visuelle
-                    step = 1 / len(colors)
+                    step = 1 / len(colors[:4])  # max 4 suivis
 
-                    for k, c in enumerate(colors):
+                    for k, c in enumerate(colors[:4]):
                         ax.add_patch(
                             plt.Rectangle(
                                 (j + k * step, -i),
