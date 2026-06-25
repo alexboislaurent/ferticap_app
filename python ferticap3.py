@@ -5,6 +5,8 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+import calendar
+import numpy as np
 
 # =========================
 # CONFIG PAGE
@@ -83,6 +85,7 @@ for col in variables_map.values():
 # =========================
 
 st.sidebar.header("📌 Options")
+show_calendar = st.sidebar.checkbox("📅 Calendrier annuel des suivis")
 
 mode = st.sidebar.radio(
     "Graph à afficher",
@@ -121,6 +124,28 @@ Le score est calculé à partir d’un éjaculat selon la formule suivante :
 # =========================
 
 df = df.dropna(subset=["Date"])
+
+# =========================
+# PREPARATION CALENDRIER SUIVIS
+# =========================
+
+suivi_cols = ["Suivi 1", "Suivi 2", "Suivi 3", "Suivi 4"]
+existing_cols = [c for c in suivi_cols if c in df.columns]
+
+df_suivi = df.melt(
+    id_vars=["Date"],
+    value_vars=existing_cols,
+    value_name="Suivi"
+)
+
+daily = (
+    df_suivi.groupby("Date")["Suivi"]
+    .apply(lambda x: list(set(x)))
+    .reset_index()
+)
+
+df_suivi = df_suivi.dropna(subset=["Suivi"])
+df_suivi = df_suivi[df_suivi["Suivi"].astype(str).str.strip() != ""]
 
 min_date = df["Date"].min().date()
 max_date = df["Date"].max().date()
@@ -290,6 +315,15 @@ def resample_series(series):
         return series.resample("ME").mean()
     return series
 
+def get_color(suivis):
+    if len(suivis) > 1:
+        return "purple"
+    if "FCO" in suivis:
+        return "red"
+    if "LNCR" in suivis:
+        return "blue"
+    return "gray"
+
 # =========================
 # HEATMAP
 # =========================
@@ -304,10 +338,74 @@ if mode == "Heatmap":
         cmap="RdYlGn",
         cbar=False,
         ax=ax,
- 	linewidths=0.5,
-    	linecolor="black"
+        linewidths=0.5,
+        linecolor="black"
     )
 
+    ax.set_xticklabels(
+        [pd.to_datetime(t.get_text()).strftime("%d/%m/%y") for t in ax.get_xticklabels()],
+        rotation=45,
+        ha="right"
+    )
+
+    ax.set_yticklabels(ax.get_yticklabels(), rotation=0)
+
+    st.pyplot(fig)
+
+    # =========================
+    # CALENDRIER (PROPRE)
+    # =========================
+
+    if show_calendar:
+
+        st.subheader("📅 Calendrier des suivis (vue annuelle)")
+
+        year = df["Date"].dt.year.max()
+
+        df_year = daily[daily["Date"].dt.year == year].copy()
+
+        df_year["color"] = df_year["Suivi"].apply(get_color)
+        df_year["day"] = df_year["Date"].dt.dayofyear
+
+        calendar_df = pd.DataFrame({"day": range(1, 367)})
+
+        calendar_df = calendar_df.merge(
+            df_year[["day", "color"]],
+            on="day",
+            how="left"
+        )
+
+        grid = calendar_df["color"].values.reshape(-1, 7)
+
+        fig2, ax2 = plt.subplots(figsize=(12, 4))
+
+        cmap = {
+            None: "white",
+            np.nan: "white",
+            "red": "red",
+            "blue": "blue",
+            "purple": "purple",
+            "gray": "lightgray"
+        }
+
+        for i in range(grid.shape[0]):
+            for j in range(grid.shape[1]):
+                ax2.add_patch(
+                    plt.Rectangle(
+                        (j, -i),
+                        1,
+                        1,
+                        color=cmap.get(grid[i][j], "white"),
+                        ec="black",
+                        lw=0.2
+                    )
+                )
+
+        ax2.set_xlim(0, 7)
+        ax2.set_ylim(-grid.shape[0], 0)
+        ax2.axis("off")
+
+        st.pyplot(fig2)
     
     # =========================
     # FORMAT DES DATES
