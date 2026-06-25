@@ -631,7 +631,7 @@ elif mode == "📅 Calendrier":
     fig, axes = plt.subplots(3, 4, figsize=(18, 10))
     axes = axes.flatten()
 
-    highlight_months = {1, 4, 5, 8, 9, 12}
+highlight_months = {1, 4, 5, 8, 9, 12}
 
 for month in range(1, 13):
 
@@ -639,6 +639,52 @@ for month in range(1, 13):
     ax.set_title(cal.month_name[month])
     ax.axis("off")
 
+    # =========================
+    # DESSIN DU CALENDRIER (TOUJOURS)
+    # =========================
+
+    month_matrix = cal.monthcalendar(year, month)
+
+    for i, week in enumerate(month_matrix):
+        for j, day in enumerate(week):
+
+            if day == 0:
+                continue
+
+            d = pd.Timestamp(year, month, day).date()
+            colors = color_map.get(d, ["white"])
+
+            if len(colors) == 1:
+                ax.add_patch(plt.Rectangle(
+                    (j, -i), 1, 1,
+                    facecolor=colors[0],
+                    edgecolor="black",
+                    lw=0.4
+                ))
+            else:
+                ax.add_patch(plt.Rectangle(
+                    (j, -i), 1, 1,
+                    facecolor="white",
+                    edgecolor="black",
+                    lw=0.4
+                ))
+
+                step = 1 / len(colors[:4])
+
+                for k, c in enumerate(colors[:4]):
+                    ax.add_patch(plt.Rectangle(
+                        (j + k * step, -i),
+                        step, 1,
+                        facecolor=c,
+                        edgecolor="none"
+                    ))
+
+    ax.set_xlim(0, 7)
+    ax.set_ylim(-6, 1)
+
+    # =========================
+    # HIGHLIGHT MOIS (SEPARÉ)
+    # =========================
     if month in highlight_months:
         ax.add_patch(
             plt.Rectangle(
