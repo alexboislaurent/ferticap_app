@@ -550,7 +550,7 @@ elif mode == "📅 Calendrier":
     # =========================
     # MAP COULEURS FIXES
     # =========================
-        
+
     COLOR_MAP = {
         "FCO": "blue",
         "LNCR": "red",
@@ -566,34 +566,20 @@ elif mode == "📅 Calendrier":
 
         for s in suivis:
             s = normalize(s)
-            colors.append(COLOR_MAP.get(s, "gray"))
 
+            if s in COLOR_MAP:
+                colors.append(COLOR_MAP[s])
+            else:
+                colors.append("gray")
+
+        # enlever doublons consécutifs
         cleaned = []
         for c in colors:
             if c not in cleaned:
                 cleaned.append(c)
 
         return cleaned if cleaned else ["white"]
-# =========================
-# LÉGENDE
-# =========================
 
-st.markdown("### Légende")
-
-cols = st.columns(len(COLOR_MAP))
-
-for col, (label, color) in zip(cols, COLOR_MAP.items()):
-    with col:
-        st.markdown(
-            f"""
-            <div style='display:flex;align-items:center;gap:6px;'>
-                <div style='width:18px;height:18px;background:{color};
-                border:1px solid black;'></div>
-                {label}
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
     # =========================
     # DATA CLEAN
     # =========================
@@ -619,70 +605,102 @@ for col, (label, color) in zip(cols, COLOR_MAP.items()):
     }
 
     # =========================
-    # FIGURE CALENDRIER
+    # LÉGENDE (IDENTIQUE À TON CODE)
     # =========================
 
-    year = df["Date"].dt.year.max()
+    st.markdown("### Légende")
 
-    fig, axes = plt.subplots(3, 4, figsize=(18, 10))
-    axes = axes.flatten()
+    cols = st.columns(len(COLOR_MAP))
+
+    for col, (label, color) in zip(cols, COLOR_MAP.items()):
+        with col:
+            st.markdown(
+                f"""
+                <div style='display:flex;align-items:center;'>
+                    <div style='width:18px;height:18px;background:{color};
+                    border:1px solid black;margin-right:6px'></div>
+                    {label}
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+    # =========================
+    # ANNÉE BASE
+    # =========================
+
+    base_year = df["Date"].dt.year.max()
+    years = [base_year - 1, base_year, base_year + 1]
 
     highlight_months = {1, 4, 5, 8, 9, 12}
 
-    for month in range(1, 13):
+    # =========================
+    # FIGURES PAR ANNÉE
+    # =========================
 
-        ax = axes[month - 1]
-        ax.set_title(cal.month_name[month])
-        ax.axis("off")
+    for year in years:
 
-        month_matrix = cal.monthcalendar(year, month)
+        st.markdown(f"### 📅 Année {year}")
 
-        for i, week in enumerate(month_matrix):
-            for j, day in enumerate(week):
+        fig, axes = plt.subplots(3, 4, figsize=(18, 10))
+        axes = axes.flatten()
 
-                if day == 0:
-                    continue
+        for month in range(1, 13):
 
-                d = pd.Timestamp(year, month, day).date()
-                colors = color_map.get(d, ["white"])
+            ax = axes[month - 1]
+            ax.set_title(cal.month_name[month])
+            ax.axis("off")
 
-                if len(colors) == 1:
-                    ax.add_patch(plt.Rectangle(
-                        (j, -i), 1, 1,
-                        facecolor=colors[0],
-                        edgecolor="black",
-                        lw=0.4
-                    ))
-                else:
-                    ax.add_patch(plt.Rectangle(
-                        (j, -i), 1, 1,
-                        facecolor="white",
-                        edgecolor="black",
-                        lw=0.4
-                    ))
+            month_matrix = cal.monthcalendar(year, month)
 
-                    step = 1 / len(colors[:4])
+            for i, week in enumerate(month_matrix):
+                for j, day in enumerate(week):
 
-                    for k, c in enumerate(colors[:4]):
+                    if day == 0:
+                        continue
+
+                    d = pd.Timestamp(year, month, day).date()
+                    colors = color_map.get(d, ["white"])
+
+                    # case simple
+                    if len(colors) == 1:
                         ax.add_patch(plt.Rectangle(
-                            (j + k * step, -i),
-                            step, 1,
-                            facecolor=c,
-                            edgecolor="none"
+                            (j, -i), 1, 1,
+                            facecolor=colors[0],
+                            edgecolor="black",
+                            lw=0.4
                         ))
 
-        ax.set_xlim(0, 7)
-        ax.set_ylim(-6, 1)
+                    # multi couleurs
+                    else:
+                        ax.add_patch(plt.Rectangle(
+                            (j, -i), 1, 1,
+                            facecolor="white",
+                            edgecolor="black",
+                            lw=0.4
+                        ))
 
-        if month in highlight_months:
-            ax.add_patch(
-                plt.Rectangle(
+                        step = 1 / len(colors[:4])
+
+                        for k, c in enumerate(colors[:4]):
+                            ax.add_patch(plt.Rectangle(
+                                (j + k * step, -i),
+                                step, 1,
+                                facecolor=c,
+                                edgecolor="none"
+                            ))
+
+            ax.set_xlim(0, 7)
+            ax.set_ylim(-6, 1)
+
+            if month in highlight_months:
+                ax.add_patch(plt.Rectangle(
                     (0, -6), 7, 7,
                     fill=False,
                     edgecolor="yellow",
                     linewidth=3
-                )
-            )
+                ))
 
-    plt.tight_layout()
-    st.pyplot(fig)
+        plt.tight_layout()
+        st.pyplot(fig)
+        plt.close(fig)
