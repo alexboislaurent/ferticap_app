@@ -356,56 +356,78 @@ if mode == "Heatmap":
     # CALENDRIER (PROPRE)
     # =========================
 
-    if show_calendar:
+   if show_calendar:
 
-        st.subheader("📅 Calendrier des suivis (vue annuelle)")
+    st.subheader("📅 Calendrier des suivis (vue annuelle)")
 
-        year = df["Date"].dt.year.max()
+    # =========================
+    # ANNÉE COURANTE
+    # =========================
+    year = df["Date"].dt.year.max()
 
-        df_year = daily[daily["Date"].dt.year == year].copy()
+    df_year = daily[daily["Date"].dt.year == year].copy()
 
-        df_year["color"] = df_year["Suivi"].apply(get_color)
-        df_year["day"] = df_year["Date"].dt.dayofyear
+    # =========================
+    # COULEURS
+    # =========================
+    df_year["color"] = df_year["Suivi"].apply(get_color)
+    df_year["day"] = df_year["Date"].dt.dayofyear
 
-        calendar_df = pd.DataFrame({"day": range(1, 367)})
+    # =========================
+    # BASE CALENDRIER
+    # =========================
+    calendar_df = pd.DataFrame({"day": range(1, 367)})
 
-        calendar_df = calendar_df.merge(
-            df_year[["day", "color"]],
-            on="day",
-            how="left"
-        )
+    calendar_df = calendar_df.merge(
+        df_year[["day", "color"]],
+        on="day",
+        how="left"
+    )
 
-        grid = calendar_df["color"].values.reshape(-1, 7)
+    # =========================
+    # GRID 7 JOURS / SEMAINE
+    # =========================
+    colors = calendar_df["color"].to_numpy()
 
-        fig2, ax2 = plt.subplots(figsize=(12, 4))
+    # padding pour compléter la grille
+    pad_size = (-len(colors)) % 7
+    colors = np.concatenate([colors, np.array([None] * pad_size)])
 
-        cmap = {
-            None: "white",
-            np.nan: "white",
-            "red": "red",
-            "blue": "blue",
-            "purple": "purple",
-            "gray": "lightgray"
-        }
+    grid = colors.reshape(-1, 7)
 
-        for i in range(grid.shape[0]):
-            for j in range(grid.shape[1]):
-                ax2.add_patch(
-                    plt.Rectangle(
-                        (j, -i),
-                        1,
-                        1,
-                        color=cmap.get(grid[i][j], "white"),
-                        ec="black",
-                        lw=0.2
-                    )
+    # =========================
+    # FIGURE
+    # =========================
+    fig2, ax2 = plt.subplots(figsize=(12, 4))
+
+    cmap = {
+        None: "white",
+        np.nan: "white",
+        "red": "red",
+        "blue": "blue",
+        "purple": "purple",
+        "gray": "lightgray"
+    }
+
+    for i in range(grid.shape[0]):
+        for j in range(grid.shape[1]):
+
+            ax2.add_patch(
+                plt.Rectangle(
+                    (j, -i),
+                    1,
+                    1,
+                    color=cmap.get(grid[i][j], "white"),
+                    ec="black",
+                    lw=0.2
                 )
+            )
 
-        ax2.set_xlim(0, 7)
-        ax2.set_ylim(-grid.shape[0], 0)
-        ax2.axis("off")
+    ax2.set_xlim(0, 7)
+    ax2.set_ylim(-grid.shape[0], 0)
+    ax2.axis("off")
 
-        st.pyplot(fig2)
+    st.pyplot(fig2)
     
     # =========================
     # FORMAT DES DATES
