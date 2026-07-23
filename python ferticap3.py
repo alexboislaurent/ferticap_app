@@ -234,6 +234,9 @@ heatmap = df_filtered.pivot_table(
     aggfunc="max"
 ).sort_index(axis=1)
 
+# Format JJ/MM/AA
+heatmap.columns = heatmap.columns.strftime("%d/%m/%y")
+
 score_global = (
     df_filtered.groupby("Date")["Score"]
     .mean()
@@ -345,6 +348,7 @@ if mode == "Heatmap":
     )
 
     ax.set_yticklabels(ax.get_yticklabels(), rotation=0)
+    ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha="right")
 
     st.pyplot(fig)
 
