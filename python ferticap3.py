@@ -19,20 +19,10 @@ st.title("📊 Dashboard Ferticap")
 # CONNEXION GOOGLE SHEETS
 # =========================
 
-scope = [
-    "https://www.googleapis.com/auth/spreadsheets",
-    "https://www.googleapis.com/auth/drive"
-]
+from data.google_sheet import load_google_sheet
 
-creds = Credentials.from_service_account_info(
-    st.secrets["gcp_service_account"],
-    scopes=scope
-)
+worksheet = load_google_sheet()
 
-client = gspread.authorize(creds)
-
-sheet = client.open_by_key("178LJjutfRAO0cvw4aCJ2RClOuMWv1-I94X0FL8Lcs0c")
-worksheet = sheet.worksheet("Labo routine total")
 
 # =========================
 # DATA
