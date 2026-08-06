@@ -839,125 +839,88 @@ elif mode == "🏆 Ranking boucs":
 
 
     # =========================
-    # PODIUM CHAMPIONS
-    # =========================
+# PODIUM
+# =========================
 
-    with col_podium:
+with col_podium:
 
-        st.markdown(
-            "### 🏆 Podium des champions"
-        )
+    st.markdown("### 🏆 Podium des champions")
 
+    if len(ranking_last10) >= 3:
 
-        if len(ranking_last10) >= 3:
+        top3 = ranking_last10.head(3)
 
+        # ordre visuel : 2ème - 1er - 3ème
+        podium_order = [
+            (1, "🥈", 80),
+            (0, "🥇", 120),
+            (2, "🥉", 60)
+        ]
 
-            top3 = ranking_last10.head(3).reset_index()
+        cols = st.columns(3)
 
+        for col, (position, medal, height) in zip(cols, podium_order):
 
-            html = """
-            <div style="
-                display:flex;
-                justify-content:center;
-                align-items:flex-end;
-                height:260px;
-            ">
-            """
+            bouc = top3.index[position]
+            score = top3.iloc[position]["Score_moyen"]
+            taux = top3.iloc[position]["Taux_reussite"]
 
+            with col:
 
-            podium = [
-
-                # position dataframe, médaille, hauteur, couleur
-                (1, "🥈", 90, "#C0C0C0"),
-                (0, "🥇", 130, "#FFD700"),
-                (2, "🥉", 70, "#CD7F32")
-
-            ]
-
-
-            for pos, medal, height, color in podium:
-
-
-                bouc = top3.iloc[pos]["Code animal"]
-
-                score = top3.iloc[pos]["Score_moyen"]
-
-                taux = top3.iloc[pos]["Taux_reussite"]
-
-
-                html += f"""
-
-                <div style="
-                    width:33%;
-                    text-align:center;
-                ">
-
-
+                st.markdown(
+                    f"""
                     <div style="
-                        font-size:32px;
+                        text-align:center;
                     ">
-                        {medal}
-                    </div>
-
-
-                    <div style="
-                        font-weight:bold;
-                        font-size:15px;
-                    ">
-                        {bouc}
-                    </div>
-
-
-                    <div style="
-                        height:{height}px;
-                        background:{color};
-                        margin:4px;
-                        border-radius:12px 12px 0 0;
-                        display:flex;
-                        flex-direction:column;
-                        justify-content:center;
-                        align-items:center;
-                        box-shadow:0px 3px 8px #999;
-                    ">
-
 
                         <div style="
-                            font-size:20px;
+                            font-size:35px;
+                        ">
+                            {medal}
+                        </div>
+
+                        <div style="
                             font-weight:bold;
+                            font-size:16px;
                         ">
-                            {score:.2f}
+                            {bouc}
                         </div>
-
 
                         <div style="
-                            font-size:12px;
+                            height:{height}px;
+                            background:linear-gradient(#eeeeee,#cccccc);
+                            margin-top:5px;
+                            border-radius:10px 10px 0 0;
+                            display:flex;
+                            flex-direction:column;
+                            justify-content:center;
+                            align-items:center;
+                            border:1px solid #999;
                         ">
-                            {taux:.0f}% réussite
+
+                            <div style="
+                                font-size:20px;
+                                font-weight:bold;
+                            ">
+                                {score:.2f}
+                            </div>
+
+                            <div style="
+                                font-size:12px;
+                            ">
+                                {taux:.0f}% réussite
+                            </div>
+
                         </div>
 
-
                     </div>
+                    """,
+                    unsafe_allow_html=True
+                )
 
-                </div>
+    else:
 
-                """
-
-
-            html += "</div>"
-
-
-            st.markdown(
-                html,
-                unsafe_allow_html=True
-            )
-
-
-        else:
-
-            st.info(
-                "Pas assez de boucs pour créer un podium."
-            )
-
+        st.info("Pas assez de boucs pour créer un podium.")
 
 
     # =========================
