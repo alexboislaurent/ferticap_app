@@ -794,65 +794,44 @@ elif mode == "🏆 Ranking boucs":
     # --------------------------------------------------
 
     st.subheader("🏆 Performance des boucs - 10 dernières collectes")
-  # =========================
-# PODIUM TOP 3 - 10 DERNIÈRES COLLECTES
+     # =========================
+# PODIUM TOP 3
 # =========================
 
 if len(ranking_last10) >= 3:
 
     top3 = ranking_last10.head(3)
 
-    st.markdown(
-        """
-        <div style="
-            text-align:center;
-            font-size:24px;
-            font-weight:bold;
-            margin-bottom:15px;
-        ">
-        🏆 Podium des champions
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-
-    # Colonnes pour placer le podium à droite
-    col_graph, col_podium = st.columns([2,1])
+    col_graph, col_podium = st.columns([2, 1])
 
 
     with col_podium:
 
-
-        podium_order = [
-            (1, "🥈", 2),
-            (0, "🥇", 1),
-            (2, "🥉", 3)
-        ]
-
+        st.markdown(
+            "### 🏆 Podium des champions"
+        )
 
         html = """
         <div style="
             display:flex;
             justify-content:center;
-            align-items:end;
-            height:250px;
+            align-items:flex-end;
         ">
         """
 
 
-        heights = {
-            1: "100px",
-            2: "70px",
-            3: "50px"
-        }
+        podium = [
+            (1, "🥈", 80),
+            (0, "🥇", 120),
+            (2, "🥉", 60)
+        ]
 
 
-        for idx, medal, place in podium_order:
+        for position, medal, height in podium:
 
-            bouc = top3.index[idx]
-            score = top3.iloc[idx]["Score_moyen"]
-            taux = top3.iloc[idx]["Taux_reussite"]
+            bouc = top3.index[position]
+            score = top3.iloc[position]["Score_moyen"]
+            taux = top3.iloc[position]["Taux_reussite"]
 
 
             html += f"""
@@ -862,42 +841,33 @@ if len(ranking_last10) >= 3:
             ">
 
                 <div style="
-                    font-size:32px;
+                    font-size:30px;
                 ">
                     {medal}
                 </div>
 
 
-                <div style="
-                    font-weight:bold;
-                    font-size:15px;
-                ">
+                <b>
                     {bouc}
-                </div>
+                </b>
 
 
                 <div style="
-                    height:{heights[place]};
+                    height:{height}px;
                     background:#d9d9d9;
-                    margin:5px;
                     border-radius:10px 10px 0 0;
+                    margin:5px;
                     display:flex;
-                    align-items:center;
-                    justify-content:center;
                     flex-direction:column;
-                    font-weight:bold;
+                    justify-content:center;
+                    align-items:center;
                 ">
 
-                    <div>
-                    {score:.2f}
-                    </div>
+                    <b>{score:.2f}</b>
 
-                    <div style="
-                        font-size:12px;
-                        font-weight:normal;
-                    ">
-                    {taux:.0f}% réussite
-                    </div>
+                    <small>
+                        {taux:.0f}% réussite
+                    </small>
 
                 </div>
 
@@ -912,6 +882,8 @@ if len(ranking_last10) >= 3:
             html,
             unsafe_allow_html=True
         )
+
+
     fig, ax = plt.subplots(figsize=(10, 6))
 
     ax.barh(
