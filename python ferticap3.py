@@ -454,46 +454,86 @@ elif mode == "Score par bouc":
 
 elif mode == "Variables biologiques":
 
-    st.subheader("📊 Variables biologiques par bouc")
+    st.subheader("📊 Variables biologiques")
 
     selected_vars = st.sidebar.multiselect(
         "Variables",
         list(variables_map.keys()),
-        default=["Volume semence (ml)", "Concentration spz (B/ml)"]
+        default=[
+            "Volume semence (ml)",
+            "Concentration spz (B/ml)"
+        ]
+    )
+
+    utiliser_selection_boucs = st.sidebar.checkbox(
+        "Limiter aux boucs sélectionnés",
+        value=False
     )
 
     afficher_individuels = st.sidebar.checkbox(
-        "Afficher les courbes individuelles des boucs sélectionnés",
+        "Afficher les courbes individuelles des boucs",
         value=False
     )
 
 
-    # Sécurité si aucun bouc sélectionné
-    if len(selected_boucs) == 0:
-        st.warning("Veuillez sélectionner au moins un bouc.")
+    # =========================
+    # PREPARATION DES DONNEES
+    # =========================
+
+    if utiliser_selection_boucs:
+
+        if len(selected_boucs) == 0:
+            st.warning("Aucun bouc sélectionné.")
+            st.stop()
+
+        data = df_filtered[
+            df_filtered["Code animal"].isin(selected_boucs)
+        ]
+
+    else:
+
+        # comportement identique à l'ancienne version
+        data = df_filtered.copy()
+
+
+    if data.empty:
+        st.warning("Aucune donnée disponible.")
         st.stop()
 
 
     fig, ax = plt.subplots(figsize=(14, 6))
 
 
+    # =========================
+    # COURBES
+    # =========================
+
     for var in selected_vars:
 
         col = variables_map[var]
 
-        if col not in df_filtered.columns:
+
+        if col not in data.columns:
+            st.warning(f"Variable absente : {col}")
             continue
 
 
-        # Données uniquement sur les boucs sélectionnés
-        data = df_filtered[
-            df_filtered["Code animal"].isin(selected_boucs)
-        ]
+        # conversion sécurité
+        data[col] = (
+            data[col]
+            .astype(str)
+            .str.replace(",", ".", regex=False)
+        )
+
+        data[col] = pd.to_numeric(
+            data[col],
+            errors="coerce"
+        )
 
 
-        # =========================================
-        # MODE COURBES INDIVIDUELLES
-        # =========================================
+        # =========================
+        # COURBES INDIVIDUELLES
+        # =========================
 
         if afficher_individuels:
 
@@ -507,14 +547,19 @@ elif mode == "Variables biologiques":
                     .sort_index()
                 )
 
+
                 if len(serie) > 0:
 
                     serie = resample_series(serie)
 
-                    serie = serie.rolling(
-                        lissage,
-                        min_periods=1
-                    ).mean()
+                    serie = (
+                        serie
+                        .rolling(
+                            lissage,
+                            min_periods=1
+                        )
+                        .mean()
+                    )
 
 
                     ax.plot(
@@ -525,9 +570,9 @@ elif mode == "Variables biologiques":
                     )
 
 
-        # =========================================
-        # MODE MOYENNE DES BOUCS
-        # =========================================
+        # =========================
+        # MOYENNE GENERALE
+        # =========================
 
         else:
 
@@ -539,27 +584,44 @@ elif mode == "Variables biologiques":
             )
 
 
-            serie = resample_series(serie)
+            if len(serie) > 0:
 
-            serie = serie.rolling(
-                lissage,
-                min_periods=1
-            ).mean()
+                serie = resample_series(serie)
 
-
-            ax.plot(
-                serie.index,
-                serie.values,
-                marker="o",
-                label=f"Moyenne {var}"
-            )
+                serie = (
+                    serie
+                    .rolling(
+                        lissage,
+                        min_periods=1
+                    )
+                    .mean()
+                )
 
 
-    ax.set_title("Variables biologiques selon sélection des boucs")
-    ax.set_ylabel("Valeur moyenne")
+                ax.plot(
+                    serie.index,
+                    serie.values,
+                    marker="o",
+                    label=var
+                )
+
+
+    # =========================
+    # FORMAT GRAPHIQUE
+    # =========================
+
+    ax.set_title(
+        "Variables biologiques"
+    )
+
+    ax.set_ylabel(
+        "Valeur moyenne"
+    )
+
     ax.grid(True)
 
     ax.legend()
+
 
     ax.xaxis.set_major_formatter(
         mdates.DateFormatter("%d/%m/%y")
@@ -569,10 +631,13 @@ elif mode == "Variables biologiques":
         mdates.AutoDateLocator()
     )
 
-    fig.autofmt_xdate(rotation=45)
+
+    fig.autofmt_xdate(
+        rotation=45
+    )
+
 
     st.pyplot(fig)
-
 
 # =========================
 # RANKING BOUCS
