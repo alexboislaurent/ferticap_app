@@ -3,8 +3,6 @@ import gspread
 from google.oauth2.service_account import Credentials
 import pandas as pd
 import seaborn as sns
-import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
 import calendar
 import numpy as np
 from analysis.ranking import calc_ranking_with_success
