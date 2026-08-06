@@ -200,15 +200,54 @@ boucs_derniere_collecte = (
     .tolist()
 )
 
+# Sécurité si aucune collecte dans la période
 if len(boucs_derniere_collecte) == 0:
-    boucs_derniere_collecte = boucs[:5]
+    boucs_derniere_collecte = boucs.copy()
 
-selected_boucs = st.sidebar.multiselect(
-    "Sélection boucs",
-    boucs,
-    default=boucs_derniere_collecte
+# Boucs actuels en premier
+boucs = (
+    sorted(boucs_derniere_collecte)
+    + sorted([b for b in boucs if b not in boucs_derniere_collecte])
 )
 
+st.sidebar.markdown("### 🐐 Sélection des boucs")
+
+# Case pour sélectionner automatiquement les boucs actuels
+if st.sidebar.button("🟢 Sélectionner les boucs actuels"):
+    for b in boucs:
+        st.session_state[f"bouc_{b}"] = b in boucs_derniere_collecte
+
+# Boutons rapides
+if st.sidebar.button("☑ Tout sélectionner"):
+    for b in boucs:
+        st.session_state[f"bouc_{b}"] = True
+
+if st.sidebar.button("☐ Tout désélectionner"):
+    for b in boucs:
+        st.session_state[f"bouc_{b}"] = False
+
+
+selected_boucs = []
+
+for b in boucs:
+
+    # Valeur par défaut au premier affichage
+    if f"bouc_{b}" not in st.session_state:
+        st.session_state[f"bouc_{b}"] = (
+            b in boucs_derniere_collecte
+        )
+
+    label = (
+        f"🟢 {b}"
+        if b in boucs_derniere_collecte
+        else f"⚪ {b}"
+    )
+
+    if st.sidebar.checkbox(
+        label,
+        key=f"bouc_{b}"
+    ):
+        selected_boucs.append(b)
 # =========================
 # PARAMÈTRES
 # =========================
