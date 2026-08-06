@@ -8,6 +8,7 @@ import matplotlib.dates as mdates
 import calendar
 import numpy as np
 from analysis.ranking import calc_ranking_with_success
+from plots.heatmap import create_heatmap
 
 # =========================
 # CONFIG PAGE
@@ -330,23 +331,11 @@ def get_color(suivis):
 # =========================
 # HEATMAP
 # =========================
-
 if mode == "Heatmap":
+
     st.subheader("Heatmap succès")
 
-    fig, ax = plt.subplots(figsize=(16, 6))
-
-    sns.heatmap(
-        heatmap,
-        cmap="RdYlGn",
-        cbar=False,
-        ax=ax,
-        linewidths=0.5,
-        linecolor="black"
-    )
-
-    ax.set_yticklabels(ax.get_yticklabels(), rotation=0)
-    ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha="right")
+    fig = create_heatmap(heatmap)
 
     st.pyplot(fig)
 
