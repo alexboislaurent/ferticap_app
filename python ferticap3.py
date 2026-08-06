@@ -789,23 +789,24 @@ elif mode == "Variables biologiques":
 
 elif mode == "🏆 Ranking boucs":
 
+    # --------------------------------------------------
+    # 10 dernières collectes + PODIUM
+    # --------------------------------------------------
+
     st.subheader("🏆 Performance des boucs - 10 dernières collectes")
 
-
-    # =========================
-    # PODIUM + GRAPHIQUE
-    # =========================
 
     col_graph, col_podium = st.columns([2, 1])
 
 
     # =========================
-    # GRAPHIQUE BARRES
+    # GRAPHIQUE 10 DERNIERES
     # =========================
 
     with col_graph:
 
         fig, ax = plt.subplots(figsize=(10, 6))
+
 
         ax.barh(
             ranking_last10.index,
@@ -824,11 +825,18 @@ elif mode == "🏆 Ranking boucs":
 
 
         ax.invert_yaxis()
+
         ax.set_xlabel("Score moyen")
-        ax.set_title("10 dernières collectes")
+
+        ax.set_title(
+            "10 dernières collectes"
+        )
+
         ax.grid(True)
 
+
         st.pyplot(fig)
+
         plt.close(fig)
 
 
@@ -918,6 +926,7 @@ elif mode == "🏆 Ranking boucs":
                             {taux:.0f}% réussite
                         </small>
 
+
                     </div>
 
                 </div>
@@ -941,42 +950,27 @@ elif mode == "🏆 Ranking boucs":
             )
 
 
-    fig, ax = plt.subplots(figsize=(10, 6))
-
-    ax.barh(
-        ranking_last10.index,
-        ranking_last10["Score_moyen"]
-    )
-
-    for i, (_, row) in enumerate(ranking_last10.iterrows()):
-        ax.text(
-            row["Score_moyen"] + 0.1,
-            i,
-            f'{row["Taux_reussite"]:.0f}% ({int(row["Nb_succes"])}/{int(row["Nb_total"])})',
-            va="center"
-        )
-
-    ax.invert_yaxis()
-    ax.set_xlabel("Score moyen")
-    ax.set_title("10 dernières collectes")
-    ax.grid(True)
-
-    st.pyplot(fig)
 
     # --------------------------------------------------
     # Année en cours
     # --------------------------------------------------
 
-    st.subheader(f"📅 Performance des boucs - {current_year}")
+    st.subheader(
+        f"📅 Performance des boucs - {current_year}"
+    )
+
 
     fig, ax = plt.subplots(figsize=(10, 6))
+
 
     ax.barh(
         ranking_year.index,
         ranking_year["Score_moyen"]
     )
 
+
     for i, (_, row) in enumerate(ranking_year.iterrows()):
+
         ax.text(
             row["Score_moyen"] + 0.1,
             i,
@@ -984,27 +978,46 @@ elif mode == "🏆 Ranking boucs":
             va="center"
         )
 
+
     ax.invert_yaxis()
-    ax.set_xlabel("Score moyen")
-    ax.set_title(f"Année {current_year}")
+
+    ax.set_xlabel(
+        "Score moyen"
+    )
+
+    ax.set_title(
+        f"Année {current_year}"
+    )
+
     ax.grid(True)
 
+
     st.pyplot(fig)
+
+    plt.close(fig)
+
+
 
     # --------------------------------------------------
     # Historique complet
     # --------------------------------------------------
 
-    st.subheader("📈 Performance des boucs - All Time")
+    st.subheader(
+        "📈 Performance des boucs - Historique complet"
+    )
+
 
     fig, ax = plt.subplots(figsize=(10, 6))
+
 
     ax.barh(
         ranking_alltime.index,
         ranking_alltime["Score_moyen"]
     )
 
+
     for i, (_, row) in enumerate(ranking_alltime.iterrows()):
+
         ax.text(
             row["Score_moyen"] + 0.1,
             i,
@@ -1012,12 +1025,23 @@ elif mode == "🏆 Ranking boucs":
             va="center"
         )
 
+
     ax.invert_yaxis()
-    ax.set_xlabel("Score moyen")
-    ax.set_title("Historique complet")
+
+    ax.set_xlabel(
+        "Score moyen"
+    )
+
+    ax.set_title(
+        "Historique complet"
+    )
+
     ax.grid(True)
 
+
     st.pyplot(fig)
+
+    plt.close(fig)
 
 # =========================
 # CALENDRIER
