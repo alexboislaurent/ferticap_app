@@ -559,12 +559,11 @@ elif mode == "Variables biologiques":
 
 
 
-    # =========================
+       # =========================
     # TRACE VARIABLES
     # =========================
 
     for var in selected_vars:
-
 
         col = variables_map[var]
 
@@ -578,17 +577,12 @@ elif mode == "Variables biologiques":
             continue
 
 
-
         # Nettoyage valeurs
         data_bio[col] = (
             data_bio[col]
             .astype(str)
             .str.strip()
-            .str.replace(
-                ",",
-                ".",
-                regex=False
-            )
+            .str.replace(",", ".", regex=False)
         )
 
 
@@ -598,64 +592,67 @@ elif mode == "Variables biologiques":
         )
 
 
+        # =========================
+        # COURBES INDIVIDUELLES
+        # =========================
 
-      # =========================
-# COURBES INDIVIDUELLES
-# =========================
+        if afficher_individuels:
 
-if afficher_individuels:
+            for b in selected_boucs:
 
-    for b in selected_boucs:
-
-        data_bouc = data_bio[
-            data_bio["Code animal"] == b
-        ]
-
-        if col == "Suivi des sauts":
-
-            serie = (
-                data_bouc
-                .groupby("Date")[col]
-                .sum()
-                .sort_index()
-                .fillna(0)
-            )
-
-        else:
-
-            serie = (
-                data_bouc
-                .groupby("Date")[col]
-                .mean()
-                .sort_index()
-                .fillna(0)
-            )
+                data_bouc = data_bio[
+                    data_bio["Code animal"] == b
+                ]
 
 
-        if len(serie) > 0:
+                # Suivi des sauts = somme des sauts
+                if col == "Suivi des sauts":
 
-            serie = resample_series(serie)
-
-            # Pas de lissage pour les sauts
-            if col != "Suivi des sauts":
-
-                serie = (
-                    serie
-                    .rolling(
-                        lissage,
-                        min_periods=1
+                    serie = (
+                        data_bouc
+                        .groupby("Date")[col]
+                        .sum()
+                        .sort_index()
+                        .fillna(0)
                     )
-                    .mean()
-                )
 
 
-            ax.plot(
-                serie.index,
-                serie.values,
-                marker="o",
-                label=f"{var} - {b}"
-            )
+                # Variables biologiques = moyenne
+                else:
 
+                    serie = (
+                        data_bouc
+                        .groupby("Date")[col]
+                        .mean()
+                        .sort_index()
+                        .fillna(0)
+                    )
+
+
+                if len(serie) > 0:
+
+                    serie = resample_series(serie)
+
+
+                    # Lissage uniquement variables continues
+                    if col != "Suivi des sauts" and lissage > 1:
+
+                        serie = (
+                            serie
+                            .rolling(
+                                window=lissage,
+                                min_periods=1
+                            )
+                            .mean()
+                        )
+
+
+                    ax.plot(
+                        serie.index,
+                        serie.values,
+                        marker="o",
+                        label=f"{var} - {b}"
+                    )
 
 
         # =========================
@@ -664,27 +661,43 @@ if afficher_individuels:
 
         else:
 
+            if col == "Suivi des sauts":
 
-            serie = (
-                data_bio
-                .groupby("Date")[col]
-                .mean()
-                .sort_index()
-                .fillna(0)
-            )
+                serie = (
+                    data_bio
+                    .groupby("Date")[col]
+                    .sum()
+                    .sort_index()
+                    .fillna(0)
+                )
+
+
+            else:
+
+                serie = (
+                    data_bio
+                    .groupby("Date")[col]
+                    .mean()
+                    .sort_index()
+                    .fillna(0)
+                )
 
 
             if len(serie) > 0:
 
-
-                serie = resample_series(
-                    serie
-                )
+                serie = resample_series(serie)
 
 
-                serie = appliquer_lissage(
-                    serie
-                )
+                if col != "Suivi des sauts" and lissage > 1:
+
+                    serie = (
+                        serie
+                        .rolling(
+                            window=lissage,
+                            min_periods=1
+                        )
+                        .mean()
+                    )
 
 
                 ax.plot(
@@ -693,7 +706,6 @@ if afficher_individuels:
                     marker="o",
                     label=var
                 )
-
 
 
     # =========================
