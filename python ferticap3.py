@@ -200,54 +200,15 @@ boucs_derniere_collecte = (
     .tolist()
 )
 
-# Sécurité si aucune collecte dans la période
 if len(boucs_derniere_collecte) == 0:
-    boucs_derniere_collecte = boucs.copy()
+    boucs_derniere_collecte = boucs[:5]
 
-# Boucs actuels en premier
-boucs = (
-    sorted(boucs_derniere_collecte)
-    + sorted([b for b in boucs if b not in boucs_derniere_collecte])
+selected_boucs = st.sidebar.multiselect(
+    "Sélection boucs",
+    boucs,
+    default=boucs_derniere_collecte
 )
 
-st.sidebar.markdown("### 🐐 Sélection des boucs")
-
-# Case pour sélectionner automatiquement les boucs actuels
-if st.sidebar.button("🟢 Sélectionner les boucs actuels"):
-    for b in boucs:
-        st.session_state[f"bouc_{b}"] = b in boucs_derniere_collecte
-
-# Boutons rapides
-if st.sidebar.button("☑ Tout sélectionner"):
-    for b in boucs:
-        st.session_state[f"bouc_{b}"] = True
-
-if st.sidebar.button("☐ Tout désélectionner"):
-    for b in boucs:
-        st.session_state[f"bouc_{b}"] = False
-
-
-selected_boucs = []
-
-for b in boucs:
-
-    # Valeur par défaut au premier affichage
-    if f"bouc_{b}" not in st.session_state:
-        st.session_state[f"bouc_{b}"] = (
-            b in boucs_derniere_collecte
-        )
-
-    label = (
-        f"🟢 {b}"
-        if b in boucs_derniere_collecte
-        else f"⚪ {b}"
-    )
-
-    if st.sidebar.checkbox(
-        label,
-        key=f"bouc_{b}"
-    ):
-        selected_boucs.append(b)
 # =========================
 # PARAMÈTRES
 # =========================
@@ -451,7 +412,8 @@ elif mode == "Score par bouc":
 # =========================
 
 elif mode == "Variables biologiques":
-    st.subheader("📊 Variables biologiques")
+
+    st.subheader("📊 Variables biologiques par bouc")
 
     selected_vars = st.sidebar.multiselect(
         "Variables",
@@ -459,32 +421,113 @@ elif mode == "Variables biologiques":
         default=["Volume semence (ml)", "Concentration spz (B/ml)"]
     )
 
+    afficher_individuels = st.sidebar.checkbox(
+        "Afficher les courbes individuelles des boucs sélectionnés",
+        value=False
+    )
+
+
+    # Sécurité si aucun bouc sélectionné
+    if len(selected_boucs) == 0:
+        st.warning("Veuillez sélectionner au moins un bouc.")
+        st.stop()
+
+
     fig, ax = plt.subplots(figsize=(14, 6))
 
+
     for var in selected_vars:
+
         col = variables_map[var]
 
-        if col in df_filtered.columns:
+        if col not in df_filtered.columns:
+            continue
+
+
+        # Données uniquement sur les boucs sélectionnés
+        data = df_filtered[
+            df_filtered["Code animal"].isin(selected_boucs)
+        ]
+
+
+        # =========================================
+        # MODE COURBES INDIVIDUELLES
+        # =========================================
+
+        if afficher_individuels:
+
+            for b in selected_boucs:
+
+                serie = (
+                    data[data["Code animal"] == b]
+                    .groupby("Date")[col]
+                    .mean()
+                    .dropna()
+                    .sort_index()
+                )
+
+                if len(serie) > 0:
+
+                    serie = resample_series(serie)
+
+                    serie = serie.rolling(
+                        lissage,
+                        min_periods=1
+                    ).mean()
+
+
+                    ax.plot(
+                        serie.index,
+                        serie.values,
+                        marker="o",
+                        label=f"{var} - {b}"
+                    )
+
+
+        # =========================================
+        # MODE MOYENNE DES BOUCS
+        # =========================================
+
+        else:
+
             serie = (
-                df_filtered.groupby("Date")[col]
+                data.groupby("Date")[col]
                 .mean()
                 .dropna()
                 .sort_index()
             )
 
+
+            serie = resample_series(serie)
+
+            serie = serie.rolling(
+                lissage,
+                min_periods=1
+            ).mean()
+
+
             ax.plot(
                 serie.index,
                 serie.values,
                 marker="o",
-                label=var
+                label=f"Moyenne {var}"
             )
 
-    ax.set_title("Variables biologiques")
-    ax.legend()
+
+    ax.set_title("Variables biologiques selon sélection des boucs")
+    ax.set_ylabel("Valeur moyenne")
     ax.grid(True)
 
-    ax.xaxis.set_major_formatter(mdates.DateFormatter("%d/%m/%y"))
-    ax.xaxis.set_major_locator(mdates.AutoDateLocator())
+    ax.legend()
+
+    ax.xaxis.set_major_formatter(
+        mdates.DateFormatter("%d/%m/%y")
+    )
+
+    ax.xaxis.set_major_locator(
+        mdates.AutoDateLocator()
+    )
+
     fig.autofmt_xdate(rotation=45)
 
     st.pyplot(fig)
