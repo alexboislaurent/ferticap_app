@@ -794,86 +794,124 @@ elif mode == "🏆 Ranking boucs":
     # --------------------------------------------------
 
     st.subheader("🏆 Performance des boucs - 10 dernières collectes")
-    # =========================
-# PODIUM TOP 3
+  # =========================
+# PODIUM TOP 3 - 10 DERNIÈRES COLLECTES
 # =========================
 
 if len(ranking_last10) >= 3:
 
     top3 = ranking_last10.head(3)
 
-    col1, col2 = st.columns([2, 1])
+    st.markdown(
+        """
+        <div style="
+            text-align:center;
+            font-size:24px;
+            font-weight:bold;
+            margin-bottom:15px;
+        ">
+        🏆 Podium des champions
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
-    with col2:
 
-        st.markdown(
-            """
-            <div style="
-                text-align:center;
-                font-size:24px;
-                font-weight:bold;
-                margin-bottom:15px;
-            ">
-            🏆 Podium des champions
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+    # Colonnes pour placer le podium à droite
+    col_graph, col_podium = st.columns([2,1])
 
-        medals = ["🥇", "🥈", "🥉"]
 
-        heights = [
-            "120px",
-            "90px",
-            "70px"
+    with col_podium:
+
+
+        podium_order = [
+            (1, "🥈", 2),
+            (0, "🥇", 1),
+            (2, "🥉", 3)
         ]
 
-        podium_html = ""
 
-        for i, (bouc, row) in enumerate(top3.iterrows()):
+        html = """
+        <div style="
+            display:flex;
+            justify-content:center;
+            align-items:end;
+            height:250px;
+        ">
+        """
 
-            podium_html += f"""
+
+        heights = {
+            1: "100px",
+            2: "70px",
+            3: "50px"
+        }
+
+
+        for idx, medal, place in podium_order:
+
+            bouc = top3.index[idx]
+            score = top3.iloc[idx]["Score_moyen"]
+            taux = top3.iloc[idx]["Taux_reussite"]
+
+
+            html += f"""
             <div style="
-                display:inline-block;
-                width:30%;
+                width:33%;
                 text-align:center;
-                vertical-align:bottom;
             ">
 
                 <div style="
-                    font-size:35px;
+                    font-size:32px;
                 ">
-                    {medals[i]}
+                    {medal}
                 </div>
+
 
                 <div style="
                     font-weight:bold;
-                    font-size:16px;
+                    font-size:15px;
                 ">
                     {bouc}
                 </div>
 
+
                 <div style="
-                    height:{heights[i]};
+                    height:{heights[place]};
                     background:#d9d9d9;
                     margin:5px;
                     border-radius:10px 10px 0 0;
                     display:flex;
                     align-items:center;
                     justify-content:center;
+                    flex-direction:column;
                     font-weight:bold;
                 ">
-                    {row['Score_moyen']:.1f}
+
+                    <div>
+                    {score:.2f}
+                    </div>
+
+                    <div style="
+                        font-size:12px;
+                        font-weight:normal;
+                    ">
+                    {taux:.0f}% réussite
+                    </div>
+
                 </div>
 
             </div>
             """
 
+
+        html += "</div>"
+
+
         st.markdown(
-            podium_html,
+            html,
             unsafe_allow_html=True
         )
-
     fig, ax = plt.subplots(figsize=(10, 6))
 
     ax.barh(
