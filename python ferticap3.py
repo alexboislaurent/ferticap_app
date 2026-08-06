@@ -794,6 +794,85 @@ elif mode == "🏆 Ranking boucs":
     # --------------------------------------------------
 
     st.subheader("🏆 Performance des boucs - 10 dernières collectes")
+    # =========================
+# PODIUM TOP 3
+# =========================
+
+if len(ranking_last10) >= 3:
+
+    top3 = ranking_last10.head(3)
+
+    col1, col2 = st.columns([2, 1])
+
+    with col2:
+
+        st.markdown(
+            """
+            <div style="
+                text-align:center;
+                font-size:24px;
+                font-weight:bold;
+                margin-bottom:15px;
+            ">
+            🏆 Podium des champions
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        medals = ["🥇", "🥈", "🥉"]
+
+        heights = [
+            "120px",
+            "90px",
+            "70px"
+        ]
+
+        podium_html = ""
+
+        for i, (bouc, row) in enumerate(top3.iterrows()):
+
+            podium_html += f"""
+            <div style="
+                display:inline-block;
+                width:30%;
+                text-align:center;
+                vertical-align:bottom;
+            ">
+
+                <div style="
+                    font-size:35px;
+                ">
+                    {medals[i]}
+                </div>
+
+                <div style="
+                    font-weight:bold;
+                    font-size:16px;
+                ">
+                    {bouc}
+                </div>
+
+                <div style="
+                    height:{heights[i]};
+                    background:#d9d9d9;
+                    margin:5px;
+                    border-radius:10px 10px 0 0;
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    font-weight:bold;
+                ">
+                    {row['Score_moyen']:.1f}
+                </div>
+
+            </div>
+            """
+
+        st.markdown(
+            podium_html,
+            unsafe_allow_html=True
+        )
 
     fig, ax = plt.subplots(figsize=(10, 6))
 
