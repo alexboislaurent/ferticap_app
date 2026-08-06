@@ -44,6 +44,12 @@ headers = all_values[1]
 rows = all_values[2:]
 
 df = pd.DataFrame(rows, columns=headers)
+# Nettoyage des noms de colonnes (espaces cachés)
+df.columns = (
+    df.columns
+    .astype(str)
+    .str.strip()
+)
 
 df["Date"] = pd.to_datetime(df["Date"], errors="coerce", dayfirst=True)
 df["Comportement"] = pd.to_numeric(df["Comportement"], errors="coerce")
