@@ -359,42 +359,17 @@ if mode == "Score global":
 # =========================
 # SCORE PAR BOUC
 # =========================
-
 elif mode == "Score par bouc":
+
     st.subheader("Score par bouc")
 
     data = resample_series(score_par_bouc)
 
-    fig, ax = plt.subplots(figsize=(14, 6))
-
-    for b in selected_boucs:
-        if b in data.columns:
-            serie = data[b]
-
-            if lissage > 1:
-                serie = (
-                    serie
-                    .rolling(
-                        window=lissage,
-                        min_periods=1
-                    )
-                    .mean()
-                )
-
-            ax.plot(
-                serie.index,
-                serie.values,
-                marker="o",
-                label=b
-            )
-
-    ax.set_title("Score par bouc")
-    ax.legend()
-    ax.grid(True)
-
-    ax.xaxis.set_major_formatter(mdates.DateFormatter("%d/%m/%y"))
-    ax.xaxis.set_major_locator(mdates.AutoDateLocator())
-    fig.autofmt_xdate(rotation=45)
+    fig = create_score_bouc(
+        data,
+        selected_boucs,
+        lissage
+    )
 
     st.pyplot(fig)
 
