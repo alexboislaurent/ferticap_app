@@ -599,46 +599,62 @@ elif mode == "Variables biologiques":
 
 
 
-        # =========================
-        # COURBES INDIVIDUELLES
-        # =========================
+      # =========================
+# COURBES INDIVIDUELLES
+# =========================
 
-        if afficher_individuels:
+if afficher_individuels:
+
+    for b in selected_boucs:
+
+        data_bouc = data_bio[
+            data_bio["Code animal"] == b
+        ]
+
+        if col == "Suivi des sauts":
+
+            serie = (
+                data_bouc
+                .groupby("Date")[col]
+                .sum()
+                .sort_index()
+                .fillna(0)
+            )
+
+        else:
+
+            serie = (
+                data_bouc
+                .groupby("Date")[col]
+                .mean()
+                .sort_index()
+                .fillna(0)
+            )
 
 
-            for b in selected_boucs:
+        if len(serie) > 0:
 
+            serie = resample_series(serie)
+
+            # Pas de lissage pour les sauts
+            if col != "Suivi des sauts":
 
                 serie = (
-                    data_bio[
-                        data_bio["Code animal"] == b
-                    ]
-                    .groupby("Date")[col]
+                    serie
+                    .rolling(
+                        lissage,
+                        min_periods=1
+                    )
                     .mean()
-                    .sort_index()
-                    .fillna(0)
                 )
 
 
-                if len(serie) > 0:
-
-
-                    serie = resample_series(
-                        serie
-                    )
-
-
-                    serie = appliquer_lissage(
-                        serie
-                    )
-
-
-                    ax.plot(
-                        serie.index,
-                        serie.values,
-                        marker="o",
-                        label=f"{var} - {b}"
-                    )
+            ax.plot(
+                serie.index,
+                serie.values,
+                marker="o",
+                label=f"{var} - {b}"
+            )
 
 
 
