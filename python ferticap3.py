@@ -60,6 +60,15 @@ df["Score"] = pd.to_numeric(
 )
 
 df["Succes"] = df["Comportement"].isin([2, 3, 4]).astype(int)
+# =========================
+# VARIABLE SUIVI DES SAUTS
+# =========================
+
+df["Suivi des sauts"] = (
+    df["Comportement"]
+    .isin([2, 3, 4])
+    .astype(int)
+)
 
 df["Code animal"] = df["Code animal"].astype(str).str.strip()
 
@@ -76,7 +85,8 @@ variables_map = {
     "Concentration spz (B/ml)": "Concentration spz (B/ml)",
     "Nb spz éjaculat (B)": "Nb spz éjaculat (B)",
     "% Mobiles": "% Mobiles",
-    "Motiles": "Motiles"
+    "Motiles": "Motiles",
+    "Suivi des sauts": "Suivi des sauts"
 }
 
 for col in variables_map.values():
