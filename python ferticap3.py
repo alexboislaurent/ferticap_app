@@ -845,78 +845,63 @@ elif mode == "🏆 Ranking boucs":
             top3 = ranking_last10.head(3)
 
 
+            # ordre podium : argent - or - bronze
             podium = [
-                (top3.iloc[1], "🥈", 80),
-                (top3.iloc[0], "🥇", 130),
-                (top3.iloc[2], "🥉", 60)
+                (top3.index[1], "🥈", "2ème"),
+                (top3.index[0], "🥇", "1er"),
+                (top3.index[2], "🥉", "3ème")
             ]
 
 
-            html = """
-            <div style="
-                display:flex;
-                justify-content:center;
-                align-items:flex-end;
-                gap:5px;
-            ">
-            """
+            cols = st.columns(3)
 
 
-            for row, medal, height in podium:
+            for col, (bouc, medaille, place) in zip(cols, podium):
 
-                html += f"""
-                <div style="
-                    width:33%;
-                    text-align:center;
-                ">
+                with col:
 
-                    <div style="
-                        font-size:40px;
-                    ">
-                        {medal}
-                    </div>
+                    score = top3.loc[bouc, "Score_moyen"]
+                    taux = top3.loc[bouc, "Taux_reussite"]
 
 
-                    <div style="
-                        font-size:16px;
-                        font-weight:bold;
-                    ">
-                        {row.name}
-                    </div>
+                    st.markdown(
+                        f"""
+                        <div style="
+                            text-align:center;
+                            border:1px solid #ddd;
+                            border-radius:15px;
+                            padding:10px;
+                        ">
 
+                        <div style="
+                            font-size:45px;
+                        ">
+                        {medaille}
+                        </div>
 
-                    <div style="
-                        height:{height}px;
-                        background:#d9d9d9;
-                        border-radius:10px 10px 0 0;
-                        margin:5px;
-                        display:flex;
-                        flex-direction:column;
-                        justify-content:center;
-                        align-items:center;
-                    ">
+                        <h4>
+                        {bouc}
+                        </h4>
 
-                        <b>
-                            {row["Score_moyen"]:.2f}
-                        </b>
+                        <div style="
+                            font-size:22px;
+                            font-weight:bold;
+                        ">
+                        {score:.2f}
+                        </div>
 
-                        <small>
-                            {row["Taux_reussite"]:.0f}% réussite
-                        </small>
+                        <div>
+                        {taux:.0f}% réussite
+                        </div>
 
-                    </div>
+                        <div>
+                        {place}
+                        </div>
 
-                </div>
-                """
-
-
-            html += "</div>"
-
-
-            st.markdown(
-                html,
-                unsafe_allow_html=True
-            )
+                        </div>
+                        """,
+                        unsafe_allow_html=True
+                    )
 
 
         else:
@@ -924,8 +909,6 @@ elif mode == "🏆 Ranking boucs":
             st.info(
                 "Pas assez de boucs pour créer un podium."
             )
-
-
 
     # =========================
     # ANNEE EN COURS
