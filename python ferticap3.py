@@ -10,6 +10,7 @@ import numpy as np
 from analysis.ranking import calc_ranking_with_success
 from plots.heatmap import create_heatmap
 from plots.scores import create_score_global
+from plots.score_bouc import create_score_bouc
 
 # =========================
 # CONFIG PAGE
