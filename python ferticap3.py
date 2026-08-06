@@ -717,9 +717,10 @@ elif mode == "Variables biologiques":
     )
 
 
-    ax.set_ylabel(
-        "Valeur moyenne"
-    )
+    if "Suivi des sauts" in selected_vars:
+        ax.set_ylabel("Nombre de sauts")
+    else:
+        ax.set_ylabel("Valeur moyenne")
 
 
     ax.grid(True)
