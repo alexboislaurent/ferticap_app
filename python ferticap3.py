@@ -831,85 +831,98 @@ elif mode == "🏆 Ranking boucs":
 
 
 
+# =========================
+# PODIUM
+# =========================
+
+with col_podium:
+
+    st.markdown("### 🏆 Podium des champions sur les 10 dernières collectes")
+
+
+    if len(ranking_last10) >= 3:
+
+        top3 = ranking_last10.head(3)
+
+
+        # ordre podium : argent - or - bronze
+        podium = [
+            (top3.index[1], "🥈", "2ème"),
+            (top3.index[0], "🥇", "1er"),
+            (top3.index[2], "🥉", "3ème")
+        ]
+
+
+        cols = st.columns(3)
+
+
+        for col, (bouc, medaille, place) in zip(cols, podium):
+
+            with col:
+
+                score = top3.loc[bouc, "Score_moyen"]
+                taux = top3.loc[bouc, "Taux_reussite"]
+
+
+                st.markdown(
+                    f"""
+                    <div style="
+                        text-align:center;
+                        border:1px solid #ddd;
+                        border-radius:15px;
+                        padding:10px;
+                    ">
+
+                    <div style="
+                        font-size:45px;
+                    ">
+                    {medaille}
+                    </div>
+
+                    <h4>
+                    {bouc}
+                    </h4>
+
+                    <div style="
+                        font-size:22px;
+                        font-weight:bold;
+                    ">
+                    {score:.2f}
+                    </div>
+
+                    <div>
+                    {taux:.0f}% réussite
+                    </div>
+
+                    <div>
+                    {place}
+                    </div>
+
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+
+    else:
+
+        st.info(
+            "Pas assez de boucs pour créer un podium."
+        )
+
+
     # =========================
-    # PODIUM
+    # IMAGE ROI DU TROUPEAU
     # =========================
 
-    with col_podium:
+    st.markdown(
+        "### 👑 Le roi du troupeau"
+    )
 
-        st.markdown("### 🏆 Podium des champions sur les 10 dernière collectes")
-
-
-        if len(ranking_last10) >= 3:
-
-            top3 = ranking_last10.head(3)
-
-
-            # ordre podium : argent - or - bronze
-            podium = [
-                (top3.index[1], "🥈", "2ème"),
-                (top3.index[0], "🥇", "1er"),
-                (top3.index[2], "🥉", "3ème")
-            ]
-
-
-            cols = st.columns(3)
-
-
-            for col, (bouc, medaille, place) in zip(cols, podium):
-
-                with col:
-
-                    score = top3.loc[bouc, "Score_moyen"]
-                    taux = top3.loc[bouc, "Taux_reussite"]
-
-
-                    st.markdown(
-                        f"""
-                        <div style="
-                            text-align:center;
-                            border:1px solid #ddd;
-                            border-radius:15px;
-                            padding:10px;
-                        ">
-
-                        <div style="
-                            font-size:45px;
-                        ">
-                        {medaille}
-                        </div>
-
-                        <h4>
-                        {bouc}
-                        </h4>
-
-                        <div style="
-                            font-size:22px;
-                            font-weight:bold;
-                        ">
-                        {score:.2f}
-                        </div>
-
-                        <div>
-                        {taux:.0f}% réussite
-                        </div>
-
-                        <div>
-                        {place}
-                        </div>
-
-                        </div>
-                        """,
-                        unsafe_allow_html=True
-                    )
-
-
-        else:
-
-            st.info(
-                "Pas assez de boucs pour créer un podium."
-            )
-
+    st.image(
+        "images/bouc_409.jpg",
+        width=220
+    )
     # =========================
     # ANNEE EN COURS
     # =========================
