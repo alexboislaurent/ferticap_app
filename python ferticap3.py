@@ -792,15 +792,11 @@ elif mode == "🏆 Ranking boucs":
     st.subheader("🏆 Performance des boucs - 10 dernières collectes")
 
 
-    # =========================
-    # PODIUM + GRAPHIQUE
-    # =========================
-
     col_graph, col_podium = st.columns([2, 1])
 
 
     # =========================
-    # GRAPHIQUE TOP 10
+    # GRAPHIQUE
     # =========================
 
     with col_graph:
@@ -812,6 +808,7 @@ elif mode == "🏆 Ranking boucs":
             ranking_last10["Score_moyen"]
         )
 
+
         for i, (_, row) in enumerate(ranking_last10.iterrows()):
 
             ax.text(
@@ -822,121 +819,114 @@ elif mode == "🏆 Ranking boucs":
                 va="center"
             )
 
+
         ax.invert_yaxis()
-
         ax.set_xlabel("Score moyen")
-
-        ax.set_title(
-            "Top 10 - 10 dernières collectes"
-        )
-
+        ax.set_title("Top 10 - 10 dernières collectes")
         ax.grid(True)
 
-        st.pyplot(fig)
 
+        st.pyplot(fig)
         plt.close(fig)
 
 
 
-    ## =========================
-# PODIUM TOP 3
-# =========================
+    # =========================
+    # PODIUM
+    # =========================
 
-with col_podium:
+    with col_podium:
 
-    st.markdown("### 🏆 Podium des champions")
-
-
-    if len(ranking_last10) >= 3:
-
-        top3 = ranking_last10.head(3)
+        st.markdown("### 🏆 Podium des champions")
 
 
-        podium = [
-            (top3.iloc[1], "🥈", 80),
-            (top3.iloc[0], "🥇", 130),
-            (top3.iloc[2], "🥉", 60)
-        ]
+        if len(ranking_last10) >= 3:
+
+            top3 = ranking_last10.head(3)
 
 
-        html = """
-        <div style="
-            display:flex;
-            justify-content:center;
-            align-items:flex-end;
-            gap:5px;
-        ">
-        """
+            podium = [
+                (top3.iloc[1], "🥈", 80),
+                (top3.iloc[0], "🥇", 130),
+                (top3.iloc[2], "🥉", 60)
+            ]
 
 
-        for row, medal, height in podium:
-
-            html += f"""
+            html = """
             <div style="
-                width:33%;
-                text-align:center;
+                display:flex;
+                justify-content:center;
+                align-items:flex-end;
+                gap:5px;
             ">
-
-                <div style="
-                    font-size:40px;
-                ">
-                    {medal}
-                </div>
-
-
-                <div style="
-                    font-size:16px;
-                    font-weight:bold;
-                ">
-                    {row.name}
-                </div>
-
-
-                <div style="
-                    height:{height}px;
-                    background:linear-gradient(#eeeeee,#bbbbbb);
-                    border-radius:12px 12px 0 0;
-                    display:flex;
-                    flex-direction:column;
-                    justify-content:center;
-                    align-items:center;
-                    box-shadow:0px 2px 5px #999;
-                ">
-
-                    <div style="
-                        font-size:20px;
-                        font-weight:bold;
-                    ">
-                        {row["Score_moyen"]:.2f}
-                    </div>
-
-
-                    <div style="
-                        font-size:12px;
-                    ">
-                        {row["Taux_reussite"]:.0f}% réussite
-                    </div>
-
-                </div>
-
-            </div>
             """
 
 
-        html += "</div>"
+            for row, medal, height in podium:
+
+                html += f"""
+                <div style="
+                    width:33%;
+                    text-align:center;
+                ">
+
+                    <div style="
+                        font-size:40px;
+                    ">
+                        {medal}
+                    </div>
 
 
-        st.markdown(
-            html,
-            unsafe_allow_html=True
-        )
+                    <div style="
+                        font-size:16px;
+                        font-weight:bold;
+                    ">
+                        {row.name}
+                    </div>
 
 
-    else:
+                    <div style="
+                        height:{height}px;
+                        background:#d9d9d9;
+                        border-radius:10px 10px 0 0;
+                        margin:5px;
+                        display:flex;
+                        flex-direction:column;
+                        justify-content:center;
+                        align-items:center;
+                    ">
 
-        st.info(
-            "Pas assez de boucs pour créer un podium."
-        )
+                        <b>
+                            {row["Score_moyen"]:.2f}
+                        </b>
+
+                        <small>
+                            {row["Taux_reussite"]:.0f}% réussite
+                        </small>
+
+                    </div>
+
+                </div>
+                """
+
+
+            html += "</div>"
+
+
+            st.markdown(
+                html,
+                unsafe_allow_html=True
+            )
+
+
+        else:
+
+            st.info(
+                "Pas assez de boucs pour créer un podium."
+            )
+
+
+
     # =========================
     # ANNEE EN COURS
     # =========================
@@ -955,30 +945,13 @@ with col_podium:
     )
 
 
-    for i, (_, row) in enumerate(ranking_year.iterrows()):
-
-        ax.text(
-            row["Score_moyen"] + 0.05,
-            i,
-            f'{row["Taux_reussite"]:.0f}% '
-            f'({int(row["Nb_succes"])}/{int(row["Nb_total"])})',
-            va="center"
-        )
-
-
     ax.invert_yaxis()
-
     ax.set_xlabel("Score moyen")
-
-    ax.set_title(
-        f"Année {current_year}"
-    )
-
+    ax.set_title(f"Année {current_year}")
     ax.grid(True)
 
 
     st.pyplot(fig)
-
     plt.close(fig)
 
 
@@ -1001,30 +974,13 @@ with col_podium:
     )
 
 
-    for i, (_, row) in enumerate(ranking_alltime.iterrows()):
-
-        ax.text(
-            row["Score_moyen"] + 0.05,
-            i,
-            f'{row["Taux_reussite"]:.0f}% '
-            f'({int(row["Nb_succes"])}/{int(row["Nb_total"])})',
-            va="center"
-        )
-
-
     ax.invert_yaxis()
-
     ax.set_xlabel("Score moyen")
-
-    ax.set_title(
-        "Historique complet"
-    )
-
+    ax.set_title("Historique complet")
     ax.grid(True)
 
 
     st.pyplot(fig)
-
     plt.close(fig)
 # =========================
 # CALENDRIER
