@@ -259,11 +259,10 @@ periode = st.sidebar.selectbox(
     ["Jour", "Semaine", "2 semaines", "Mois"]
 )
 
-lissage = st.sidebar.slider(
+lissage = st.sidebar.select_slider(
     "Lissage (0 = aucun)",
-    0,
-    10,
-    0
+    options=[0, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    value=0
 )
 
 # =========================
