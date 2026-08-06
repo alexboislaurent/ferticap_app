@@ -591,6 +591,7 @@ elif mode == "Variables biologiques":
                         serie
                         .rolling(
                             lissage,
+                            center=True,
                             min_periods=1
                         )
                         .mean()
