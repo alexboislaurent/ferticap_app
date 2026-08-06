@@ -14,7 +14,7 @@ def show_ranking(
     )
 
 
-    col_graph, col_podium = st.columns([2,1])
+    col_graph, col_podium = st.columns([2, 1])
 
 
     # =========================
@@ -24,9 +24,8 @@ def show_ranking(
     with col_graph:
 
         fig, ax = plt.subplots(
-            figsize=(10,6)
+            figsize=(10, 6)
         )
-
 
         ax.barh(
             ranking_last10.index,
@@ -67,18 +66,17 @@ def show_ranking(
 
 
     # =========================
-    # PODIUM
+    # PODIUM + ROI
     # =========================
 
     with col_podium:
 
         st.markdown(
-            "### 🏆 Podium"
+            "### 🏆 Podium des champions"
         )
 
 
         if len(ranking_last10) >= 3:
-
 
             top3 = ranking_last10.head(3)
 
@@ -132,13 +130,18 @@ def show_ranking(
                         padding:10px;
                         ">
 
-                        <div style="font-size:45px;">
+                        <div style="font-size:40px;">
                         {medaille}
                         </div>
 
                         <h4>{bouc}</h4>
 
-                        <b>{score:.2f}</b>
+                        <div style="
+                        font-size:22px;
+                        font-weight:bold;
+                        ">
+                        {score:.2f}
+                        </div>
 
                         <div>
                         {taux:.0f}% réussite
@@ -152,18 +155,28 @@ def show_ranking(
                         """,
                         unsafe_allow_html=True
                     )
-    # =========================
-    # IMAGE ROI DU TROUPEAU
-    # =========================
 
-    st.markdown(
-        "### 👑 Le roi du troupeau"
-    )
 
-    st.image(
-        "images/bouc_409.jpg",
-        width=220
-    )
+        else:
+
+            st.info(
+                "Pas assez de boucs pour créer un podium."
+            )
+
+
+        # =========================
+        # IMAGE ROI DU TROUPEAU
+        # =========================
+
+        st.markdown(
+            "### 👑 Le roi du troupeau"
+        )
+
+        st.image(
+            "images/bouc_409.jpg",
+            width=220
+        )
+
 
 
     # =========================
@@ -181,8 +194,9 @@ def show_ranking(
     )
 
 
+
     # =========================
-    # HISTORIQUE
+    # HISTORIQUE COMPLET
     # =========================
 
     st.subheader(
@@ -203,7 +217,7 @@ def create_bar_chart(
 ):
 
     fig, ax = plt.subplots(
-        figsize=(10,6)
+        figsize=(10, 6)
     )
 
 
