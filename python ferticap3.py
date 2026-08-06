@@ -600,8 +600,8 @@ elif mode == "Variables biologiques":
                     ]
                     .groupby("Date")[col]
                     .mean()
-                    .dropna()
                     .sort_index()
+                    .fillna(0)
                 )
 
 
@@ -638,8 +638,8 @@ elif mode == "Variables biologiques":
                 data_bio
                 .groupby("Date")[col]
                 .mean()
-                .dropna()
                 .sort_index()
+                .fillna(0)
             )
 
 
