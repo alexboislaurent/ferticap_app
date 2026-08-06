@@ -456,8 +456,9 @@ elif mode == "Variables biologiques":
 
     st.subheader("📊 Variables biologiques")
 
+
     selected_vars = st.sidebar.multiselect(
-        "Variables",
+        "Variables biologiques",
         list(variables_map.keys()),
         default=[
             "Volume semence (ml)",
@@ -465,70 +466,96 @@ elif mode == "Variables biologiques":
         ]
     )
 
-    utiliser_selection_boucs = st.sidebar.checkbox(
-        "Limiter aux boucs sélectionnés",
+
+    # Option de filtrage par boucs
+    filtrer_boucs = st.sidebar.checkbox(
+        "Filtrer par boucs sélectionnés",
         value=False
     )
+
 
     afficher_individuels = st.sidebar.checkbox(
-        "Afficher les courbes individuelles des boucs",
+        "Afficher une courbe par bouc",
         value=False
     )
 
 
     # =========================
-    # PREPARATION DES DONNEES
+    # CHOIX DES DONNEES
     # =========================
 
-    if utiliser_selection_boucs:
+    if filtrer_boucs:
 
         if len(selected_boucs) == 0:
-            st.warning("Aucun bouc sélectionné.")
+            st.warning(
+                "Aucun bouc sélectionné."
+            )
             st.stop()
 
-        data = df_filtered[
+        data_bio = df_filtered[
             df_filtered["Code animal"].isin(selected_boucs)
-        ]
+        ].copy()
 
     else:
 
-        # comportement identique à l'ancienne version
-        data = df_filtered.copy()
+        # Identique à l'ancienne version
+        data_bio = df_filtered.copy()
 
 
-    if data.empty:
-        st.warning("Aucune donnée disponible.")
+
+    if data_bio.empty:
+
+        st.warning(
+            "Aucune donnée disponible pour cette sélection."
+        )
+
         st.stop()
 
 
-    fig, ax = plt.subplots(figsize=(14, 6))
+
+    fig, ax = plt.subplots(
+        figsize=(14, 6)
+    )
 
 
     # =========================
-    # COURBES
+    # TRACE DES VARIABLES
     # =========================
 
     for var in selected_vars:
 
+
         col = variables_map[var]
 
 
-        if col not in data.columns:
-            st.warning(f"Variable absente : {col}")
+        if col not in data_bio.columns:
+
+            st.warning(
+                f"Colonne absente : {col}"
+            )
+
             continue
 
 
-        # conversion sécurité
-        data[col] = (
-            data[col]
+
+        # Nettoyage numérique
+        data_bio[col] = (
+            data_bio[col]
             .astype(str)
-            .str.replace(",", ".", regex=False)
+            .str.strip()
+            .str.replace(
+                ",",
+                ".",
+                regex=False
+            )
         )
 
-        data[col] = pd.to_numeric(
-            data[col],
+
+        data_bio[col] = pd.to_numeric(
+            data_bio[col],
             errors="coerce"
         )
+
 
 
         # =========================
@@ -537,10 +564,14 @@ elif mode == "Variables biologiques":
 
         if afficher_individuels:
 
+
             for b in selected_boucs:
 
+
                 serie = (
-                    data[data["Code animal"] == b]
+                    data_bio[
+                        data_bio["Code animal"] == b
+                    ]
                     .groupby("Date")[col]
                     .mean()
                     .dropna()
@@ -550,7 +581,11 @@ elif mode == "Variables biologiques":
 
                 if len(serie) > 0:
 
-                    serie = resample_series(serie)
+
+                    serie = resample_series(
+                        serie
+                    )
+
 
                     serie = (
                         serie
@@ -570,14 +605,17 @@ elif mode == "Variables biologiques":
                     )
 
 
+
         # =========================
         # MOYENNE GENERALE
         # =========================
 
         else:
 
+
             serie = (
-                data.groupby("Date")[col]
+                data_bio
+                .groupby("Date")[col]
                 .mean()
                 .dropna()
                 .sort_index()
@@ -586,7 +624,11 @@ elif mode == "Variables biologiques":
 
             if len(serie) > 0:
 
-                serie = resample_series(serie)
+
+                serie = resample_series(
+                    serie
+                )
+
 
                 serie = (
                     serie
@@ -606,26 +648,32 @@ elif mode == "Variables biologiques":
                 )
 
 
+
     # =========================
     # FORMAT GRAPHIQUE
     # =========================
 
     ax.set_title(
-        "Variables biologiques"
+        "Evolution des variables biologiques"
     )
+
 
     ax.set_ylabel(
         "Valeur moyenne"
     )
 
+
     ax.grid(True)
 
+
     ax.legend()
+
 
 
     ax.xaxis.set_major_formatter(
         mdates.DateFormatter("%d/%m/%y")
     )
+
 
     ax.xaxis.set_major_locator(
         mdates.AutoDateLocator()
@@ -638,7 +686,6 @@ elif mode == "Variables biologiques":
 
 
     st.pyplot(fig)
-
 # =========================
 # RANKING BOUCS
 # =========================
