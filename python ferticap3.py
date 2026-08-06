@@ -349,46 +349,12 @@ if mode == "Score global":
 
     score = resample_series(score_global)
 
-    # Lissage seulement si demandé
-    if lissage > 1:
-        score = (
-            score
-            .rolling(
-                window=lissage,
-                min_periods=1
-            )
-            .mean()
-        )
-
-    # Création graphique toujours exécutée
-    fig, ax = plt.subplots(figsize=(12, 5))
-
-    ax.plot(
-        score.index,
-        score.values,
-        marker="o"
-    )
-
-    ax.grid(True)
-
-    ax.set_title("Score moyen global")
-
-    ax.set_ylabel("Score")
-
-    ax.xaxis.set_major_formatter(
-        mdates.DateFormatter("%d/%m/%y")
-    )
-
-    ax.xaxis.set_major_locator(
-        mdates.AutoDateLocator()
-    )
-
-    fig.autofmt_xdate(
-        rotation=45
+    fig = create_score_global(
+        score,
+        lissage
     )
 
     st.pyplot(fig)
-    plt.close(fig)
 # =========================
 # SCORE PAR BOUC
 # =========================
