@@ -789,51 +789,48 @@ elif mode == "Variables biologiques":
 
 elif mode == "🏆 Ranking boucs":
 
-    # --------------------------------------------------
-    # 10 dernières collectes + PODIUM
-    # --------------------------------------------------
-
     st.subheader("🏆 Performance des boucs - 10 dernières collectes")
 
+
+    # =========================
+    # PODIUM + GRAPHIQUE
+    # =========================
 
     col_graph, col_podium = st.columns([2, 1])
 
 
     # =========================
-    # GRAPHIQUE 10 DERNIERES
+    # GRAPHIQUE TOP 10
     # =========================
 
     with col_graph:
 
         fig, ax = plt.subplots(figsize=(10, 6))
 
-
         ax.barh(
             ranking_last10.index,
             ranking_last10["Score_moyen"]
         )
 
-
         for i, (_, row) in enumerate(ranking_last10.iterrows()):
 
             ax.text(
-                row["Score_moyen"] + 0.1,
+                row["Score_moyen"] + 0.05,
                 i,
-                f'{row["Taux_reussite"]:.0f}% ({int(row["Nb_succes"])}/{int(row["Nb_total"])})',
+                f'{row["Taux_reussite"]:.0f}% '
+                f'({int(row["Nb_succes"])}/{int(row["Nb_total"])})',
                 va="center"
             )
-
 
         ax.invert_yaxis()
 
         ax.set_xlabel("Score moyen")
 
         ax.set_title(
-            "10 dernières collectes"
+            "Top 10 - 10 dernières collectes"
         )
 
         ax.grid(True)
-
 
         st.pyplot(fig)
 
@@ -842,7 +839,7 @@ elif mode == "🏆 Ranking boucs":
 
 
     # =========================
-    # PODIUM
+    # PODIUM CHAMPIONS
     # =========================
 
     with col_podium:
@@ -855,7 +852,7 @@ elif mode == "🏆 Ranking boucs":
         if len(ranking_last10) >= 3:
 
 
-            top3 = ranking_last10.head(3)
+            top3 = ranking_last10.head(3).reset_index()
 
 
             html = """
@@ -863,25 +860,29 @@ elif mode == "🏆 Ranking boucs":
                 display:flex;
                 justify-content:center;
                 align-items:flex-end;
+                height:260px;
             ">
             """
 
 
             podium = [
-                (1, "🥈", 80),
-                (0, "🥇", 120),
-                (2, "🥉", 60)
+
+                # position dataframe, médaille, hauteur, couleur
+                (1, "🥈", 90, "#C0C0C0"),
+                (0, "🥇", 130, "#FFD700"),
+                (2, "🥉", 70, "#CD7F32")
+
             ]
 
 
-            for position, medal, height in podium:
+            for pos, medal, height, color in podium:
 
 
-                bouc = top3.index[position]
+                bouc = top3.iloc[pos]["Code animal"]
 
-                score = top3.iloc[position]["Score_moyen"]
+                score = top3.iloc[pos]["Score_moyen"]
 
-                taux = top3.iloc[position]["Taux_reussite"]
+                taux = top3.iloc[pos]["Taux_reussite"]
 
 
                 html += f"""
@@ -891,8 +892,9 @@ elif mode == "🏆 Ranking boucs":
                     text-align:center;
                 ">
 
+
                     <div style="
-                        font-size:30px;
+                        font-size:32px;
                     ">
                         {medal}
                     </div>
@@ -908,23 +910,30 @@ elif mode == "🏆 Ranking boucs":
 
                     <div style="
                         height:{height}px;
-                        background:#d9d9d9;
-                        margin:5px;
-                        border-radius:10px 10px 0 0;
+                        background:{color};
+                        margin:4px;
+                        border-radius:12px 12px 0 0;
                         display:flex;
-                        align-items:center;
-                        justify-content:center;
                         flex-direction:column;
+                        justify-content:center;
+                        align-items:center;
+                        box-shadow:0px 3px 8px #999;
                     ">
 
-                        <b>
+
+                        <div style="
+                            font-size:20px;
+                            font-weight:bold;
+                        ">
                             {score:.2f}
-                        </b>
+                        </div>
 
 
-                        <small>
+                        <div style="
+                            font-size:12px;
+                        ">
                             {taux:.0f}% réussite
-                        </small>
+                        </div>
 
 
                     </div>
@@ -951,9 +960,9 @@ elif mode == "🏆 Ranking boucs":
 
 
 
-    # --------------------------------------------------
-    # Année en cours
-    # --------------------------------------------------
+    # =========================
+    # ANNEE EN COURS
+    # =========================
 
     st.subheader(
         f"📅 Performance des boucs - {current_year}"
@@ -972,18 +981,17 @@ elif mode == "🏆 Ranking boucs":
     for i, (_, row) in enumerate(ranking_year.iterrows()):
 
         ax.text(
-            row["Score_moyen"] + 0.1,
+            row["Score_moyen"] + 0.05,
             i,
-            f'{row["Taux_reussite"]:.0f}% ({int(row["Nb_succes"])}/{int(row["Nb_total"])})',
+            f'{row["Taux_reussite"]:.0f}% '
+            f'({int(row["Nb_succes"])}/{int(row["Nb_total"])})',
             va="center"
         )
 
 
     ax.invert_yaxis()
 
-    ax.set_xlabel(
-        "Score moyen"
-    )
+    ax.set_xlabel("Score moyen")
 
     ax.set_title(
         f"Année {current_year}"
@@ -998,9 +1006,9 @@ elif mode == "🏆 Ranking boucs":
 
 
 
-    # --------------------------------------------------
-    # Historique complet
-    # --------------------------------------------------
+    # =========================
+    # HISTORIQUE COMPLET
+    # =========================
 
     st.subheader(
         "📈 Performance des boucs - Historique complet"
@@ -1019,18 +1027,17 @@ elif mode == "🏆 Ranking boucs":
     for i, (_, row) in enumerate(ranking_alltime.iterrows()):
 
         ax.text(
-            row["Score_moyen"] + 0.1,
+            row["Score_moyen"] + 0.05,
             i,
-            f'{row["Taux_reussite"]:.0f}% ({int(row["Nb_succes"])}/{int(row["Nb_total"])})',
+            f'{row["Taux_reussite"]:.0f}% '
+            f'({int(row["Nb_succes"])}/{int(row["Nb_total"])})',
             va="center"
         )
 
 
     ax.invert_yaxis()
 
-    ax.set_xlabel(
-        "Score moyen"
-    )
+    ax.set_xlabel("Score moyen")
 
     ax.set_title(
         "Historique complet"
@@ -1042,7 +1049,6 @@ elif mode == "🏆 Ranking boucs":
     st.pyplot(fig)
 
     plt.close(fig)
-
 # =========================
 # CALENDRIER
 # =========================
