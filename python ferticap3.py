@@ -415,33 +415,51 @@ if mode == "Heatmap":
 # =========================
 
 if mode == "Score global":
+
     st.subheader("Score moyen global")
 
     score = resample_series(score_global)
 
-if lissage > 1:
-    score = (
-        score
-        .rolling(
-            window=lissage,
-            min_periods=1
+    # Lissage seulement si demandé
+    if lissage > 1:
+        score = (
+            score
+            .rolling(
+                window=lissage,
+                min_periods=1
+            )
+            .mean()
         )
-        .mean()
+
+    # Création graphique toujours exécutée
+    fig, ax = plt.subplots(figsize=(12, 5))
+
+    ax.plot(
+        score.index,
+        score.values,
+        marker="o"
     )
 
-    fig, ax = plt.subplots()
-
-    ax.plot(score.index, score.values, marker="o")
     ax.grid(True)
 
     ax.set_title("Score moyen global")
 
-    ax.xaxis.set_major_formatter(mdates.DateFormatter("%d/%m/%y"))
-    ax.xaxis.set_major_locator(mdates.AutoDateLocator())
-    fig.autofmt_xdate(rotation=45)
+    ax.set_ylabel("Score")
+
+    ax.xaxis.set_major_formatter(
+        mdates.DateFormatter("%d/%m/%y")
+    )
+
+    ax.xaxis.set_major_locator(
+        mdates.AutoDateLocator()
+    )
+
+    fig.autofmt_xdate(
+        rotation=45
+    )
 
     st.pyplot(fig)
-
+    plt.close(fig)
 # =========================
 # SCORE PAR BOUC
 # =========================
