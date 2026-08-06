@@ -152,7 +152,18 @@ def show_ranking(
                         """,
                         unsafe_allow_html=True
                     )
+    # =========================
+    # IMAGE ROI DU TROUPEAU
+    # =========================
 
+    st.markdown(
+        "### 👑 Le roi du troupeau"
+    )
+
+    st.image(
+        "images/bouc_409.jpg",
+        width=220
+    )
 
 
     # =========================
