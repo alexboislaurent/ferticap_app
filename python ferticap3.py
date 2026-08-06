@@ -9,6 +9,7 @@ import calendar
 import numpy as np
 from analysis.ranking import calc_ranking_with_success
 from plots.heatmap import create_heatmap
+from plots.scores import create_score_global
 
 # =========================
 # CONFIG PAGE
