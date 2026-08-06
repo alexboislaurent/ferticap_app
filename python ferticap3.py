@@ -260,8 +260,10 @@ periode = st.sidebar.selectbox(
 )
 
 lissage = st.sidebar.slider(
-    "Lissage",
-    1, 10, 3
+    "Lissage (0 = aucun)",
+    0,
+    10,
+    0
 )
 
 # =========================
@@ -467,7 +469,6 @@ elif mode == "Variables biologiques":
     )
 
 
-    # Option de filtrage par boucs
     filtrer_boucs = st.sidebar.checkbox(
         "Filtrer par boucs sélectionnés",
         value=False
@@ -487,18 +488,22 @@ elif mode == "Variables biologiques":
     if filtrer_boucs:
 
         if len(selected_boucs) == 0:
+
             st.warning(
                 "Aucun bouc sélectionné."
             )
+
             st.stop()
+
 
         data_bio = df_filtered[
             df_filtered["Code animal"].isin(selected_boucs)
         ].copy()
 
+
     else:
 
-        # Identique à l'ancienne version
+        # identique à l'ancien fonctionnement
         data_bio = df_filtered.copy()
 
 
@@ -506,7 +511,7 @@ elif mode == "Variables biologiques":
     if data_bio.empty:
 
         st.warning(
-            "Aucune donnée disponible pour cette sélection."
+            "Aucune donnée disponible."
         )
 
         st.stop()
@@ -518,8 +523,29 @@ elif mode == "Variables biologiques":
     )
 
 
+
     # =========================
-    # TRACE DES VARIABLES
+    # FONCTION LISSAGE
+    # =========================
+
+    def appliquer_lissage(serie):
+
+        if lissage <= 1:
+            return serie
+
+        return (
+            serie
+            .rolling(
+                window=lissage,
+                min_periods=1
+            )
+            .mean()
+        )
+
+
+
+    # =========================
+    # TRACE VARIABLES
     # =========================
 
     for var in selected_vars:
@@ -531,14 +557,14 @@ elif mode == "Variables biologiques":
         if col not in data_bio.columns:
 
             st.warning(
-                f"Colonne absente : {col}"
+                f"Variable absente : {col}"
             )
 
             continue
 
 
 
-        # Nettoyage numérique
+        # Nettoyage valeurs
         data_bio[col] = (
             data_bio[col]
             .astype(str)
@@ -587,14 +613,8 @@ elif mode == "Variables biologiques":
                     )
 
 
-                    serie = (
+                    serie = appliquer_lissage(
                         serie
-                        .rolling(
-                            lissage,
-                            center=True,
-                            min_periods=1
-                        )
-                        .mean()
                     )
 
 
@@ -631,13 +651,8 @@ elif mode == "Variables biologiques":
                 )
 
 
-                serie = (
+                serie = appliquer_lissage(
                     serie
-                    .rolling(
-                        lissage,
-                        min_periods=1
-                    )
-                    .mean()
                 )
 
 
