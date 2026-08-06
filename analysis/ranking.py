@@ -1,0 +1,30 @@
+def calc_ranking_with_success(data):
+
+    tmp = data.copy()
+
+    tmp["Succes"] = (
+        tmp["Comportement"]
+        .isin([2,3,4])
+    )
+
+    result = (
+        tmp.groupby("Code animal")
+        .agg(
+            Score_moyen=("Score","mean"),
+            Nb_succes=("Succes","sum"),
+            Nb_total=("Succes","count")
+        )
+    )
+
+    result["Taux_reussite"] = (
+        result["Nb_succes"]
+        /
+        result["Nb_total"]
+        *
+        100
+    )
+
+    return result.sort_values(
+        "Score_moyen",
+        ascending=False
+    )
