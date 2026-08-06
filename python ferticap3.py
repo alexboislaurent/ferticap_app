@@ -789,21 +789,53 @@ elif mode == "Variables biologiques":
 
 elif mode == "🏆 Ranking boucs":
 
-    # --------------------------------------------------
-    # 10 dernières collectes
-    # --------------------------------------------------
-
     st.subheader("🏆 Performance des boucs - 10 dernières collectes")
-     # =========================
-# PODIUM TOP 3
-# =========================
 
-if len(ranking_last10) >= 3:
 
-    top3 = ranking_last10.head(3)
+    # =========================
+    # PODIUM + GRAPHIQUE
+    # =========================
 
     col_graph, col_podium = st.columns([2, 1])
 
+
+    # =========================
+    # GRAPHIQUE BARRES
+    # =========================
+
+    with col_graph:
+
+        fig, ax = plt.subplots(figsize=(10, 6))
+
+        ax.barh(
+            ranking_last10.index,
+            ranking_last10["Score_moyen"]
+        )
+
+
+        for i, (_, row) in enumerate(ranking_last10.iterrows()):
+
+            ax.text(
+                row["Score_moyen"] + 0.1,
+                i,
+                f'{row["Taux_reussite"]:.0f}% ({int(row["Nb_succes"])}/{int(row["Nb_total"])})',
+                va="center"
+            )
+
+
+        ax.invert_yaxis()
+        ax.set_xlabel("Score moyen")
+        ax.set_title("10 dernières collectes")
+        ax.grid(True)
+
+        st.pyplot(fig)
+        plt.close(fig)
+
+
+
+    # =========================
+    # PODIUM
+    # =========================
 
     with col_podium:
 
@@ -811,77 +843,102 @@ if len(ranking_last10) >= 3:
             "### 🏆 Podium des champions"
         )
 
-        html = """
-        <div style="
-            display:flex;
-            justify-content:center;
-            align-items:flex-end;
-        ">
-        """
+
+        if len(ranking_last10) >= 3:
 
 
-        podium = [
-            (1, "🥈", 80),
-            (0, "🥇", 120),
-            (2, "🥉", 60)
-        ]
+            top3 = ranking_last10.head(3)
 
 
-        for position, medal, height in podium:
-
-            bouc = top3.index[position]
-            score = top3.iloc[position]["Score_moyen"]
-            taux = top3.iloc[position]["Taux_reussite"]
-
-
-            html += f"""
+            html = """
             <div style="
-                width:33%;
-                text-align:center;
+                display:flex;
+                justify-content:center;
+                align-items:flex-end;
             ">
-
-                <div style="
-                    font-size:30px;
-                ">
-                    {medal}
-                </div>
-
-
-                <b>
-                    {bouc}
-                </b>
-
-
-                <div style="
-                    height:{height}px;
-                    background:#d9d9d9;
-                    border-radius:10px 10px 0 0;
-                    margin:5px;
-                    display:flex;
-                    flex-direction:column;
-                    justify-content:center;
-                    align-items:center;
-                ">
-
-                    <b>{score:.2f}</b>
-
-                    <small>
-                        {taux:.0f}% réussite
-                    </small>
-
-                </div>
-
-            </div>
             """
 
 
-        html += "</div>"
+            podium = [
+                (1, "🥈", 80),
+                (0, "🥇", 120),
+                (2, "🥉", 60)
+            ]
 
 
-        st.markdown(
-            html,
-            unsafe_allow_html=True
-        )
+            for position, medal, height in podium:
+
+
+                bouc = top3.index[position]
+
+                score = top3.iloc[position]["Score_moyen"]
+
+                taux = top3.iloc[position]["Taux_reussite"]
+
+
+                html += f"""
+
+                <div style="
+                    width:33%;
+                    text-align:center;
+                ">
+
+                    <div style="
+                        font-size:30px;
+                    ">
+                        {medal}
+                    </div>
+
+
+                    <div style="
+                        font-weight:bold;
+                        font-size:15px;
+                    ">
+                        {bouc}
+                    </div>
+
+
+                    <div style="
+                        height:{height}px;
+                        background:#d9d9d9;
+                        margin:5px;
+                        border-radius:10px 10px 0 0;
+                        display:flex;
+                        align-items:center;
+                        justify-content:center;
+                        flex-direction:column;
+                    ">
+
+                        <b>
+                            {score:.2f}
+                        </b>
+
+
+                        <small>
+                            {taux:.0f}% réussite
+                        </small>
+
+                    </div>
+
+                </div>
+
+                """
+
+
+            html += "</div>"
+
+
+            st.markdown(
+                html,
+                unsafe_allow_html=True
+            )
+
+
+        else:
+
+            st.info(
+                "Pas assez de boucs pour créer un podium."
+            )
 
 
     fig, ax = plt.subplots(figsize=(10, 6))
