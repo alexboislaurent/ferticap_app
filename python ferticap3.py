@@ -418,7 +418,16 @@ if mode == "Score global":
     st.subheader("Score moyen global")
 
     score = resample_series(score_global)
-    score = score.rolling(lissage, min_periods=1).mean()
+
+if lissage > 1:
+    score = (
+        score
+        .rolling(
+            window=lissage,
+            min_periods=1
+        )
+        .mean()
+    )
 
     fig, ax = plt.subplots()
 
@@ -446,7 +455,17 @@ elif mode == "Score par bouc":
 
     for b in selected_boucs:
         if b in data.columns:
-            serie = data[b].rolling(lissage, min_periods=1).mean()
+            serie = data[b]
+
+            if lissage > 1:
+                serie = (
+                    serie
+                    .rolling(
+                        window=lissage,
+                        min_periods=1
+                    )
+                    .mean()
+                )
 
             ax.plot(
                 serie.index,
