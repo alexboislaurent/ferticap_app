@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import calendar
 import numpy as np
+from analysis.ranking import calc_ranking_with_success
 
 # =========================
 # CONFIG PAGE
@@ -281,40 +282,6 @@ score_par_bouc = df_filtered.pivot_table(
     values="Score",
     aggfunc="mean"
 ).sort_index()
-
-# =========================
-# DONNÉES RANKING BOUCS
-# =========================
-
-def calc_ranking_with_success(data):
-
-    tmp = data.copy()
-
-    tmp = tmp[tmp["Comportement"].notna()]
-
-    tmp["Succes"] = tmp["Comportement"].isin([2, 3, 4])
-
-    result = (
-        tmp.groupby("Code animal")
-        .agg(
-            Score_moyen=("Score", "mean"),
-            Nb_succes=("Succes", "sum"),
-            Nb_total=("Succes", "count")
-        )
-    )
-
-    result["Taux_reussite"] = (
-        result["Nb_succes"] /
-        result["Nb_total"] * 100
-    )
-
-    result = result.sort_values(
-        "Score_moyen",
-        ascending=False
-    )
-
-    return result
-
 
 # 10 dernières collectes
 last_10_dates = sorted(
