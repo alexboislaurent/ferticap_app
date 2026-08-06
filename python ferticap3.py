@@ -837,7 +837,7 @@ elif mode == "🏆 Ranking boucs":
 
     with col_podium:
 
-        st.markdown("### 🏆 Podium des champions")
+        st.markdown("### 🏆 Podium des champions sur les 10 dernière collectes")
 
 
         if len(ranking_last10) >= 3:
