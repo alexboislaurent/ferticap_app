@@ -12,12 +12,28 @@ from plots.heatmap import create_heatmap
 from plots.scores import create_score_global
 from plots.score_bouc import create_score_bouc
 from plots.ranking import show_ranking
+from streamlit_autorefresh import st_autorefresh
 
 # =========================
 # CONFIG PAGE
 # =========================
 
 st.set_page_config(page_title="Ferticap Dashboard", layout="wide")
+
+# =========================
+# MODE ECRAN TV
+# =========================
+
+DUREE_ECRAN_TV = 15  # secondes
+
+MODES_TV = [
+    "Heatmap",
+    "Score global",
+    "Score par bouc",
+    "Variables biologiques",
+    "🏆 Ranking boucs",
+    "📅 Calendrier"
+]
 st.title("📊 Dashboard Ferticap")
 
 # =========================
@@ -80,18 +96,30 @@ for col in variables_map.values():
 
 st.sidebar.header("📌 Options")
 
-mode = st.sidebar.radio(
-    "Graph à afficher",
-    [
-        "Heatmap",
-        "Score global",
-        "Score par bouc",
-        "Variables biologiques",
-        "🏆 Ranking boucs",
-        "📅 Calendrier"
-        
-    ]
+mode_tv = st.sidebar.checkbox(
+    "🖥️ Mode écran TV",
+    value=False
 )
+
+if mode_tv:
+
+    # Rafraîchissement automatique toutes les X secondes
+    compteur_tv = st_autorefresh(
+        interval=DUREE_ECRAN_TV * 1000,
+        key="rotation_tv"
+    )
+
+    # Détermine quel écran afficher
+    mode = MODES_TV[
+        compteur_tv % len(MODES_TV)
+    ]
+
+else:
+
+    mode = st.sidebar.radio(
+        "Graph à afficher",
+        MODES_TV
+    )
 
 # =========================
 # INFO SCORE
