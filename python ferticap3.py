@@ -816,6 +816,6 @@ elif mode == "🏆 Ranking boucs":
 
 elif mode == "📅 Calendrier":
 
-    create_calendar(df)
+    afficher_calendar(df)
 
     
