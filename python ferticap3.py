@@ -133,7 +133,7 @@ else:
             "Score par bouc",
             "Variables biologiques",
             "🏆 Ranking boucs",
-            "📅 "
+            "📅 Calendrier"
         ]
     )
 
