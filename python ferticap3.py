@@ -40,7 +40,7 @@ MODES_TV = [
     "Bouc TV",
     "🏆 Ranking boucs",
     "Bouc TV",
-    "📅 ",
+    "📅 Calendrier",
     "Bouc TV"
 ]
 
@@ -460,17 +460,7 @@ def afficher_bouc_tv(df, bouc):
         df["Code animal"] == bouc
     ].copy()
 
-    data_2026 = data_bouc[
-        data_bouc["Date"].dt.year == 2026
-    ]
-
-    def afficher_bouc_tv(df, bouc):
-
-    data_bouc = df[
-        df["Code animal"] == bouc
-    ].copy()
-
-    # La période est déjà filtrée avant d'arriver ici
+    # La période est déjà filtrée par df_filtered
     data_periode = data_bouc.copy()
 
     # =========================
@@ -479,19 +469,33 @@ def afficher_bouc_tv(df, bouc):
 
     data_mesures = data_bouc.sort_values("Date")
 
-    dernier_poids = (
-        data_mesures["Valeure Pesée"].dropna().iloc[-1]
-        if "Valeure Pesée" in data_mesures.columns
+    # Dernier poids connu dans la période sélectionnée
+    if (
+        "Valeure Pesée" in data_mesures.columns
         and data_mesures["Valeure Pesée"].notna().any()
-        else None
-    )
+    ):
+        dernier_poids = (
+            data_mesures.loc[
+                data_mesures["Valeure Pesée"].notna(),
+                "Valeure Pesée"
+            ].iloc[-1]
+        )
+    else:
+        dernier_poids = None
 
-    derniere_cs = (
-        data_mesures["Valeur CS"].dropna().iloc[-1]
-        if "Valeur CS" in data_mesures.columns
+    # Dernière CS connue dans la période sélectionnée
+    if (
+        "Valeur CS" in data_mesures.columns
         and data_mesures["Valeur CS"].notna().any()
-        else None
-    )
+    ):
+        derniere_cs = (
+            data_mesures.loc[
+                data_mesures["Valeur CS"].notna(),
+                "Valeur CS"
+            ].iloc[-1]
+        )
+    else:
+        derniere_cs = None
 
     poids_txt = (
         f"{dernier_poids:.1f} kg"
@@ -544,7 +548,7 @@ def afficher_bouc_tv(df, bouc):
             margin-bottom:20px;
         ">
             <h1>🐐 Bouc {bouc}</h1>
-            <h2>Performances sur 1an</h2>
+            <h2>Performances sur la période sélectionnée</h2>
         </div>
         """,
         unsafe_allow_html=True
@@ -612,6 +616,12 @@ def afficher_bouc_tv(df, bouc):
             <h3>🔬 Concentration moyenne</h3>
             <h1>{concentration_txt}</h1>
 
+            <h3>⚖️ Dernier poids</h3>
+            <h1>{poids_txt}</h1>
+
+            <h3>📏 Dernière CS</h3>
+            <h1>{cs_txt}</h1>
+
             <h3>📅 Nombre de collectes</h3>
             <h1>{nb_collectes}</h1>
 
@@ -619,7 +629,6 @@ def afficher_bouc_tv(df, bouc):
             """,
             unsafe_allow_html=True
         )
-
 
 # =========================
 # AFFICHAGE
