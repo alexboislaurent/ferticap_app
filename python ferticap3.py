@@ -118,7 +118,9 @@ variables_map = {
     "Nb spz éjaculat (B)": "Nb spz éjaculat (B)",
     "% Mobiles": "% Mobiles",
     "Motiles": "Motiles",
-    "Suivi des sauts": "Suivi des sauts"
+    "Suivi des sauts": "Suivi des sauts",
+    "Poids (kg)": "Valeure Pesée",
+    "CS (cm)": "Valeur CS"
 }
 
 for col in variables_map.values():
@@ -462,27 +464,68 @@ def afficher_bouc_tv(df, bouc):
         data_bouc["Date"].dt.year == 2026
     ]
 
+    def afficher_bouc_tv(df, bouc):
+
+    data_bouc = df[
+        df["Code animal"] == bouc
+    ].copy()
+
+    # La période est déjà filtrée avant d'arriver ici
+    data_periode = data_bouc.copy()
+
+    # =========================
+    # DERNIER POIDS ET DERNIÈRE CS
+    # =========================
+
+    data_mesures = data_bouc.sort_values("Date")
+
+    dernier_poids = (
+        data_mesures["Valeure Pesée"].dropna().iloc[-1]
+        if "Valeure Pesée" in data_mesures.columns
+        and data_mesures["Valeure Pesée"].notna().any()
+        else None
+    )
+
+    derniere_cs = (
+        data_mesures["Valeur CS"].dropna().iloc[-1]
+        if "Valeur CS" in data_mesures.columns
+        and data_mesures["Valeur CS"].notna().any()
+        else None
+    )
+
+    poids_txt = (
+        f"{dernier_poids:.1f} kg"
+        if dernier_poids is not None
+        else "—"
+    )
+
+    cs_txt = (
+        f"{derniere_cs:.1f} cm"
+        if derniere_cs is not None
+        else "—"
+    )
+
     # =========================
     # PERFORMANCES
     # =========================
 
     nb_sauts = (
-        data_2026["Comportement"]
+        data_periode["Comportement"]
         .isin([2, 3, 4])
         .sum()
     )
 
     volume_moyen = pd.to_numeric(
-        data_2026["Volume semence (ml)"],
+        data_periode["Volume semence (ml)"],
         errors="coerce"
     ).mean()
 
     concentration_moyenne = pd.to_numeric(
-        data_2026["Concentration spz (B/ml)"],
+        data_periode["Concentration spz (B/ml)"],
         errors="coerce"
     ).mean()
 
-    nb_collectes = len(data_2026)
+    nb_collectes = len(data_periode)
 
     # =========================
     # PHOTO
