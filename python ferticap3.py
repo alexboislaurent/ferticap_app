@@ -450,43 +450,49 @@ def get_color(suivis):
         return "blue"
     return "gray"
 
-# =========================
-# FICHE BOUC MODE TV
-# =========================
+def afficher_bouc_tv(df, bouc):
 
-def afficher_bouc_tv(df, bouc, df_periode):
+    if bouc is None:
+        st.warning("Aucun bouc disponible.")
+        return
 
     # =========================
-    # HISTORIQUE COMPLET DU BOUC
+    # DONNEES DU BOUC
     # =========================
 
     data_bouc = df[
         df["Code animal"] == bouc
     ].copy()
 
+    if data_bouc.empty:
+        st.warning(f"Aucune donnée pour le bouc {bouc}.")
+        return
+
+    # La période est déjà filtrée
+    data_periode = data_bouc.copy()
+
     # =========================
-    # DONNÉES DE LA PÉRIODE
+    # TRI PAR DATE
     # =========================
 
-    data_periode = df_periode[
-        df_periode["Code animal"] == bouc
-    ].copy()
+    data_mesures = (
+        data_bouc
+        .sort_values("Date")
+        .copy()
+    )
 
     # =========================
-    # DERNIER POIDS CONNU
+    # DERNIER POIDS
     # =========================
 
     dernier_poids = None
     date_dernier_poids = None
 
-    if "Valeure Pesée" in data_bouc.columns:
+    if "Valeure Pesée" in data_mesures.columns:
 
-        poids_data = (
-            data_bouc[
-                data_bouc["Valeure Pesée"].notna()
-            ]
-            .sort_values("Date")
-        )
+        poids_data = data_mesures[
+            data_mesures["Valeure Pesée"].notna()
+        ]
 
         if not poids_data.empty:
 
@@ -494,20 +500,17 @@ def afficher_bouc_tv(df, bouc, df_periode):
             date_dernier_poids = poids_data.iloc[-1]["Date"]
 
     # =========================
-    # DERNIÈRE CS CONNUE
+    # DERNIÈRE CS
     # =========================
 
     derniere_cs = None
     date_derniere_cs = None
 
-    if "Valeur CS" in data_bouc.columns:
+    if "Valeur CS" in data_mesures.columns:
 
-        cs_data = (
-            data_bouc[
-                data_bouc["Valeur CS"].notna()
-            ]
-            .sort_values("Date")
-        )
+        cs_data = data_mesures[
+            data_mesures["Valeur CS"].notna()
+        ]
 
         if not cs_data.empty:
 
@@ -521,7 +524,7 @@ def afficher_bouc_tv(df, bouc, df_periode):
     if dernier_poids is not None:
 
         poids_txt = (
-            f"{dernier_poids:.1f} kg"
+            f"{float(dernier_poids):.1f} kg"
             f"<br><small>"
             f"{date_dernier_poids:%d/%m/%Y}"
             f"</small>"
@@ -538,7 +541,7 @@ def afficher_bouc_tv(df, bouc, df_periode):
     if derniere_cs is not None:
 
         cs_txt = (
-            f"{derniere_cs:.1f} cm"
+            f"{float(derniere_cs):.1f} cm"
             f"<br><small>"
             f"{date_derniere_cs:%d/%m/%Y}"
             f"</small>"
@@ -577,7 +580,7 @@ def afficher_bouc_tv(df, bouc, df_periode):
     photo = f"images/bouc_{bouc}.jpg"
 
     # =========================
-    # AFFICHAGE
+    # TITRE
     # =========================
 
     st.markdown(
@@ -586,12 +589,21 @@ def afficher_bouc_tv(df, bouc, df_periode):
             text-align:center;
             margin-bottom:20px;
         ">
+
             <h1>🐐 Bouc {bouc}</h1>
-            <h2>Performances sur la période sélectionnée</h2>
+
+            <h2>
+                Performances sur la période sélectionnée
+            </h2>
+
         </div>
         """,
         unsafe_allow_html=True
     )
+
+    # =========================
+    # COLONNES
+    # =========================
 
     col_photo, col_stats = st.columns(
         [1.3, 1]
@@ -644,25 +656,25 @@ def afficher_bouc_tv(df, bouc, df_periode):
                 margin-top:20px;
             ">
 
-            <h2>📊 Performances</h2>
+                <h2>📊 Performances</h2>
 
-            <h3>🦘 Nombre de sauts</h3>
-            <h1>{nb_sauts}</h1>
+                <h3>🦘 Nombre de sauts</h3>
+                <h1>{nb_sauts}</h1>
 
-            <h3>💧 Volume moyen</h3>
-            <h1>{volume_txt}</h1>
+                <h3>💧 Volume moyen</h3>
+                <h1>{volume_txt}</h1>
 
-            <h3>🔬 Concentration moyenne</h3>
-            <h1>{concentration_txt}</h1>
+                <h3>🔬 Concentration moyenne</h3>
+                <h1>{concentration_txt}</h1>
 
-            <h3>⚖️ Dernier poids connu</h3>
-            <h1>{poids_txt}</h1>
+                <h3>⚖️ Dernier poids</h3>
+                <h1>{poids_txt}</h1>
 
-            <h3>📏 Dernière CS connue</h3>
-            <h1>{cs_txt}</h1>
+                <h3>📏 Dernière CS</h3>
+                <h1>{cs_txt}</h1>
 
-            <h3>📅 Nombre de collectes</h3>
-            <h1>{nb_collectes}</h1>
+                <h3>📅 Nombre de collectes</h3>
+                <h1>{nb_collectes}</h1>
 
             </div>
             """,
