@@ -525,7 +525,7 @@ def afficher_bouc_tv(df, bouc):
 
 
 # =========================
-# HEATMAP
+# AFFICHAGE
 # =========================
 
 if mode == "Heatmap":
@@ -536,9 +536,6 @@ if mode == "Heatmap":
 
     st.pyplot(fig)
 
-# =========================
-# BOUC TV
-# =========================
 
 elif mode == "Bouc TV":
 
@@ -547,9 +544,6 @@ elif mode == "Bouc TV":
         bouc_tv
     )
 
-# =========================
-# SCORE GLOBAL
-# =========================
 
 elif mode == "Score global":
 
@@ -563,9 +557,8 @@ elif mode == "Score global":
     )
 
     st.pyplot(fig)
-# =========================
-# SCORE PAR BOUC
-# =========================
+
+
 elif mode == "Score par bouc":
 
     st.subheader("Score par bouc")
@@ -580,14 +573,14 @@ elif mode == "Score par bouc":
 
     st.pyplot(fig)
 
-# =========================
-# VARIABLES BIOLOGIQUES
-# =========================
 
 elif mode == "Variables biologiques":
 
-    st.subheader("📊 Variables biologiques")
+    # =====================================================
+    # VARIABLES BIOLOGIQUES
+    # =====================================================
 
+    st.subheader("📊 Variables biologiques")
 
     selected_vars = st.sidebar.multiselect(
         "Variables biologiques",
@@ -598,18 +591,15 @@ elif mode == "Variables biologiques":
         ]
     )
 
-
     filtrer_boucs = st.sidebar.checkbox(
         "Filtrer par boucs sélectionnés",
         value=False
     )
 
-
     afficher_individuels = st.sidebar.checkbox(
         "Afficher une courbe par bouc",
         value=False
     )
-
 
     # =========================
     # CHOIX DES DONNEES
@@ -625,18 +615,13 @@ elif mode == "Variables biologiques":
 
             st.stop()
 
-
         data_bio = df_filtered[
             df_filtered["Code animal"].isin(selected_boucs)
         ].copy()
 
-
     else:
 
-        # identique à l'ancien fonctionnement
         data_bio = df_filtered.copy()
-
-
 
     if data_bio.empty:
 
@@ -646,42 +631,21 @@ elif mode == "Variables biologiques":
 
         st.stop()
 
-
+    # =========================
+    # FIGURE
+    # =========================
 
     fig, ax = plt.subplots(
         figsize=(14, 6)
     )
 
-
-
     # =========================
-    # FONCTION LISSAGE
-    # =========================
-
-    def appliquer_lissage(serie):
-
-        if lissage <= 1:
-            return serie
-
-        return (
-            serie
-            .rolling(
-                window=lissage,
-                min_periods=1
-            )
-            .mean()
-        )
-
-
-
-       # =========================
     # TRACE VARIABLES
     # =========================
 
     for var in selected_vars:
 
         col = variables_map[var]
-
 
         if col not in data_bio.columns:
 
@@ -691,8 +655,8 @@ elif mode == "Variables biologiques":
 
             continue
 
-
         # Nettoyage valeurs
+
         data_bio[col] = (
             data_bio[col]
             .astype(str)
@@ -700,12 +664,10 @@ elif mode == "Variables biologiques":
             .str.replace(",", ".", regex=False)
         )
 
-
         data_bio[col] = pd.to_numeric(
             data_bio[col],
             errors="coerce"
         )
-
 
         # =========================
         # COURBES INDIVIDUELLES
@@ -719,8 +681,6 @@ elif mode == "Variables biologiques":
                     data_bio["Code animal"] == b
                 ]
 
-
-                # Suivi des sauts = somme des sauts
                 if col == "Suivi des sauts":
 
                     serie = (
@@ -731,8 +691,6 @@ elif mode == "Variables biologiques":
                         .fillna(0)
                     )
 
-
-                # Variables biologiques = moyenne
                 else:
 
                     serie = (
@@ -743,13 +701,10 @@ elif mode == "Variables biologiques":
                         .fillna(0)
                     )
 
-
                 if len(serie) > 0:
 
                     serie = resample_series(serie)
 
-
-                    # Lissage uniquement variables continues
                     if col != "Suivi des sauts" and lissage > 1:
 
                         serie = (
@@ -761,14 +716,12 @@ elif mode == "Variables biologiques":
                             .mean()
                         )
 
-
                     ax.plot(
                         serie.index,
                         serie.values,
                         marker="o",
                         label=f"{var} - {b}"
                     )
-
 
         # =========================
         # MOYENNE GENERALE
@@ -786,7 +739,6 @@ elif mode == "Variables biologiques":
                     .fillna(0)
                 )
 
-
             else:
 
                 serie = (
@@ -797,11 +749,9 @@ elif mode == "Variables biologiques":
                     .fillna(0)
                 )
 
-
             if len(serie) > 0:
 
                 serie = resample_series(serie)
-
 
                 if col != "Suivi des sauts" and lissage > 1:
 
@@ -814,7 +764,6 @@ elif mode == "Variables biologiques":
                         .mean()
                     )
 
-
                 ax.plot(
                     serie.index,
                     serie.values,
@@ -822,48 +771,37 @@ elif mode == "Variables biologiques":
                     label=var
                 )
 
-
     # =========================
-    # FORMAT GRAPHIQUE
+    # FORMAT
     # =========================
 
     ax.set_title(
         "Evolution des variables biologiques"
     )
 
-
     if "Suivi des sauts" in selected_vars:
         ax.set_ylabel("Nombre de sauts")
     else:
         ax.set_ylabel("Valeur moyenne")
 
-
     ax.grid(True)
 
-
     ax.legend()
-
-
 
     ax.xaxis.set_major_formatter(
         mdates.DateFormatter("%d/%m/%y")
     )
 
-
     ax.xaxis.set_major_locator(
         mdates.AutoDateLocator()
     )
-
 
     fig.autofmt_xdate(
         rotation=45
     )
 
-
     st.pyplot(fig)
-# =========================
-# RANKING BOUCS
-# =========================
+
 
 elif mode == "🏆 Ranking boucs":
 
@@ -873,19 +811,17 @@ elif mode == "🏆 Ranking boucs":
         ranking_alltime,
         current_year
     )
-# =========================
-# CALENDRIER
-# =========================
+
 
 elif mode == "📅 Calendrier":
+
+    # =====================================================
+    # CALENDRIER
+    # =====================================================
 
     st.subheader("📅 Calendrier annuel des suivis")
 
     import calendar as cal
-
-    # =========================
-    # MAP COULEURS FIXES
-    # =========================
 
     COLOR_MAP = {
         "FCO": "blue",
@@ -899,9 +835,11 @@ elif mode == "📅 Calendrier":
         return str(x).strip()
 
     def get_color_list(suivis):
+
         colors = []
 
         for s in suivis:
+
             s = normalize(s)
 
             if s in COLOR_MAP:
@@ -909,20 +847,30 @@ elif mode == "📅 Calendrier":
             else:
                 colors.append("gray")
 
-        # enlever doublons consécutifs
         cleaned = []
+
         for c in colors:
+
             if c not in cleaned:
                 cleaned.append(c)
 
         return cleaned if cleaned else ["white"]
 
     # =========================
-    # DATA CLEAN
+    # DATA
     # =========================
 
-    suivi_cols = ["Suivi 1", "Suivi 2", "Suivi 3", "Suivi 4"]
-    existing_cols = [c for c in suivi_cols if c in df.columns]
+    suivi_cols = [
+        "Suivi 1",
+        "Suivi 2",
+        "Suivi 3",
+        "Suivi 4"
+    ]
+
+    existing_cols = [
+        c for c in suivi_cols
+        if c in df.columns
+    ]
 
     df_suivi = df.melt(
         id_vars=["Date"],
@@ -930,116 +878,201 @@ elif mode == "📅 Calendrier":
         value_name="Suivi"
     )
 
-    df_suivi["Suivi"] = df_suivi["Suivi"].astype(str).str.strip()
-    df_suivi = df_suivi[df_suivi["Suivi"].notna()]
-    df_suivi = df_suivi[df_suivi["Suivi"] != ""]
+    df_suivi["Suivi"] = (
+        df_suivi["Suivi"]
+        .astype(str)
+        .str.strip()
+    )
 
-    daily = df_suivi.groupby("Date")["Suivi"].apply(list).reset_index()
+    df_suivi = df_suivi[
+        df_suivi["Suivi"].notna()
+    ]
+
+    df_suivi = df_suivi[
+        df_suivi["Suivi"] != ""
+    ]
+
+    daily = (
+        df_suivi
+        .groupby("Date")["Suivi"]
+        .apply(list)
+        .reset_index()
+    )
 
     color_map = {
-        row["Date"].date(): get_color_list(row["Suivi"])
+        row["Date"].date():
+            get_color_list(row["Suivi"])
         for _, row in daily.iterrows()
     }
 
     # =========================
-    # LÉGENDE (IDENTIQUE À TON CODE)
+    # LEGENDE
     # =========================
 
     st.markdown("### Légende")
 
     cols = st.columns(len(COLOR_MAP))
 
-    for col, (label, color) in zip(cols, COLOR_MAP.items()):
+    for col, (label, color) in zip(
+        cols,
+        COLOR_MAP.items()
+    ):
+
         with col:
+
             st.markdown(
                 f"""
-                <div style='display:flex;align-items:center;'>
-                    <div style='width:18px;height:18px;background:{color};
-                    border:1px solid black;margin-right:6px'></div>
+                <div style='display:flex;
+                align-items:center;'>
+
+                    <div style='
+                    width:18px;
+                    height:18px;
+                    background:{color};
+                    border:1px solid black;
+                    margin-right:6px'>
+                    </div>
+
                     {label}
+
                 </div>
                 """,
                 unsafe_allow_html=True
             )
 
     # =========================
-    # ANNÉE BASE
+    # ANNEES
     # =========================
 
     base_year = df["Date"].dt.year.max()
 
-    # A0, puis A-1 jusqu'à A-10
-    years = [base_year - i for i in range(0, 11)]
+    years = [
+        base_year - i
+        for i in range(0, 11)
+    ]
 
-    highlight_months = {1, 4, 5, 8, 9, 12}
+    highlight_months = {
+        1, 4, 5, 8, 9, 12
+    }
 
     # =========================
-    # FIGURES PAR ANNÉE
+    # CALENDRIERS
     # =========================
 
     for year in years:
 
-        st.markdown(f"### 📅 Année {year}")
+        st.markdown(
+            f"### 📅 Année {year}"
+        )
 
-        fig, axes = plt.subplots(3, 4, figsize=(18, 10))
+        fig, axes = plt.subplots(
+            3,
+            4,
+            figsize=(18, 10)
+        )
+
         axes = axes.flatten()
 
         for month in range(1, 13):
 
             ax = axes[month - 1]
-            ax.set_title(cal.month_name[month])
+
+            ax.set_title(
+                cal.month_name[month]
+            )
+
             ax.axis("off")
 
-            month_matrix = cal.monthcalendar(year, month)
+            month_matrix = cal.monthcalendar(
+                year,
+                month
+            )
 
-            for i, week in enumerate(month_matrix):
+            for i, week in enumerate(
+                month_matrix
+            ):
+
                 for j, day in enumerate(week):
 
                     if day == 0:
                         continue
 
-                    d = pd.Timestamp(year, month, day).date()
-                    colors = color_map.get(d, ["white"])
+                    d = pd.Timestamp(
+                        year,
+                        month,
+                        day
+                    ).date()
 
-                    # case simple
+                    colors = color_map.get(
+                        d,
+                        ["white"]
+                    )
+
                     if len(colors) == 1:
-                        ax.add_patch(plt.Rectangle(
-                            (j, -i), 1, 1,
-                            facecolor=colors[0],
-                            edgecolor="black",
-                            lw=0.4
-                        ))
 
-                    # multi couleurs
+                        ax.add_patch(
+                            plt.Rectangle(
+                                (j, -i),
+                                1,
+                                1,
+                                facecolor=colors[0],
+                                edgecolor="black",
+                                lw=0.4
+                            )
+                        )
+
                     else:
-                        ax.add_patch(plt.Rectangle(
-                            (j, -i), 1, 1,
-                            facecolor="white",
-                            edgecolor="black",
-                            lw=0.4
-                        ))
 
-                        step = 1 / len(colors[:4])
+                        ax.add_patch(
+                            plt.Rectangle(
+                                (j, -i),
+                                1,
+                                1,
+                                facecolor="white",
+                                edgecolor="black",
+                                lw=0.4
+                            )
+                        )
 
-                        for k, c in enumerate(colors[:4]):
-                            ax.add_patch(plt.Rectangle(
-                                (j + k * step, -i),
-                                step, 1,
-                                facecolor=c,
-                                edgecolor="none"
-                            ))
+                        step = 1 / len(
+                            colors[:4]
+                        )
+
+                        for k, c in enumerate(
+                            colors[:4]
+                        ):
+
+                            ax.add_patch(
+                                plt.Rectangle(
+                                    (
+                                        j + k * step,
+                                        -i
+                                    ),
+                                    step,
+                                    1,
+                                    facecolor=c,
+                                    edgecolor="none"
+                                )
+                            )
 
             ax.set_xlim(0, 7)
             ax.set_ylim(-6, 1)
 
             if month in highlight_months:
-                ax.add_patch(plt.Rectangle(
-                    (0, -6), 7, 7,
-                    fill=False,
-                    edgecolor="yellow",
-                    linewidth=3
-                ))
+
+                ax.add_patch(
+                    plt.Rectangle(
+                        (0, -6),
+                        7,
+                        7,
+                        fill=False,
+                        edgecolor="yellow",
+                        linewidth=3
+                    )
+                )
 
         plt.tight_layout()
+
         st.pyplot(fig)
+
         plt.close(fig)
