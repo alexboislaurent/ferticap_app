@@ -501,7 +501,7 @@ def afficher_bouc_tv(df, bouc):
             margin-bottom:20px;
         ">
             <h1>🐐 Bouc {bouc}</h1>
-            <h2>Performances 2026</h2>
+            <h2>Performances sur 1an</h2>
         </div>
         """,
         unsafe_allow_html=True
