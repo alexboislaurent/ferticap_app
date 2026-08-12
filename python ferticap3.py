@@ -44,58 +44,65 @@ MODES_TV = [
     "Bouc TV"
 ]
 
+# =========================
+# INDICATEUR JOURS LONGS / COURTS
+# =========================
+
 date_actuelle = pd.Timestamp.today()
 mois_actuel = date_actuelle.month
 
+# Mois considérés comme jours longs
 mois_jours_longs = [12, 1, 4, 5, 8, 9]
 
 if mois_actuel in mois_jours_longs:
-    couleur_jour = "#FFD700"
-    texte_jour = "Jours longs actuellement"
+    couleur_jour = "#FFD700"   # Jaune
+    texte_jour = "Jours longs"
 else:
-    couleur_jour = "#2196F3"
-    texte_jour = "Jours courts actuellement"
+    couleur_jour = "#2196F3"   # Bleu
+    texte_jour = "Jours courts"
 
-st.markdown(
-    f"""
-    <div style="
-        display:flex;
-        align-items:center;
-        gap:18px;
-        margin-bottom:20px;
-    ">
 
-        <h1 style="
-            margin:0;
-        ">
-            📊 Dashboard Ferticap
-        </h1>
+# =========================
+# EN-TÊTE
+# =========================
 
+col_titre, col_jours = st.columns([3, 2])
+
+with col_titre:
+    st.title("📊 Dashboard Ferticap")
+
+with col_jours:
+
+    st.markdown(
+        f"""
         <div style="
             display:flex;
             align-items:center;
-            gap:8px;
+            height:100%;
+            padding-top:12px;
             font-size:20px;
             font-weight:600;
         ">
 
             <span style="
                 display:inline-block;
-                width:16px;
-                height:16px;
+                width:18px;
+                height:18px;
+                min-width:18px;
                 background-color:{couleur_jour};
                 border-radius:50%;
                 border:1px solid #555;
+                margin-right:10px;
             "></span>
 
-            <span>{texte_jour}</span>
+            <span>
+                {texte_jour} actuellement
+            </span>
 
         </div>
-
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+        """,
+        unsafe_allow_html=True
+    )
 # =========================
 # CONNEXION GOOGLE SHEETS
 # =========================
