@@ -12,7 +12,7 @@ def calc_ranking_with_success(data, nb_collectes=None):
     tmp["Score"] = pd.to_numeric(
         tmp["Score"],
         errors="coerce"
-    ).fillna(0)
+    )
 
     # =========================
     # SUCCÈS
@@ -23,45 +23,76 @@ def calc_ranking_with_success(data, nb_collectes=None):
     )
 
     # =========================
-    # CAS RANKING 10 DERNIÈRES COLLECTES
+    # RANKING 10 DERNIÈRES COLLECTES
     # =========================
 
     if nb_collectes is not None:
 
-        # Tous les boucs présents dans les données
-        boucs = tmp["Code animal"].dropna().unique()
+        # Date de dernière collecte disponible
+        derniere_date = tmp["Date"].max()
 
-        # Score total réellement obtenu
-        scores = (
-            tmp.groupby("Code animal")["Score"]
-            .sum()
-        )
+        resultats = []
 
-        # Nombre de réussites
-        succes = (
-            tmp.groupby("Code animal")["Succes"]
-            .sum()
-        )
+        for bouc, groupe in tmp.groupby("Code animal"):
 
-        result = pd.DataFrame(index=boucs)
+            groupe = groupe.sort_values("Date")
 
-        result["Score_moyen"] = (
-            scores / nb_collectes
-        )
+            derniere_collecte_bouc = groupe["Date"].max()
 
-        result["Nb_succes"] = (
-            succes
-            .reindex(boucs)
-            .fillna(0)
-        )
+            nb_succes = int(groupe["Succes"].sum())
 
-        result["Nb_total"] = nb_collectes
+            # ==========================================
+            # BOUC DISPARU AVANT LA FIN DES 10 COLLECTES
+            # ==========================================
+
+            bouc_disparu = (
+                derniere_collecte_bouc < derniere_date
+            )
+
+            if bouc_disparu:
+
+                # Score des collectes où le bouc était présent
+                score_total = groupe["Score"].fillna(0).sum()
+
+                # Les collectes après sa disparition = 0
+                score_moyen = (
+                    score_total / nb_collectes
+                )
+
+            else:
+
+                # Bouc encore présent :
+                # on ignore les scores vides / échecs
+                scores_valides = groupe.loc[
+                    groupe["Score"].notna(),
+                    "Score"
+                ]
+
+                if len(scores_valides) > 0:
+                    score_moyen = scores_valides.mean()
+                else:
+                    score_moyen = 0
+
+            resultats.append({
+                "Code animal": bouc,
+                "Score_moyen": score_moyen,
+                "Nb_succes": nb_succes,
+                "Nb_total": nb_collectes
+            })
+
+        result = pd.DataFrame(resultats)
+
+        result = result.set_index("Code animal")
 
     # =========================
     # ANNÉE / HISTORIQUE
     # =========================
 
     else:
+
+        # Pour les autres rankings :
+        # moyenne des scores disponibles
+        tmp["Score"] = tmp["Score"].fillna(0)
 
         result = (
             tmp.groupby("Code animal")
