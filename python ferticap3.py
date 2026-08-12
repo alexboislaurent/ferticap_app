@@ -44,10 +44,6 @@ MODES_TV = [
     "Bouc TV"
 ]
 
-# =========================
-# INDICATEUR JOURS LONGS / COURTS
-# =========================
-
 date_actuelle = pd.Timestamp.today()
 mois_actuel = date_actuelle.month
 
@@ -100,7 +96,6 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-
 # =========================
 # CONNEXION GOOGLE SHEETS
 # =========================
