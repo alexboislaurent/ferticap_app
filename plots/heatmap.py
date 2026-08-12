@@ -1,7 +1,7 @@
 
 import matplotlib.pyplot as plt
 import seaborn as sns
-
+from matplotlib.patches import Patch
 
 def create_heatmap(data):
 
@@ -27,6 +27,20 @@ def create_heatmap(data):
         ax.get_xticklabels(),
         rotation=45,
         ha="right"
+    )
+
+    # Légende
+    legend_elements = [
+        Patch(facecolor="green", edgecolor="black", label="À sauté"),
+        Patch(facecolor="red", edgecolor="black", label="Refus"),
+        Patch(facecolor="white", edgecolor="black", label="Absent")
+    ]
+
+    ax.legend(
+        handles=legend_elements,
+        title="Légende",
+        loc="upper left",
+        bbox_to_anchor=(1.02, 1)
     )
 
     return fig
