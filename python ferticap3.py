@@ -15,7 +15,7 @@ from plots.scores import create_score_global
 from plots.score_bouc import create_score_bouc
 from plots.ranking import show_ranking
 from streamlit_autorefresh import st_autorefresh
-from plots.calendrier import create_calendar
+from plots.calendrier import afficher_calendrier
 
 # =========================
 # CONFIG PAGE
