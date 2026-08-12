@@ -464,50 +464,97 @@ def afficher_bouc_tv(df, bouc):
     data_periode = data_bouc.copy()
 
     # =========================
-    # DERNIER POIDS ET DERNIÈRE CS
-    # =========================
+# DERNIER POIDS ET DERNIÈRE CS
+# =========================
 
-    data_mesures = data_bouc.sort_values("Date")
+data_mesures = data_bouc.sort_values("Date").copy()
 
-    # Dernier poids connu dans la période sélectionnée
-    if (
-        "Valeure Pesée" in data_mesures.columns
-        and data_mesures["Valeure Pesée"].notna().any()
-    ):
-        dernier_poids = (
-            data_mesures.loc[
-                data_mesures["Valeure Pesée"].notna(),
-                "Valeure Pesée"
-            ].iloc[-1]
-        )
-    else:
-        dernier_poids = None
+# Nettoyage des valeurs
+if "Valeure Pesée" in data_mesures.columns:
+    data_mesures["Valeure Pesée"] = pd.to_numeric(
+        data_mesures["Valeure Pesée"]
+        .astype(str)
+        .str.replace(",", ".", regex=False)
+        .str.replace("kg", "", regex=False)
+        .str.strip(),
+        errors="coerce"
+    )
 
-    # Dernière CS connue dans la période sélectionnée
-    if (
-        "Valeur CS" in data_mesures.columns
-        and data_mesures["Valeur CS"].notna().any()
-    ):
-        derniere_cs = (
-            data_mesures.loc[
-                data_mesures["Valeur CS"].notna(),
-                "Valeur CS"
-            ].iloc[-1]
-        )
-    else:
-        derniere_cs = None
+if "Valeur CS" in data_mesures.columns:
+    data_mesures["Valeur CS"] = pd.to_numeric(
+        data_mesures["Valeur CS"]
+        .astype(str)
+        .str.replace(",", ".", regex=False)
+        .str.replace("cm", "", regex=False)
+        .str.strip(),
+        errors="coerce"
+    )
+
+# =========================
+# DERNIER POIDS
+# =========================
+
+poids_data = data_mesures.dropna(
+    subset=["Valeure Pesée"]
+) if "Valeure Pesée" in data_mesures.columns else pd.DataFrame()
+
+if not poids_data.empty:
+
+    dernier_poids = poids_data.iloc[-1]["Valeure Pesée"]
+    date_dernier_poids = poids_data.iloc[-1]["Date"]
+
+else:
+
+    dernier_poids = None
+    date_dernier_poids = None
+
+# =========================
+# DERNIÈRE CS
+# =========================
+
+cs_data = data_mesures.dropna(
+    subset=["Valeur CS"]
+) if "Valeur CS" in data_mesures.columns else pd.DataFrame()
+
+if not cs_data.empty:
+
+    derniere_cs = cs_data.iloc[-1]["Valeur CS"]
+    date_derniere_cs = cs_data.iloc[-1]["Date"]
+
+else:
+
+    derniere_cs = None
+    date_derniere_cs = None
+
+# =========================
+# FORMAT AFFICHAGE
+# =========================
+
+if dernier_poids is not None:
 
     poids_txt = (
         f"{dernier_poids:.1f} kg"
-        if dernier_poids is not None
-        else "—"
+        f"<br><small>"
+        f"{date_dernier_poids:%d/%m/%Y}"
+        f"</small>"
     )
+
+else:
+
+    poids_txt = "—"
+
+if derniere_cs is not None:
 
     cs_txt = (
         f"{derniere_cs:.1f} cm"
-        if derniere_cs is not None
-        else "—"
+        f"<br><small>"
+        f"{date_derniere_cs:%d/%m/%Y}"
+        f"</small>"
     )
+
+else:
+
+    cs_txt = "—"
 
     # =========================
     # PERFORMANCES
