@@ -338,7 +338,7 @@ for b in boucs:
 
 periode = st.sidebar.selectbox(
     "Regroupement temporel",
-    ["Jour", "Semaine", "2 semaines", "Mois"]
+    ["Jour", "Semaine", "2 semaines", "Mois"],
     index=2
 )
 
