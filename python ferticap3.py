@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import calendar
 import numpy as np
+import random
+import os
 from analysis.ranking import calc_ranking_with_success
 from plots.heatmap import create_heatmap
 from plots.scores import create_score_global
@@ -120,6 +122,7 @@ else:
         "Graph à afficher",
         MODES_TV
     )
+    
 
 # =========================
 # INFO SCORE
@@ -225,6 +228,22 @@ boucs_derniere_collecte = (
 # Sécurité si aucune collecte dans la période
 if len(boucs_derniere_collecte) == 0:
     boucs_derniere_collecte = boucs.copy()
+# =========================
+# BOUC AFFICHÉ EN MODE TV
+# =========================
+
+bouc_tv = None
+
+if mode_tv and boucs_derniere_collecte:
+
+    # Change de bouc à chaque cycle complet
+    index_bouc_tv = (
+        compteur_tv // len(MODES_TV)
+    )
+
+    bouc_tv = boucs_derniere_collecte[
+        index_bouc_tv % len(boucs_derniere_collecte)
+    ]
 
 # Boucs actuels en premier
 boucs = (
@@ -360,8 +379,150 @@ def get_color(suivis):
     return "gray"
 
 # =========================
+# FICHE BOUC MODE TV
+# =========================
+
+def afficher_bouc_tv(df, bouc):
+
+    data_bouc = df[
+        df["Code animal"] == bouc
+    ].copy()
+
+    data_2026 = data_bouc[
+        data_bouc["Date"].dt.year == 2026
+    ]
+
+    # =========================
+    # PERFORMANCES
+    # =========================
+
+    nb_sauts = (
+        data_2026["Comportement"]
+        .isin([2, 3, 4])
+        .sum()
+    )
+
+    volume_moyen = pd.to_numeric(
+        data_2026["Volume semence (ml)"],
+        errors="coerce"
+    ).mean()
+
+    concentration_moyenne = pd.to_numeric(
+        data_2026["Concentration spz (B/ml)"],
+        errors="coerce"
+    ).mean()
+
+    nb_collectes = len(data_2026)
+
+    # =========================
+    # PHOTO
+    # =========================
+
+    photo = f"images/bouc_{bouc}.jpg"
+
+    # =========================
+    # AFFICHAGE
+    # =========================
+
+    st.markdown(
+        f"""
+        <div style="
+            text-align:center;
+            margin-bottom:20px;
+        ">
+            <h1>🐐 Bouc {bouc}</h1>
+            <h2>Performances 2026</h2>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    col_photo, col_stats = st.columns(
+        [1.3, 1]
+    )
+
+    # =========================
+    # PHOTO
+    # =========================
+
+    with col_photo:
+
+        if os.path.exists(photo):
+
+            st.image(
+                photo,
+                width=550
+            )
+
+        else:
+
+            st.warning(
+                f"📷 Photo non disponible pour le bouc {bouc}"
+            )
+
+    # =========================
+    # STATISTIQUES
+    # =========================
+
+    with col_stats:
+
+        volume_txt = (
+            f"{volume_moyen:.1f} ml"
+            if pd.notna(volume_moyen)
+            else "—"
+        )
+
+        concentration_txt = (
+            f"{concentration_moyenne:.1f} B/ml"
+            if pd.notna(concentration_moyenne)
+            else "—"
+        )
+
+        st.markdown(
+            f"""
+            <div style="
+                padding:30px;
+                border-radius:20px;
+                border:2px solid #ddd;
+                text-align:center;
+                margin-top:20px;
+            ">
+
+            <h2>📊 Performances</h2>
+
+            <h3>🦘 Nombre de sauts</h3>
+            <h1>{nb_sauts}</h1>
+
+            <h3>💧 Volume moyen</h3>
+            <h1>{volume_txt}</h1>
+
+            <h3>🔬 Concentration moyenne</h3>
+            <h1>{concentration_txt}</h1>
+
+            <h3>📅 Nombre de collectes</h3>
+            <h1>{nb_collectes}</h1>
+
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+# =========================
+# FICHE BOUC EN MODE TV
+# =========================
+
+if mode_tv and bouc_tv is not None:
+
+    afficher_bouc_tv(
+        df,
+        bouc_tv
+    )
+
+
+# =========================
 # HEATMAP
 # =========================
+
 if mode == "Heatmap":
 
     st.subheader("Heatmap succès")
