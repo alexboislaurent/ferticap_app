@@ -331,9 +331,18 @@ df_year = df_filtered[
     df_filtered["Date"].dt.year == current_year
 ]
 
-ranking_last10 = calc_ranking_with_success(df_last10)
-ranking_year = calc_ranking_with_success(df_year)
-ranking_alltime = calc_ranking_with_success(df)
+ranking_last10 = calc_ranking_with_success(
+    df_last10,
+    nb_collectes=len(last_10_dates)
+)
+
+ranking_year = calc_ranking_with_success(
+    df_year
+)
+
+ranking_alltime = calc_ranking_with_success(
+    df
+)
 
 # =========================
 # RESAMPLE
