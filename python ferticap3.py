@@ -913,28 +913,26 @@ elif mode == "📅 Calendrier":
 
     cols = st.columns(len(COLOR_MAP))
 
-    for col, (label, color) in zip(
-        cols,
-        COLOR_MAP.items()
-    ):
+    for col, (label, color) in zip(cols, COLOR_MAP.items()):
 
         with col:
 
             st.markdown(
                 f"""
-                <div style='display:flex;
-                align-items:center;'>
-
-                    <div style='
-                    width:18px;
-                    height:18px;
-                    background:{color};
-                    border:1px solid black;
-                    margin-right:6px'>
-                    </div>
-
-                    {label}
-
+                <div style="
+                    display:flex;
+                    align-items:center;
+                    gap:8px;
+                    margin-bottom:10px;
+                ">
+                    <span style="
+                        display:inline-block;
+                        width:18px;
+                        height:18px;
+                        background-color:{color};
+                        border:1px solid black;
+                    "></span>
+                    <span>{label}</span>
                 </div>
                 """,
                 unsafe_allow_html=True
