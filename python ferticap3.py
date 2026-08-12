@@ -336,13 +336,9 @@ ranking_last10 = calc_ranking_with_success(
     nb_collectes=len(last_10_dates)
 )
 
-ranking_year = calc_ranking_with_success(
-    df_year
-)
+ranking_year = calc_ranking_with_success(df_year)
 
-ranking_alltime = calc_ranking_with_success(
-    df
-)
+ranking_alltime = calc_ranking_with_success(df)
 
 # =========================
 # RESAMPLE
