@@ -588,7 +588,7 @@ elif mode == "Variables biologiques":
         list(variables_map.keys()),
         default=[
             "Volume semence (ml)",
-            "Concentration spz (B/ml)"
+            "Concentration spz (B/ml)",
             "Suivi des sauts"
         ]
     )
