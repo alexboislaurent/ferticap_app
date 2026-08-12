@@ -187,15 +187,39 @@ daily = (
 df_suivi = df_suivi.dropna(subset=["Suivi"])
 df_suivi = df_suivi[df_suivi["Suivi"].astype(str).str.strip() != ""]
 
+# =========================
+# FILTRE DATES
+# =========================
+
+df = df.dropna(subset=["Date"])
+
 min_date = df["Date"].min().date()
 max_date = df["Date"].max().date()
+
+# 1 an glissant par défaut
+date_debut_1_an = (
+    pd.Timestamp(max_date) - pd.DateOffset(years=1)
+).date()
+
+# Ne pas aller avant la première donnée disponible
+date_debut_1_an = max(
+    date_debut_1_an,
+    min_date
+)
 
 date_range = st.sidebar.slider(
     "Période d'analyse",
     min_value=min_date,
     max_value=max_date,
-    value=(min_date, max_date)
+    value=(date_debut_1_an, max_date)
 )
+
+start_date, end_date = date_range
+
+df_filtered = df[
+    (df["Date"] >= pd.to_datetime(start_date)) &
+    (df["Date"] <= pd.to_datetime(end_date))
+]
 
 start_date, end_date = date_range
 
