@@ -589,6 +589,7 @@ elif mode == "Variables biologiques":
         default=[
             "Volume semence (ml)",
             "Concentration spz (B/ml)"
+            "Suivi des sauts"
         ]
     )
 
