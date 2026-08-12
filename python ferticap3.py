@@ -44,7 +44,56 @@ MODES_TV = [
     "Bouc TV"
 ]
 
-st.title("📊 Dashboard Ferticap")
+# =========================
+# INDICATEUR JOURS LONGS / COURTS
+# =========================
+
+date_actuelle = pd.Timestamp.today()
+mois_actuel = date_actuelle.month
+
+mois_jours_longs = [12, 1, 4, 5, 8, 9]
+
+if mois_actuel in mois_jours_longs:
+    couleur_jour = "#FFD700"  # jaune
+    texte_jour = "Jours longs actuellement"
+else:
+    couleur_jour = "#2196F3"  # bleu
+    texte_jour = "Jours courts actuellement"
+
+st.markdown(
+    f"""
+    <div style="
+        display:flex;
+        align-items:center;
+        gap:12px;
+        margin-bottom:20px;
+    ">
+        <h1 style="margin:0;">
+            📊 Dashboard Ferticap
+        </h1>
+
+        <div style="
+            display:flex;
+            align-items:center;
+            gap:8px;
+            font-size:20px;
+            font-weight:600;
+        ">
+            <span style="
+                display:inline-block;
+                width:16px;
+                height:16px;
+                background-color:{couleur_jour};
+                border-radius:50%;
+                border:1px solid #555;
+            "></span>
+
+            <span>{texte_jour}</span>
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 # =========================
 # CONNEXION GOOGLE SHEETS
