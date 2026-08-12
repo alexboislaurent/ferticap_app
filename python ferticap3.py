@@ -15,7 +15,7 @@ from plots.scores import create_score_global
 from plots.score_bouc import create_score_bouc
 from plots.ranking import show_ranking
 from streamlit_autorefresh import st_autorefresh
-from plots.calendrier import afficher_calendrier
+from plots. import afficher_calendrier
 
 # =========================
 # CONFIG PAGE
@@ -40,7 +40,7 @@ MODES_TV = [
     "Bouc TV",
     "🏆 Ranking boucs",
     "Bouc TV",
-    "📅 Calendrier",
+    "📅 ",
     "Bouc TV"
 ]
 
@@ -133,7 +133,7 @@ else:
             "Score par bouc",
             "Variables biologiques",
             "🏆 Ranking boucs",
-            "📅 Calendrier"
+            "📅 "
         ]
     )
 
@@ -165,7 +165,7 @@ Le score est calculé à partir d’un éjaculat selon la formule suivante :
 df = df.dropna(subset=["Date"])
 
 # =========================
-# PREPARATION CALENDRIER SUIVIS
+# PREPARATION  SUIVIS
 # =========================
 
 suivi_cols = ["Suivi 1", "Suivi 2", "Suivi 3", "Suivi 4"]
@@ -814,7 +814,7 @@ elif mode == "🏆 Ranking boucs":
     )
 
 
-elif mode == "📅 Calendrier":
+elif mode == "📅 ":
 
     afficher_calendar(df)
 
