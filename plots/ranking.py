@@ -172,12 +172,16 @@ def show_ranking(
             "### 👑 Le roi du troupeau"
         )
 
-        st.image(
-            "images/bouc_409.jpg",
-            width=220
-        )
+        if len(ranking_last10) > 0:
 
+            roi = str(ranking_last10.index[0]).strip()
 
+            photo_roi = f"images/bouc_{roi}.jpg"
+
+            st.image(
+                photo_roi,
+                width=220
+            )
 
     # =========================
     # ANNEE EN COURS
