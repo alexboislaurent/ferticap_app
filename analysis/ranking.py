@@ -1,7 +1,7 @@
 import pandas as pd
 
 
-def calc_ranking_with_success(data):
+def calc_ranking_with_success(data, total_collectes=None):
 
     tmp = data.copy()
 
@@ -9,13 +9,12 @@ def calc_ranking_with_success(data):
     # SCORE
     # =========================
 
-    # Conversion en numérique
     tmp["Score"] = pd.to_numeric(
         tmp["Score"],
         errors="coerce"
     )
 
-    # Une case Score vide = score 0
+    # Case Score vide = 0
     tmp["Score"] = tmp["Score"].fillna(0)
 
     # =========================
@@ -27,7 +26,7 @@ def calc_ranking_with_success(data):
     )
 
     # =========================
-    # CALCUL DU RANKING
+    # CALCUL PAR BOUC
     # =========================
 
     result = (
@@ -40,18 +39,35 @@ def calc_ranking_with_success(data):
     )
 
     # =========================
-    # TAUX DE RÉUSSITE
+    # NOMBRE TOTAL DE COLLECTES
     # =========================
 
-    result["Taux_reussite"] = (
-        result["Nb_succes"]
-        / result["Nb_total"]
-        * 100
-    )
+    if total_collectes is not None:
 
-    # =========================
-    # TRI
-    # =========================
+        result["Nb_total"] = total_collectes
+
+        result["Taux_reussite"] = (
+            result["Nb_succes"]
+            / total_collectes
+            * 100
+        )
+
+        # Moyenne sur les 10 collectes
+        result["Score_moyen"] = (
+            result["Score_moyen"]
+            * (
+                result["Nb_succes"]
+                / result["Nb_total"]
+            )
+        )
+
+    else:
+
+        result["Taux_reussite"] = (
+            result["Nb_succes"]
+            / result["Nb_total"]
+            * 100
+        )
 
     return result.sort_values(
         "Score_moyen",
