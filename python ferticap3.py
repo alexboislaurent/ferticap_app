@@ -51,57 +51,28 @@ MODES_TV = [
 date_actuelle = pd.Timestamp.today()
 mois_actuel = date_actuelle.month
 
-# Mois considérés comme jours longs
 mois_jours_longs = [12, 1, 4, 5, 8, 9]
 
 if mois_actuel in mois_jours_longs:
-    couleur_jour = "#FFD700"   # Jaune
-    texte_jour = "Jours longs"
+    indicateur = "🟡"
+    texte_jour = "Jours longs actuellement"
 else:
-    couleur_jour = "#2196F3"   # Bleu
-    texte_jour = "Jours courts"
+    indicateur = "🔵"
+    texte_jour = "Jours courts actuellement"
 
 
 # =========================
-# EN-TÊTE
+# TITRE
 # =========================
 
-col_titre, col_jours = st.columns([3, 2])
+col1, col2 = st.columns([3, 2])
 
-with col_titre:
+with col1:
     st.title("📊 Dashboard Ferticap")
 
-with col_jours:
-
+with col2:
     st.markdown(
-        f"""
-        <div style="
-            display:flex;
-            align-items:center;
-            height:100%;
-            padding-top:12px;
-            font-size:20px;
-            font-weight:600;
-        ">
-
-            <span style="
-                display:inline-block;
-                width:18px;
-                height:18px;
-                min-width:18px;
-                background-color:{couleur_jour};
-                border-radius:50%;
-                border:1px solid #555;
-                margin-right:10px;
-            "></span>
-
-            <span>
-                {texte_jour} actuellement
-            </span>
-
-        </div>
-        """,
-        unsafe_allow_html=True
+        f"### {indicateur} {texte_jour}"
     )
 # =========================
 # CONNEXION GOOGLE SHEETS
