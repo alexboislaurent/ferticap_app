@@ -1,3 +1,6 @@
+import pandas as pd
+
+
 def calc_ranking_with_success(data):
 
     tmp = data.copy()
@@ -6,13 +9,13 @@ def calc_ranking_with_success(data):
     # SCORE
     # =========================
 
-    # Conversion numérique
+    # Conversion en numérique
     tmp["Score"] = pd.to_numeric(
         tmp["Score"],
         errors="coerce"
     )
 
-    # Une cellule Score vide = score 0
+    # Une case Score vide = score 0
     tmp["Score"] = tmp["Score"].fillna(0)
 
     # =========================
@@ -24,7 +27,7 @@ def calc_ranking_with_success(data):
     )
 
     # =========================
-    # RANKING
+    # CALCUL DU RANKING
     # =========================
 
     result = (
@@ -45,6 +48,10 @@ def calc_ranking_with_success(data):
         / result["Nb_total"]
         * 100
     )
+
+    # =========================
+    # TRI
+    # =========================
 
     return result.sort_values(
         "Score_moyen",
