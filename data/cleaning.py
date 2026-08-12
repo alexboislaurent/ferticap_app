@@ -41,41 +41,12 @@ def clean_data(all_values):
     # SCORE
     # =========================
 
-    df["Score"] = pd.to_numeric(
-        df["Score"]
-        .astype(str)
-        .str.replace(",", ".", regex=False)
-        .str.strip(),
-        errors="coerce"
-    )
+    if "Score" in df.columns:
 
-    # =========================
-    # POIDS
-    # =========================
-
-    if "Valeure Pesée" in df.columns:
-
-        df["Valeure Pesée"] = pd.to_numeric(
-            df["Valeure Pesée"]
+        df["Score"] = pd.to_numeric(
+            df["Score"]
             .astype(str)
-            .str.replace(",", ".", regex=False)
-            .str.replace("kg", "", regex=False)
-            .str.strip(),
-            errors="coerce"
-        )
-
-    # =========================
-    # CS
-    # =========================
-
-    if "Valeur CS" in df.columns:
-
-        df["Valeur CS"] = pd.to_numeric(
-            df["Valeur CS"]
-            .astype(str)
-            .str.replace(",", ".", regex=False)
-            .str.replace("cm", "", regex=False)
-            .str.strip(),
+            .str.replace(",", ".", regex=False),
             errors="coerce"
         )
 
@@ -100,8 +71,39 @@ def clean_data(all_values):
     )
 
     # =========================
-    # SUPPRESSION DES LIGNES
-    # SANS DATE
+    # POIDS
+    # =========================
+
+    if "Valeure Pesée" in df.columns:
+
+        df["Valeure Pesée"] = pd.to_numeric(
+            df["Valeure Pesée"]
+            .astype(str)
+            .str.strip()
+            .str.replace(",", ".", regex=False)
+            .str.replace("kg", "", regex=False)
+            .str.strip(),
+            errors="coerce"
+        )
+
+    # =========================
+    # CS
+    # =========================
+
+    if "Valeur CS" in df.columns:
+
+        df["Valeur CS"] = pd.to_numeric(
+            df["Valeur CS"]
+            .astype(str)
+            .str.strip()
+            .str.replace(",", ".", regex=False)
+            .str.replace("cm", "", regex=False)
+            .str.strip(),
+            errors="coerce"
+        )
+
+    # =========================
+    # DATE VALIDE
     # =========================
 
     df = df.dropna(
