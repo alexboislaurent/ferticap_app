@@ -30,11 +30,17 @@ DUREE_ECRAN_TV = 15  # secondes
 
 MODES_TV = [
     "Heatmap",
+    "Bouc TV",
     "Score global",
+    "Bouc TV",
     "Score par bouc",
+    "Bouc TV",
     "Variables biologiques",
+    "Bouc TV",
     "🏆 Ranking boucs",
-    "📅 Calendrier"
+    "Bouc TV",
+    "📅 Calendrier",
+    "Bouc TV"
 ]
 st.title("📊 Dashboard Ferticap")
 
@@ -105,13 +111,11 @@ mode_tv = st.sidebar.checkbox(
 
 if mode_tv:
 
-    # Rafraîchissement automatique toutes les X secondes
     compteur_tv = st_autorefresh(
         interval=DUREE_ECRAN_TV * 1000,
         key="rotation_tv"
     )
 
-    # Détermine quel écran afficher
     mode = MODES_TV[
         compteur_tv % len(MODES_TV)
     ]
@@ -120,7 +124,14 @@ else:
 
     mode = st.sidebar.radio(
         "Graph à afficher",
-        MODES_TV
+        [
+            "Heatmap",
+            "Score global",
+            "Score par bouc",
+            "Variables biologiques",
+            "🏆 Ranking boucs",
+            "📅 Calendrier"
+        ]
     )
     
 
@@ -232,13 +243,16 @@ if len(boucs_derniere_collecte) == 0:
 # BOUC AFFICHÉ EN MODE TV
 # =========================
 
+# =========================
+# BOUC POUR L'AFFICHAGE TV
+# =========================
+
 bouc_tv = None
 
 if mode_tv and boucs_derniere_collecte:
 
-    # Change de bouc à chaque cycle complet
     index_bouc_tv = (
-        compteur_tv // len(MODES_TV)
+        compteur_tv // 2
     )
 
     bouc_tv = boucs_derniere_collecte[
@@ -530,6 +544,17 @@ if mode == "Heatmap":
     fig = create_heatmap(heatmap)
 
     st.pyplot(fig)
+
+# =========================
+# BOUC TV
+# =========================
+
+elif mode == "Bouc TV":
+
+    afficher_bouc_tv(
+        df,
+        bouc_tv
+    )
 
 # =========================
 # SCORE GLOBAL
