@@ -1,7 +1,7 @@
 import pandas as pd
 
 
-def calc_ranking_with_success(data, total_collectes=None):
+def calc_ranking_with_success(data):
 
     tmp = data.copy()
 
@@ -26,48 +26,16 @@ def calc_ranking_with_success(data, total_collectes=None):
     )
 
     # =========================
-    # CALCUL PAR BOUC
+    # RANKING
     # =========================
 
     result = (
         tmp.groupby("Code animal")
         .agg(
             Score_moyen=("Score", "mean"),
-            Nb_succes=("Succes", "sum"),
-            Nb_total=("Succes", "size")
+            Nb_succes=("Succes", "sum")
         )
     )
-
-    # =========================
-    # NOMBRE TOTAL DE COLLECTES
-    # =========================
-
-    if total_collectes is not None:
-
-        result["Nb_total"] = total_collectes
-
-        result["Taux_reussite"] = (
-            result["Nb_succes"]
-            / total_collectes
-            * 100
-        )
-
-        # Moyenne sur les 10 collectes
-        result["Score_moyen"] = (
-            result["Score_moyen"]
-            * (
-                result["Nb_succes"]
-                / result["Nb_total"]
-            )
-        )
-
-    else:
-
-        result["Taux_reussite"] = (
-            result["Nb_succes"]
-            / result["Nb_total"]
-            * 100
-        )
 
     return result.sort_values(
         "Score_moyen",
