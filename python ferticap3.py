@@ -54,10 +54,10 @@ mois_actuel = date_actuelle.month
 mois_jours_longs = [12, 1, 4, 5, 8, 9]
 
 if mois_actuel in mois_jours_longs:
-    couleur_jour = "#FFD700"  # jaune
+    couleur_jour = "#FFD700"
     texte_jour = "Jours longs actuellement"
 else:
-    couleur_jour = "#2196F3"  # bleu
+    couleur_jour = "#2196F3"
     texte_jour = "Jours courts actuellement"
 
 st.markdown(
@@ -65,10 +65,13 @@ st.markdown(
     <div style="
         display:flex;
         align-items:center;
-        gap:12px;
+        gap:18px;
         margin-bottom:20px;
     ">
-        <h1 style="margin:0;">
+
+        <h1 style="
+            margin:0;
+        ">
             📊 Dashboard Ferticap
         </h1>
 
@@ -79,6 +82,7 @@ st.markdown(
             font-size:20px;
             font-weight:600;
         ">
+
             <span style="
                 display:inline-block;
                 width:16px;
@@ -89,7 +93,9 @@ st.markdown(
             "></span>
 
             <span>{texte_jour}</span>
+
         </div>
+
     </div>
     """,
     unsafe_allow_html=True
