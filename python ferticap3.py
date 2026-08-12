@@ -42,6 +42,7 @@ MODES_TV = [
     "📅 Calendrier",
     "Bouc TV"
 ]
+
 st.title("📊 Dashboard Ferticap")
 
 # =========================
@@ -116,6 +117,7 @@ if mode_tv:
         key="rotation_tv"
     )
 
+    # UNE SEULE page à la fois
     mode = MODES_TV[
         compteur_tv % len(MODES_TV)
     ]
@@ -133,7 +135,6 @@ else:
             "📅 Calendrier"
         ]
     )
-    
 
 # =========================
 # INFO SCORE
@@ -239,9 +240,6 @@ boucs_derniere_collecte = (
 # Sécurité si aucune collecte dans la période
 if len(boucs_derniere_collecte) == 0:
     boucs_derniere_collecte = boucs.copy()
-# =========================
-# BOUC AFFICHÉ EN MODE TV
-# =========================
 
 # =========================
 # BOUC POUR L'AFFICHAGE TV
@@ -251,12 +249,16 @@ bouc_tv = None
 
 if mode_tv and boucs_derniere_collecte:
 
-    index_bouc_tv = (
-        compteur_tv // 2
-    )
+    # Nombre de passages sur "Bouc TV"
+    # avant le passage actuel
+    nb_passages_bouc = sum(
+        1
+        for i in range(compteur_tv + 1)
+        if MODES_TV[i % len(MODES_TV)] == "Bouc TV"
+    ) - 1
 
     bouc_tv = boucs_derniere_collecte[
-        index_bouc_tv % len(boucs_derniere_collecte)
+        nb_passages_bouc % len(boucs_derniere_collecte)
     ]
 
 # Boucs actuels en premier
@@ -521,17 +523,6 @@ def afficher_bouc_tv(df, bouc):
             unsafe_allow_html=True
         )
 
-# =========================
-# FICHE BOUC EN MODE TV
-# =========================
-
-if mode_tv and bouc_tv is not None:
-
-    afficher_bouc_tv(
-        df,
-        bouc_tv
-    )
-
 
 # =========================
 # HEATMAP
@@ -560,7 +551,7 @@ elif mode == "Bouc TV":
 # SCORE GLOBAL
 # =========================
 
-if mode == "Score global":
+elif mode == "Score global":
 
     st.subheader("Score moyen global")
 
