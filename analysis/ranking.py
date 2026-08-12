@@ -1,50 +1,30 @@
-import pandas as pd
+def calc_ranking_with_success(data):
 
+    tmp = data.copy()
 
-def calc_ranking_with_success(data, nb_collectes=None):
-
-    data = data.copy()
-
-    # Score vide = 0
-    data["Score"] = pd.to_numeric(
-        data["Score"],
-        errors="coerce"
-    ).fillna(0)
-
-    # Réussite = comportement 2, 3 ou 4
-    data["Succes"] = data["Comportement"].isin([2, 3, 4])
-
-    # =========================
-    # RANKING
-    # =========================
+    tmp["Succes"] = (
+        tmp["Comportement"]
+        .isin([2,3,4])
+    )
 
     result = (
-        data.groupby("Code animal")
+        tmp.groupby("Code animal")
         .agg(
-            Score_total=("Score", "sum"),
-            Nb_succes=("Succes", "sum")
+            Score_moyen=("Score","mean"),
+            Nb_succes=("Succes","sum"),
+            Nb_total=("Succes","count")
         )
     )
 
-    # 10 dernières collectes
-    if nb_collectes is not None:
-        result["Nb_total"] = nb_collectes
-
-    # Année / historique
-    else:
-        result["Nb_total"] = (
-            data.groupby("Code animal")
-            .size()
-        )
-
-    # Taux de réussite
     result["Taux_reussite"] = (
         result["Nb_succes"]
-        / result["Nb_total"]
-        * 100
+        /
+        result["Nb_total"]
+        *
+        100
     )
 
     return result.sort_values(
-        "Score_total",
+        "Score_moyen",
         ascending=False
     )
