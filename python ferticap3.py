@@ -789,8 +789,10 @@ elif mode == "📅 Calendrier":
     # ANNÉE BASE
     # =========================
 
-    base_year = df["Date"].dt.year.max()
-    years = [base_year - 1, base_year, base_year + 1]
+       base_year = df["Date"].dt.year.max()
+
+    # A0, puis A-1 jusqu'à A-10
+        years = [base_year - i for i in range(0, 11)]
 
     highlight_months = {1, 4, 5, 8, 9, 12}
 
