@@ -454,107 +454,99 @@ def get_color(suivis):
 # FICHE BOUC MODE TV
 # =========================
 
-def afficher_bouc_tv(df, bouc):
+def afficher_bouc_tv(df, bouc, df_periode):
+
+    # =========================
+    # HISTORIQUE COMPLET DU BOUC
+    # =========================
 
     data_bouc = df[
         df["Code animal"] == bouc
     ].copy()
 
-    # La période est déjà filtrée par df_filtered
-    data_periode = data_bouc.copy()
+    # =========================
+    # DONNÉES DE LA PÉRIODE
+    # =========================
+
+    data_periode = df_periode[
+        df_periode["Code animal"] == bouc
+    ].copy()
 
     # =========================
-# DERNIER POIDS ET DERNIÈRE CS
-# =========================
-
-data_mesures = data_bouc.sort_values("Date").copy()
-
-# Nettoyage des valeurs
-if "Valeure Pesée" in data_mesures.columns:
-    data_mesures["Valeure Pesée"] = pd.to_numeric(
-        data_mesures["Valeure Pesée"]
-        .astype(str)
-        .str.replace(",", ".", regex=False)
-        .str.replace("kg", "", regex=False)
-        .str.strip(),
-        errors="coerce"
-    )
-
-if "Valeur CS" in data_mesures.columns:
-    data_mesures["Valeur CS"] = pd.to_numeric(
-        data_mesures["Valeur CS"]
-        .astype(str)
-        .str.replace(",", ".", regex=False)
-        .str.replace("cm", "", regex=False)
-        .str.strip(),
-        errors="coerce"
-    )
-
-# =========================
-# DERNIER POIDS
-# =========================
-
-poids_data = data_mesures.dropna(
-    subset=["Valeure Pesée"]
-) if "Valeure Pesée" in data_mesures.columns else pd.DataFrame()
-
-if not poids_data.empty:
-
-    dernier_poids = poids_data.iloc[-1]["Valeure Pesée"]
-    date_dernier_poids = poids_data.iloc[-1]["Date"]
-
-else:
+    # DERNIER POIDS CONNU
+    # =========================
 
     dernier_poids = None
     date_dernier_poids = None
 
-# =========================
-# DERNIÈRE CS
-# =========================
+    if "Valeure Pesée" in data_bouc.columns:
 
-cs_data = data_mesures.dropna(
-    subset=["Valeur CS"]
-) if "Valeur CS" in data_mesures.columns else pd.DataFrame()
+        poids_data = (
+            data_bouc[
+                data_bouc["Valeure Pesée"].notna()
+            ]
+            .sort_values("Date")
+        )
 
-if not cs_data.empty:
+        if not poids_data.empty:
 
-    derniere_cs = cs_data.iloc[-1]["Valeur CS"]
-    date_derniere_cs = cs_data.iloc[-1]["Date"]
+            dernier_poids = poids_data.iloc[-1]["Valeure Pesée"]
+            date_dernier_poids = poids_data.iloc[-1]["Date"]
 
-else:
+    # =========================
+    # DERNIÈRE CS CONNUE
+    # =========================
 
     derniere_cs = None
     date_derniere_cs = None
 
-# =========================
-# FORMAT AFFICHAGE
-# =========================
+    if "Valeur CS" in data_bouc.columns:
 
-if dernier_poids is not None:
+        cs_data = (
+            data_bouc[
+                data_bouc["Valeur CS"].notna()
+            ]
+            .sort_values("Date")
+        )
 
-    poids_txt = (
-        f"{dernier_poids:.1f} kg"
-        f"<br><small>"
-        f"{date_dernier_poids:%d/%m/%Y}"
-        f"</small>"
-    )
+        if not cs_data.empty:
 
-else:
+            derniere_cs = cs_data.iloc[-1]["Valeur CS"]
+            date_derniere_cs = cs_data.iloc[-1]["Date"]
 
-    poids_txt = "—"
+    # =========================
+    # FORMAT POIDS
+    # =========================
 
-if derniere_cs is not None:
+    if dernier_poids is not None:
 
-    cs_txt = (
-        f"{derniere_cs:.1f} cm"
-        f"<br><small>"
-        f"{date_derniere_cs:%d/%m/%Y}"
-        f"</small>"
-    )
+        poids_txt = (
+            f"{dernier_poids:.1f} kg"
+            f"<br><small>"
+            f"{date_dernier_poids:%d/%m/%Y}"
+            f"</small>"
+        )
 
-else:
+    else:
 
-    cs_txt = "—"
+        poids_txt = "—"
+
+    # =========================
+    # FORMAT CS
+    # =========================
+
+    if derniere_cs is not None:
+
+        cs_txt = (
+            f"{derniere_cs:.1f} cm"
+            f"<br><small>"
+            f"{date_derniere_cs:%d/%m/%Y}"
+            f"</small>"
+        )
+
+    else:
+
+        cs_txt = "—"
 
     # =========================
     # PERFORMANCES
@@ -663,10 +655,10 @@ else:
             <h3>🔬 Concentration moyenne</h3>
             <h1>{concentration_txt}</h1>
 
-            <h3>⚖️ Dernier poids</h3>
+            <h3>⚖️ Dernier poids connu</h3>
             <h1>{poids_txt}</h1>
 
-            <h3>📏 Dernière CS</h3>
+            <h3>📏 Dernière CS connue</h3>
             <h1>{cs_txt}</h1>
 
             <h3>📅 Nombre de collectes</h3>
