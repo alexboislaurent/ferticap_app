@@ -594,7 +594,7 @@ if mode == "Heatmap":
 elif mode == "Bouc TV":
 
     afficher_bouc_tv(
-        df_filtred,
+        df_filtered,
         bouc_tv
     )
 
