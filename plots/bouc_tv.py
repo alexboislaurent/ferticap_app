@@ -57,6 +57,7 @@ def calculer_alerte_poids(data_historique):
         * 100
     )
 
+    # Seuil actuel : 5 %
     if perte_pourcentage >= 5:
 
         return {
@@ -110,9 +111,13 @@ def calculer_alerte_performance(data_historique):
     performances["Performance insuffisante"] = (
         (performances["Volume semence (ml)"] < 0.5)
         |
-        (performances["Concentration spz (B/ml)"] < 3)
+        (
+            performances["Concentration spz (B/ml)"] < 3
+        )
     )
 
+    # Alerte uniquement si les 5 dernières collectes
+    # sont toutes insuffisantes
     if performances["Performance insuffisante"].all():
 
         return {
@@ -138,7 +143,9 @@ def afficher_alertes(data_historique):
     ):
         return
 
-    st.error("🚨 ALERTES SUR LE BOUC")
+    st.error(
+        "🚨 ALERTES SUR LE BOUC"
+    )
 
     if alerte_poids is not None:
 
@@ -163,8 +170,9 @@ def afficher_alertes(data_historique):
 
 
 # =====================================================
-# FICHE BOUC TV
+# TENDANCES
 # =====================================================
+
 def calculer_tendances(data_historique):
 
     colonnes = [
@@ -185,13 +193,17 @@ def calculer_tendances(data_historique):
         return {}
 
     data = (
-        data_historique[colonnes_existantes]
+        data_historique[
+            colonnes_existantes
+        ]
         .sort_values("Date")
         .copy()
     )
 
+    # 10 dernières collectes
     data = data.tail(10)
 
+    # Il faut au moins 10 collectes
     if len(data) < 10:
         return {}
 
@@ -214,10 +226,18 @@ def calculer_tendances(data_historique):
             errors="coerce"
         )
 
-        ancienne = serie.iloc[:5].mean()
-        recente = serie.iloc[5:].mean()
+        ancienne = (
+            serie.iloc[:5].mean()
+        )
 
-        if pd.isna(ancienne) or ancienne == 0:
+        recente = (
+            serie.iloc[5:].mean()
+        )
+
+        if (
+            pd.isna(ancienne)
+            or ancienne == 0
+        ):
             continue
 
         variation = (
@@ -233,7 +253,12 @@ def calculer_tendances(data_historique):
         }
 
     return resultats
-    
+
+
+# =====================================================
+# FICHE BOUC TV
+# =====================================================
+
 def afficher_bouc_tv(
     df,
     bouc,
@@ -241,7 +266,9 @@ def afficher_bouc_tv(
 ):
 
     if bouc is None:
-        st.warning("Aucun bouc disponible.")
+        st.warning(
+            "Aucun bouc disponible."
+        )
         return
 
     # =================================================
@@ -252,23 +279,28 @@ def afficher_bouc_tv(
         df["Code animal"] == bouc
     ].copy()
 
-    tendances = calculer_tendances(
-    data_historique
-    )    
-
     if data_bouc.empty:
         st.warning(
             f"Aucune donnée pour le bouc {bouc}."
         )
         return
 
-    # Historique complet pour les alertes
+    # =================================================
+    # HISTORIQUE COMPLET
+    # =================================================
+
     if df_historique is None:
         df_historique = df
 
     data_historique = df_historique[
         df_historique["Code animal"] == bouc
     ].copy()
+
+    # Tendances calculées après création
+    # de data_historique
+    tendances = calculer_tendances(
+        data_historique
+    )
 
     # La période est déjà filtrée
     data_periode = data_bouc.copy()
@@ -353,7 +385,9 @@ def afficher_bouc_tv(
     ).mean()
 
     concentration_moyenne = pd.to_numeric(
-        data_periode["Concentration spz (B/ml)"],
+        data_periode[
+            "Concentration spz (B/ml)"
+        ],
         errors="coerce"
     ).mean()
 
@@ -367,13 +401,17 @@ def afficher_bouc_tv(
         errors="coerce"
     ).mean()
 
-    nb_collectes = len(data_periode)
+    nb_collectes = len(
+        data_periode
+    )
 
     # =================================================
     # PHOTO
     # =================================================
 
-    photo = f"images/bouc_{bouc}.jpg"
+    photo = (
+        f"images/bouc_{bouc}.jpg"
+    )
 
     # =================================================
     # TITRE
@@ -461,9 +499,9 @@ def afficher_bouc_tv(
             else "—"
         )
 
-        # =========================
+        # =================================================
         # TENDANCES
-        # =========================
+        # =================================================
 
         if tendances:
 
@@ -473,14 +511,18 @@ def afficher_bouc_tv(
 
             noms = {
                 "Volume semence (ml)": "💧 Volume",
-                "Concentration spz (B/ml)": "🔬 Concentration",
+                "Concentration spz (B/ml)": (
+                    "🔬 Concentration"
+                ),
                 "% Mobiles": "🏃 Mobilité",
                 "Motiles": "🦘 Motilité",
             }
 
             for variable, valeur in tendances.items():
 
-                variation = valeur["variation"]
+                variation = (
+                    valeur["variation"]
+                )
 
                 if variation > 5:
                     symbole = "🟢 ↑"
