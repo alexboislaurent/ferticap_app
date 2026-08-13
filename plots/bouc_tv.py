@@ -165,7 +165,75 @@ def afficher_alertes(data_historique):
 # =====================================================
 # FICHE BOUC TV
 # =====================================================
+def calculer_tendances(data_historique):
 
+    colonnes = [
+        "Date",
+        "Volume semence (ml)",
+        "Concentration spz (B/ml)",
+        "% Mobiles",
+        "Motiles",
+    ]
+
+    colonnes_existantes = [
+        col
+        for col in colonnes
+        if col in data_historique.columns
+    ]
+
+    if "Date" not in colonnes_existantes:
+        return {}
+
+    data = (
+        data_historique[colonnes_existantes]
+        .sort_values("Date")
+        .copy()
+    )
+
+    data = data.tail(10)
+
+    if len(data) < 10:
+        return {}
+
+    resultats = {}
+
+    variables = [
+        "Volume semence (ml)",
+        "Concentration spz (B/ml)",
+        "% Mobiles",
+        "Motiles",
+    ]
+
+    for variable in variables:
+
+        if variable not in data.columns:
+            continue
+
+        serie = pd.to_numeric(
+            data[variable],
+            errors="coerce"
+        )
+
+        ancienne = serie.iloc[:5].mean()
+        recente = serie.iloc[5:].mean()
+
+        if pd.isna(ancienne) or ancienne == 0:
+            continue
+
+        variation = (
+            (recente - ancienne)
+            / ancienne
+            * 100
+        )
+
+        resultats[variable] = {
+            "ancienne": ancienne,
+            "recente": recente,
+            "variation": variation,
+        }
+
+    return resultats
+    
 def afficher_bouc_tv(
     df,
     bouc,
@@ -183,6 +251,10 @@ def afficher_bouc_tv(
     data_bouc = df[
         df["Code animal"] == bouc
     ].copy()
+
+    tendances = calculer_tendances(
+    data_historique
+    )    
 
     if data_bouc.empty:
         st.warning(
@@ -388,6 +460,42 @@ def afficher_bouc_tv(
             if derniere_cs is not None
             else "—"
         )
+
+        # =========================
+        # TENDANCES
+        # =========================
+
+        if tendances:
+
+            st.subheader(
+                "📈 Tendances récentes"
+            )
+
+            noms = {
+                "Volume semence (ml)": "💧 Volume",
+                "Concentration spz (B/ml)": "🔬 Concentration",
+                "% Mobiles": "🏃 Mobilité",
+                "Motiles": "🦘 Motilité",
+            }
+
+            for variable, valeur in tendances.items():
+
+                variation = valeur["variation"]
+
+                if variation > 5:
+                    symbole = "🟢 ↑"
+
+                elif variation < -5:
+                    symbole = "🔴 ↓"
+
+                else:
+                    symbole = "🟡 →"
+
+                st.write(
+                    f"**{noms[variable]} :** "
+                    f"{symbole} "
+                    f"{variation:+.1f} %"
+                )
 
         # =================================================
         # LIGNE 1
