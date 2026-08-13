@@ -439,6 +439,12 @@ elif mode == "🏆 Ranking boucs":
         current_year
     )
 
+elif mode == "Rations":
+
+    afficher_rations(
+        worksheet_rations
+    )
+
 
 elif mode == "📅 Calendrier":
 
