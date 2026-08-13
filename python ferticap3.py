@@ -613,7 +613,7 @@ def afficher_bouc_tv(df, bouc):
                 f"📷 Photo non disponible pour le bouc {bouc}"
             )
 
-    # =========================
+# =========================
 # STATISTIQUES
 # =========================
 
