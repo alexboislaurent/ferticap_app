@@ -98,13 +98,15 @@ def analyser_performance(data_bouc):
     performances = (
         data_bouc[colonnes]
         .sort_values("Date")
-        .tail(NB_COLLECTES_PERFORMANCE)
+        .tail(5)
         .copy()
     )
 
-    if len(performances) < NB_COLLECTES_PERFORMANCE:
+    # Il faut au moins 5 collectes
+    if len(performances) < 5:
         return None
 
+    # Absence de donnée = 0
     performances["Volume semence (ml)"] = pd.to_numeric(
         performances["Volume semence (ml)"],
         errors="coerce"
@@ -115,25 +117,22 @@ def analyser_performance(data_bouc):
         errors="coerce"
     ).fillna(0)
 
+    # Une collecte est insuffisante si :
+    # volume < 0,5 ml OU concentration < 3 B/ml
     performances["Insuffisant"] = (
         (performances["Volume semence (ml)"] < SEUIL_VOLUME)
         |
-        (
-            performances["Concentration spz (B/ml)"]
-            < SEUIL_CONCENTRATION
-        )
+        (performances["Concentration spz (B/ml)"] < SEUIL_CONCENTRATION)
     )
 
-    nb_insuffisantes = int(
-        performances["Insuffisant"].sum()
-    )
-
-    if nb_insuffisantes == 0:
+    # ALERTE UNIQUEMENT si les 5 dernières collectes
+    # sont toutes insuffisantes
+    if not performances["Insuffisant"].all():
         return None
 
     return {
-        "nb_insuffisantes": nb_insuffisantes,
-        "nb_collectes": NB_COLLECTES_PERFORMANCE,
+        "nb_insuffisantes": 5,
+        "nb_collectes": 5,
         "dernieres_collectes": performances,
     }
 
