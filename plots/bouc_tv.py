@@ -96,7 +96,6 @@ def calculer_alerte_performance(data_historique):
     if len(performances) < 5:
         return None
 
-    # Absence de donnée = 0
     performances["Volume semence (ml)"] = pd.to_numeric(
         performances["Volume semence (ml)"],
         errors="coerce"
@@ -197,7 +196,6 @@ def calculer_tendances(data_historique):
         .copy()
     )
 
-    # 10 dernières collectes
     data = data.tail(10)
 
     if len(data) < 10:
@@ -296,7 +294,6 @@ def afficher_bouc_tv(
         data_historique
     )
 
-    # La période sélectionnée
     data_periode = data_bouc.copy()
 
     # =================================================
@@ -486,53 +483,93 @@ def afficher_bouc_tv(
             )
 
     # =================================================
-    # STATISTIQUES COMPACTES
+    # STATISTIQUES
     # =================================================
 
     with col_stats:
 
-        st.subheader(
-            "📊 Performances"
+        st.markdown(
+            """
+            <h2 style="
+                margin-top:-25px;
+                margin-bottom:8px;
+            ">
+                📊 Performances
+            </h2>
+            """,
+            unsafe_allow_html=True
         )
 
-        donnees = pd.DataFrame({
-            "Indicateur": [
-                "🦘 Sauts",
-                "📅 Collectes",
-                "💧 Volume moyen",
-                "🔬 Concentration",
-                "🏃 Mobilité",
-                "🦘 Motilité",
-                "⚖️ Dernier poids",
-                "📏 Dernière CS",
-            ],
-            "Valeur": [
-                str(nb_sauts),
-                str(nb_collectes),
-                volume_txt,
-                concentration_txt,
-                mobilite_txt,
-                motilite_txt,
-                poids_txt,
-                cs_txt,
-            ]
-        })
+        donnees = [
+            ("🦘 Sauts", str(nb_sauts)),
+            ("📅 Collectes", str(nb_collectes)),
+            ("💧 Volume moyen", volume_txt),
+            ("🔬 Concentration", concentration_txt),
+            ("🏃 Mobilité", mobilite_txt),
+            ("🦘 Motilité", motilite_txt),
+            ("⚖️ Dernier poids", poids_txt),
+            ("📏 Dernière CS", cs_txt),
+        ]
 
-        st.dataframe(
-            donnees,
-            hide_index=True,
-            use_container_width=True,
-            height=300,
+        html_indicateurs = """
+        <div style="
+            margin-top:-5px;
+            margin-bottom:10px;
+            width:100%;
+        ">
+        """
+
+        for nom, valeur in donnees:
+
+            html_indicateurs += f"""
+            <div style="
+                display:flex;
+                justify-content:space-between;
+                align-items:center;
+                padding:5px 10px;
+                border-bottom:1px solid rgba(128,128,128,0.25);
+                font-size:17px;
+            ">
+                <span style="
+                    font-weight:700;
+                ">
+                    {nom}
+                </span>
+
+                <span style="
+                    font-weight:700;
+                    font-size:18px;
+                ">
+                    {valeur}
+                </span>
+            </div>
+            """
+
+        html_indicateurs += """
+        </div>
+        """
+
+        st.markdown(
+            html_indicateurs,
+            unsafe_allow_html=True
         )
 
         # =================================================
-        # TENDANCES COMPACTES
+        # TENDANCES
         # =================================================
 
         if tendances:
 
-            st.subheader(
-                "📈 Tendances récentes"
+            st.markdown(
+                """
+                <h2 style="
+                    margin-top:4px;
+                    margin-bottom:6px;
+                ">
+                    📈 Tendances récentes
+                </h2>
+                """,
+                unsafe_allow_html=True
             )
 
             noms = {
@@ -562,18 +599,52 @@ def afficher_bouc_tv(
                     symbole = "🟡 →"
 
                 lignes_tendance.append({
-                    "Variable": noms[variable],
-                    "Évolution": (
+                    "variable": noms[variable],
+                    "evolution": (
                         f"{symbole} "
                         f"{variation:+.1f} %"
                     )
                 })
 
-            st.dataframe(
-                pd.DataFrame(
-                    lignes_tendance
-                ),
-                hide_index=True,
-                use_container_width=True,
-                height=180,
+            html_tendances = """
+            <div style="
+                display:grid;
+                grid-template-columns:1fr 1fr;
+                gap:6px;
+                margin-top:-2px;
+            ">
+            """
+
+            for ligne in lignes_tendance:
+
+                html_tendances += f"""
+                <div style="
+                    padding:7px 10px;
+                    border-radius:6px;
+                    border:1px solid rgba(128,128,128,0.3);
+                    font-size:16px;
+                ">
+                    <div style="
+                        font-weight:700;
+                        margin-bottom:2px;
+                    ">
+                        {ligne["variable"]}
+                    </div>
+
+                    <div style="
+                        font-weight:700;
+                        font-size:17px;
+                    ">
+                        {ligne["evolution"]}
+                    </div>
+                </div>
+                """
+
+            html_tendances += """
+            </div>
+            """
+
+            st.markdown(
+                html_tendances,
+                unsafe_allow_html=True
             )
