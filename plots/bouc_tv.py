@@ -25,6 +25,18 @@ def calculer_alerte_poids(data_historique):
     if poids.empty:
         return None
 
+    poids["Valeure Pesée"] = pd.to_numeric(
+        poids["Valeure Pesée"],
+        errors="coerce"
+    )
+
+    poids = poids.dropna(
+        subset=["Valeure Pesée"]
+    )
+
+    if poids.empty:
+        return None
+
     dernier = poids.iloc[-1]
 
     date_limite = (
@@ -202,6 +214,8 @@ def calculer_tendances(data_historique):
     # 10 dernières collectes
     data = data.tail(10)
 
+    # Il faut 10 collectes pour comparer
+    # les 5 anciennes aux 5 récentes
     if len(data) < 10:
         return {}
 
@@ -263,6 +277,7 @@ def afficher_bouc_tv(
     df_historique=None
 ):
 
+    # Sécurité
     if bouc is None:
         st.warning(
             "Aucun bouc disponible."
@@ -294,19 +309,13 @@ def afficher_bouc_tv(
         df_historique["Code animal"] == bouc
     ].copy()
 
+    # Tendances
     tendances = calculer_tendances(
         data_historique
     )
 
+    # Période sélectionnée
     data_periode = data_bouc.copy()
-
-    # =================================================
-    # ALERTES
-    # =================================================
-
-    afficher_alertes(
-        data_historique
-    )
 
     # =================================================
     # TRI PAR DATE
@@ -329,17 +338,28 @@ def afficher_bouc_tv(
 
         poids_data = data_mesures[
             data_mesures["Valeure Pesée"].notna()
-        ]
+        ].copy()
 
         if not poids_data.empty:
 
-            dernier_poids = (
-                poids_data.iloc[-1]["Valeure Pesée"]
+            poids_data["Valeure Pesée"] = pd.to_numeric(
+                poids_data["Valeure Pesée"],
+                errors="coerce"
             )
 
-            date_dernier_poids = (
-                poids_data.iloc[-1]["Date"]
+            poids_data = poids_data.dropna(
+                subset=["Valeure Pesée"]
             )
+
+            if not poids_data.empty:
+
+                dernier_poids = (
+                    poids_data.iloc[-1]["Valeure Pesée"]
+                )
+
+                date_dernier_poids = (
+                    poids_data.iloc[-1]["Date"]
+                )
 
     # =================================================
     # DERNIÈRE CS
@@ -352,17 +372,28 @@ def afficher_bouc_tv(
 
         cs_data = data_mesures[
             data_mesures["Valeur CS"].notna()
-        ]
+        ].copy()
 
         if not cs_data.empty:
 
-            derniere_cs = (
-                cs_data.iloc[-1]["Valeur CS"]
+            cs_data["Valeur CS"] = pd.to_numeric(
+                cs_data["Valeur CS"],
+                errors="coerce"
             )
 
-            date_derniere_cs = (
-                cs_data.iloc[-1]["Date"]
+            cs_data = cs_data.dropna(
+                subset=["Valeur CS"]
             )
+
+            if not cs_data.empty:
+
+                derniere_cs = (
+                    cs_data.iloc[-1]["Valeur CS"]
+                )
+
+                date_derniere_cs = (
+                    cs_data.iloc[-1]["Date"]
+                )
 
     # =================================================
     # PERFORMANCES
@@ -439,11 +470,11 @@ def afficher_bouc_tv(
     )
 
     # =================================================
-    # PHOTO
+    # ALERTES
     # =================================================
 
-    photo = (
-        f"images/bouc_{bouc}.jpg"
+    afficher_alertes(
+        data_historique
     )
 
     # =================================================
@@ -467,6 +498,8 @@ def afficher_bouc_tv(
     # =================================================
 
     with col_photo:
+
+        photo = f"images/bouc_{bouc}.jpg"
 
         if os.path.exists(photo):
 
@@ -492,84 +525,110 @@ def afficher_bouc_tv(
             "📊 Performances"
         )
 
-        # =================================================
+        # =========================
         # LIGNE 1
-        # =================================================
+        # =========================
 
         c1, c2 = st.columns(2)
 
         with c1:
+
             st.markdown(
-                f"**🦘 Sauts**  \n"
+                f"**🦘 Sauts**"
+            )
+            st.write(
                 f"## {nb_sauts}"
             )
 
         with c2:
+
             st.markdown(
-                f"**📅 Collectes**  \n"
+                f"**📅 Collectes**"
+            )
+            st.write(
                 f"## {nb_collectes}"
             )
 
-        # =================================================
+        # =========================
         # LIGNE 2
-        # =================================================
+        # =========================
 
         c3, c4 = st.columns(2)
 
         with c3:
+
             st.markdown(
-                f"**💧 Volume moyen**  \n"
+                f"**💧 Volume moyen**"
+            )
+            st.write(
                 f"## {volume_txt}"
             )
 
         with c4:
+
             st.markdown(
-                f"**🔬 Concentration**  \n"
+                f"**🔬 Concentration**"
+            )
+            st.write(
                 f"## {concentration_txt}"
             )
 
-        # =================================================
+        # =========================
         # LIGNE 3
-        # =================================================
+        # =========================
 
         c5, c6 = st.columns(2)
 
         with c5:
+
             st.markdown(
-                f"**🏃 Mobilité**  \n"
+                f"**🏃 Mobilité**"
+            )
+            st.write(
                 f"## {mobilite_txt}"
             )
 
         with c6:
+
             st.markdown(
-                f"**🦘 Motilité**  \n"
+                f"**🦘 Motilité**"
+            )
+            st.write(
                 f"## {motilite_txt}"
             )
 
-        # =================================================
+        # =========================
         # LIGNE 4
-        # =================================================
+        # =========================
 
         c7, c8 = st.columns(2)
 
         with c7:
+
             st.markdown(
-                f"**⚖️ Dernier poids**  \n"
+                f"**⚖️ Dernier poids**"
+            )
+            st.write(
                 f"## {poids_txt}"
             )
 
             if date_dernier_poids is not None:
+
                 st.caption(
                     f"{date_dernier_poids:%d/%m/%Y}"
                 )
 
         with c8:
+
             st.markdown(
-                f"**📏 Dernière CS**  \n"
+                f"**📏 Dernière CS**"
+            )
+            st.write(
                 f"## {cs_txt}"
             )
 
             if date_derniere_cs is not None:
+
                 st.caption(
                     f"{date_derniere_cs:%d/%m/%Y}"
                 )
@@ -620,9 +679,14 @@ def afficher_bouc_tv(
                     symbole = "🟡 →"
 
                 with col:
+
                     st.markdown(
-                        f"**{noms[variable]}**  \n"
-                        f"**{symbole} {variation:+.1f} %**"
+                        f"**{noms[variable]}**"
+                    )
+
+                    st.write(
+                        f"**{symbole} "
+                        f"{variation:+.1f} %**"
                     )
 
             # =========================
@@ -652,7 +716,12 @@ def afficher_bouc_tv(
                         symbole = "🟡 →"
 
                     with col:
+
                         st.markdown(
-                            f"**{noms[variable]}**  \n"
-                            f"**{symbole} {variation:+.1f} %**"
+                            f"**{noms[variable]}**"
+                        )
+
+                        st.write(
+                            f"**{symbole} "
+                            f"{variation:+.1f} %**"
                         )
