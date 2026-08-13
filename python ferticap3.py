@@ -255,13 +255,6 @@ df_filtered = df[
     (df["Date"] <= pd.to_datetime(end_date))
 ]
 
-start_date, end_date = date_range
-
-df_filtered = df[
-    (df["Date"] >= pd.to_datetime(start_date)) &
-    (df["Date"] <= pd.to_datetime(end_date))
-]
-
 # =========================
 # RANKING BOUCS (10 DERNIÈRES COLLECTES) ✔ FIXÉ
 # =========================
@@ -444,33 +437,6 @@ def resample_series(series):
     if periode == "Mois":
         return series.resample("ME").mean()
     return series
-    
-def resample_series_physio(series):
-    if periode_physio == "Jour":
-        return series
-    if periode_physio == "Semaine":
-        return series.resample("W").mean()
-    if periode_physio == "2 semaines":
-        return series.resample("2W").mean()
-    if periode_physio == "Mois":
-        return series.resample("ME").mean()
-    return series
-
-def get_color(suivis):
-    if len(suivis) > 1:
-        return "purple"
-    if "FCO" in suivis:
-        return "red"
-    if "LNCR" in suivis:
-        return "blue"
-    return "gray"
-
-elif mode == "Bouc TV":
-
-    afficher_bouc_tv(
-        df_filtered,
-        bouc_tv
-    )
 # =========================
 # AFFICHAGE
 # =========================
