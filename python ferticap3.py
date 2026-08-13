@@ -341,7 +341,8 @@ elif mode == "Bouc TV":
 
     afficher_bouc_tv(
         df_filtered,
-        bouc_tv
+        bouc_tv,
+        df_historique=df
     )
 
 
