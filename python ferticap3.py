@@ -77,19 +77,6 @@ else:
 
 
 # =========================
-# TITRE
-# =========================
-
-col1, col2 = st.columns([3, 2])
-
-with col1:
-    st.title("📊 Dashboard Ferticap")
-
-with col2:
-    st.markdown(
-        f"### {indicateur} {texte_jour}"
-    )
-# =========================
 # CONNEXION GOOGLE SHEETS
 # =========================
 
@@ -177,6 +164,22 @@ else:
         "Bouc TV"
     ]
 )
+
+# =========================
+# TITRE
+# =========================
+
+if mode != "Bouc TV":
+
+    col1, col2 = st.columns([3, 2])
+
+    with col1:
+        st.title("📊 Dashboard Ferticap")
+
+    with col2:
+        st.markdown(
+            f"### {indicateur} {texte_jour}"
+        )
 
 # =========================
 # INFO SCORE
