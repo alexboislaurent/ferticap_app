@@ -81,6 +81,16 @@ def afficher_bouc_tv(df, bouc):
 
     nb_collectes = len(data_periode)
 
+    mobilite_moyenne = pd.to_numeric(
+        data_periode["% Mobiles"],
+        errors="coerce"
+    ).mean()
+
+    motilite_moyenne = pd.to_numeric(
+        data_periode["Motiles"],
+        errors="coerce"
+    ).mean()
+
     # =========================
     # PHOTO
     # =========================
@@ -140,6 +150,17 @@ def afficher_bouc_tv(df, bouc):
             if pd.notna(concentration_moyenne)
             else "—"
         )
+        mobilite_txt = (
+        f"{mobilite_moyenne:.1f} %"
+        if pd.notna(mobilite_moyenne)
+        else "—"
+        )
+
+        motilite_txt = (
+            f"{motilite_moyenne:.1f}"
+            if pd.notna(motilite_moyenne)
+            else "—"
+        )
 
         poids_txt = (
             f"{float(dernier_poids):.1f} kg"
@@ -153,57 +174,72 @@ def afficher_bouc_tv(df, bouc):
             else "—"
         )
 
-        # Ligne 1
-        c1, c2 = st.columns(2)
+     # Ligne 1
+c1, c2 = st.columns(2)
 
-        with c1:
-            st.metric(
-                "🦘 Nombre de sauts",
-                nb_sauts
-            )    
+with c1:
+    st.metric(
+        "🦘 Nombre de sauts",
+        nb_sauts
+    )
 
-        with c2:
-            st.metric(
-                "📅 Nombre de collectes",
-                nb_collectes
-            )
+with c2:
+    st.metric(
+        "📅 Nombre de collectes",
+        nb_collectes
+    )
 
-        # Ligne 2
-        c3, c4 = st.columns(2)
+# Ligne 2
+c3, c4 = st.columns(2)
 
-        with c3:
-            st.metric(
-                "💧 Volume moyen",
-                volume_txt
-            )
+with c3:
+    st.metric(
+        "💧 Volume moyen",
+        volume_txt
+    )
 
-        with c4:
-            st.metric(
-                "🔬 Concentration moyenne",
-                concentration_txt
-            )
+with c4:
+    st.metric(
+        "🔬 Concentration moyenne",
+        concentration_txt
+    )
 
-        # Ligne 3
-        c5, c6 = st.columns(2)
+# Ligne 3
+c5, c6 = st.columns(2)
 
-        with c5:
-            st.metric(
-                "⚖️ Dernier poids",
-                poids_txt,
-                delta=(
-                    f"{date_dernier_poids:%d/%m/%Y}"
-                    if date_dernier_poids is not None
-                    else None
-                )
-            )
+with c5:
+    st.metric(
+        "🏃 Mobilité moyenne",
+        mobilite_txt
+    )
 
-        with c6:
-            st.metric(
-                "📏 Dernière CS",
-                cs_txt,
-                delta=(
-                    f"{date_derniere_cs:%d/%m/%Y}"
-                    if date_derniere_cs is not None
-                    else None
-                )
-            )
+with c6:
+    st.metric(
+        "🦘 Motilité moyenne",
+        motilite_txt
+    )
+
+# Ligne 4
+c7, c8 = st.columns(2)
+
+with c7:
+    st.metric(
+        "⚖️ Dernier poids",
+        poids_txt,
+        delta=(
+            f"{date_dernier_poids:%d/%m/%Y}"
+            if date_dernier_poids is not None
+            else None
+        )
+    )
+
+with c8:
+    st.metric(
+        "📏 Dernière CS",
+        cs_txt,
+        delta=(
+            f"{date_derniere_cs:%d/%m/%Y}"
+            if date_derniere_cs is not None
+            else None
+        )
+    )
