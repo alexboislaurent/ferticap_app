@@ -57,7 +57,7 @@ def calculer_alerte_poids(data_historique):
         * 100
     )
 
-    if perte_pourcentage >= 8:
+    if perte_pourcentage >= 5:
 
         return {
             "perte": perte_pourcentage,
