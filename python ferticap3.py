@@ -253,11 +253,23 @@ bouc_manuel = None
 
 if not mode_tv:
 
-    bouc_manuel = st.sidebar.selectbox(
-        "🐐 Bouc à afficher",
-        boucs,
-        key="bouc_manuel"
-    )
+    if len(selected_boucs) == 1:
+
+        bouc_manuel = selected_boucs[0]
+
+    elif len(selected_boucs) > 1:
+
+        bouc_manuel = st.sidebar.selectbox(
+            "🐐 Bouc à afficher",
+            selected_boucs,
+            key="bouc_manuel"
+        )
+
+    else:
+
+        st.sidebar.info(
+            "Sélectionnez un bouc dans la liste."
+        )
 # =========================
 # PARAMÈTRES
 # =========================
