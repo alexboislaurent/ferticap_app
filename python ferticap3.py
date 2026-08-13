@@ -92,6 +92,7 @@ from data.cleaning import clean_data
 all_values = worksheet.get_all_values()
 
 df = clean_data(all_values)
+st.write("COLONNES DF :", df.columns.tolist())
 # =========================
 # VARIABLE SUIVI DES SAUTS
 # =========================
@@ -250,6 +251,7 @@ df_filtered = df[
     (df["Date"] >= pd.to_datetime(start_date)) &
     (df["Date"] <= pd.to_datetime(end_date))
 ]
+st.write("COLONNES DF_FILTERED :", df_filtered.columns.tolist())
 
 start_date, end_date = date_range
 
@@ -826,6 +828,7 @@ elif mode == "Variables biologiques":
             data_bio[col],
             errors="coerce"
         )
+        st.write("COLONNES DATA_BIO :", data_bio.columns.tolist())
 
         # =========================
         # COURBES INDIVIDUELLES
