@@ -57,7 +57,6 @@ def calculer_alerte_poids(data_historique):
         * 100
     )
 
-    # Seuil actuel : 5 %
     if perte_pourcentage >= 5:
 
         return {
@@ -203,7 +202,6 @@ def calculer_tendances(data_historique):
     # 10 dernières collectes
     data = data.tail(10)
 
-    # Il faut au moins 10 collectes
     if len(data) < 10:
         return {}
 
@@ -296,7 +294,7 @@ def afficher_bouc_tv(
         df_historique["Code animal"] == bouc
     ].copy()
 
-    # Tendances calculées après création
+    # Calcul des tendances APRÈS création
     # de data_historique
     tendances = calculer_tendances(
         data_historique
@@ -385,9 +383,7 @@ def afficher_bouc_tv(
     ).mean()
 
     concentration_moyenne = pd.to_numeric(
-        data_periode[
-            "Concentration spz (B/ml)"
-        ],
+        data_periode["Concentration spz (B/ml)"],
         errors="coerce"
     ).mean()
 
@@ -409,9 +405,7 @@ def afficher_bouc_tv(
     # PHOTO
     # =================================================
 
-    photo = (
-        f"images/bouc_{bouc}.jpg"
-    )
+    photo = f"images/bouc_{bouc}.jpg"
 
     # =================================================
     # TITRE
@@ -500,79 +494,92 @@ def afficher_bouc_tv(
         )
 
         # =================================================
-        # TENDANCES
+        # TENDANCES RÉCENTES
         # =================================================
 
         if tendances:
 
-    st.subheader(
-        "📈 Tendances récentes"
-    )
-
-    noms = {
-        "Volume semence (ml)": "💧 Volume",
-        "Concentration spz (B/ml)": "🔬 Concentration",
-        "% Mobiles": "🏃 Mobilité",
-        "Motiles": "🦘 Motilité",
-    }
-
-    variables_tendances = list(tendances.keys())
-
-    # Ligne 1
-    t1, t2 = st.columns(2)
-
-    for col, variable in zip(
-        [t1, t2],
-        variables_tendances[:2]
-    ):
-
-        variation = tendances[
-            variable
-        ]["variation"]
-
-        if variation > 5:
-            symbole = "🟢 ↑"
-
-        elif variation < -5:
-            symbole = "🔴 ↓"
-
-        else:
-            symbole = "🟡 →"
-
-        with col:
-            st.metric(
-                noms[variable],
-                f"{symbole} {variation:+.1f} %"
+            st.subheader(
+                "📈 Tendances récentes"
             )
 
-    # Ligne 2
-    if len(variables_tendances) > 2:
+            noms = {
+                "Volume semence (ml)": "💧 Volume",
+                "Concentration spz (B/ml)": (
+                    "🔬 Concentration"
+                ),
+                "% Mobiles": "🏃 Mobilité",
+                "Motiles": "🦘 Motilité",
+            }
 
-        t3, t4 = st.columns(2)
+            variables_tendances = list(
+                tendances.keys()
+            )
 
-        for col, variable in zip(
-            [t3, t4],
-            variables_tendances[2:4]
-        ):
+            # -------------------------
+            # LIGNE 1
+            # -------------------------
 
-            variation = tendances[
-                variable
-            ]["variation"]
+            t1, t2 = st.columns(2)
 
-            if variation > 5:
-                symbole = "🟢 ↑"
+            for col, variable in zip(
+                [t1, t2],
+                variables_tendances[:2]
+            ):
 
-            elif variation < -5:
-                symbole = "🔴 ↓"
-
-            else:
-                symbole = "🟡 →"
-
-            with col:
-                st.metric(
-                    noms[variable],
-                    f"{symbole} {variation:+.1f} %"
+                variation = (
+                    tendances[variable]["variation"]
                 )
+
+                if variation > 5:
+                    symbole = "🟢 ↑"
+
+                elif variation < -5:
+                    symbole = "🔴 ↓"
+
+                else:
+                    symbole = "🟡 →"
+
+                with col:
+
+                    st.metric(
+                        noms[variable],
+                        f"{symbole} {variation:+.1f} %"
+                    )
+
+            # -------------------------
+            # LIGNE 2
+            # -------------------------
+
+            if len(variables_tendances) > 2:
+
+                t3, t4 = st.columns(2)
+
+                for col, variable in zip(
+                    [t3, t4],
+                    variables_tendances[2:4]
+                ):
+
+                    variation = (
+                        tendances[variable]["variation"]
+                    )
+
+                    if variation > 5:
+                        symbole = "🟢 ↑"
+
+                    elif variation < -5:
+                        symbole = "🔴 ↓"
+
+                    else:
+                        symbole = "🟡 →"
+
+                    with col:
+
+                        st.metric(
+                            noms[variable],
+                            f"{symbole} "
+                            f"{variation:+.1f} %"
+                        )
 
         # =================================================
         # LIGNE 1
@@ -581,12 +588,14 @@ def afficher_bouc_tv(
         c1, c2 = st.columns(2)
 
         with c1:
+
             st.metric(
                 "🦘 Nombre de sauts",
                 nb_sauts
             )
 
         with c2:
+
             st.metric(
                 "📅 Nombre de collectes",
                 nb_collectes
@@ -599,12 +608,14 @@ def afficher_bouc_tv(
         c3, c4 = st.columns(2)
 
         with c3:
+
             st.metric(
                 "💧 Volume moyen",
                 volume_txt
             )
 
         with c4:
+
             st.metric(
                 "🔬 Concentration moyenne",
                 concentration_txt
@@ -617,12 +628,14 @@ def afficher_bouc_tv(
         c5, c6 = st.columns(2)
 
         with c5:
+
             st.metric(
                 "🏃 Mobilité moyenne",
                 mobilite_txt
             )
 
         with c6:
+
             st.metric(
                 "🦘 Motilité moyenne",
                 motilite_txt
@@ -635,6 +648,7 @@ def afficher_bouc_tv(
         c7, c8 = st.columns(2)
 
         with c7:
+
             st.metric(
                 "⚖️ Dernier poids",
                 poids_txt,
@@ -646,6 +660,7 @@ def afficher_bouc_tv(
             )
 
         with c8:
+
             st.metric(
                 "📏 Dernière CS",
                 cs_txt,
