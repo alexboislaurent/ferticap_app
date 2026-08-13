@@ -158,14 +158,14 @@ def analyser_bouc(data_bouc):
 
 def afficher_boucs_surveillance(
     df,
-    boucs_presents
+    boucs_presents_derniere_collecte
 ):
 
     st.title("🚨 Boucs à surveiller")
 
     resultats = []
 
-    for bouc in boucs_presents:
+    for bouc in boucs_presents_derniere_collecte:
 
         data_bouc = df[
             df["Code animal"] == bouc
@@ -176,98 +176,112 @@ def afficher_boucs_surveillance(
         )
 
         if analyse is not None:
-
             resultats.append({
-                "bouc": bouc,
+                "Bouc": bouc,
                 **analyse,
             })
+
+    # =========================
+    # AUCUNE ALERTE
+    # =========================
 
     if not resultats:
 
         st.success(
-            "✅ Aucun bouc ne présente actuellement "
-            "de critère d'alerte."
+            "✅ Aucun bouc à surveiller actuellement."
         )
+
         return
 
-    st.warning(
-        f"⚠️ {len(resultats)} bouc(s) à surveiller"
+    # =========================
+    # RESUME
+    # =========================
+
+    st.error(
+        f"🚨 {len(resultats)} bouc(s) à surveiller"
     )
+
+    # =========================
+    # TABLEAU COMPACT
+    # =========================
+
+    lignes = []
 
     for resultat in resultats:
 
-        bouc = resultat["bouc"]
+        bouc = resultat["Bouc"]
         poids = resultat["poids"]
         performance = resultat["performance"]
 
-        st.subheader(
-            f"🐐 {bouc}"
-        )
+        # -------------------------
+        # Poids
+        # -------------------------
 
-        c1, c2 = st.columns(2)
+        if poids is not None:
 
-        # =========================
-        # ALERTE POIDS
-        # =========================
+            texte_poids = (
+                f"🔴 -{poids['perte']:.1f} % "
+                f"({poids['poids_reference']:.1f} → "
+                f"{poids['poids_dernier']:.1f} kg)"
+            )
 
-        with c1:
+        else:
 
-            if poids is not None:
+            texte_poids = "✅ Normal"
 
-                st.error(
-                    f"⚖️ Perte de poids : "
-                    f"-{poids['perte']:.1f} %"
-                )
+        # -------------------------
+        # Performance
+        # -------------------------
 
-                st.write(
-                    f"{poids['poids_reference']:.1f} kg "
-                    f"→ "
-                    f"{poids['poids_dernier']:.1f} kg"
-                )
+        if performance is not None:
 
-                st.caption(
-                    f"Du {poids['date_reference']:%d/%m/%Y} "
-                    f"au {poids['date_dernier']:%d/%m/%Y}"
-                )
+            texte_performance = (
+                f"🔴 {performance['nb_insuffisantes']}/"
+                f"{performance['nb_collectes']} "
+                f"collectes faibles"
+            )
 
-            else:
+        else:
 
-                st.info(
-                    "⚖️ Pas d'alerte poids"
-                )
+            texte_performance = "✅ Normal"
 
-        # =========================
-        # ALERTE PERFORMANCE
-        # =========================
+        # -------------------------
+        # Motif global
+        # -------------------------
 
-        with c2:
+        if (
+            poids is not None
+            and performance is not None
+        ):
 
-            if performance is not None:
+            motif = "⚠️ Poids + performance"
 
-                nb = performance[
-                    "nb_insuffisantes"
-                ]
+        elif poids is not None:
 
-                st.error(
-                    f"📉 Performance faible : "
-                    f"{nb}/{performance['nb_collectes']} "
-                    f"collectes"
-                )
+            motif = "⚖️ Poids"
 
-                st.write(
-                    f"Volume < {SEUIL_VOLUME} ml "
-                    f"ou concentration < "
-                    f"{SEUIL_CONCENTRATION} B/ml"
-                )
+        else:
 
-                st.caption(
-                    "Les données absentes sont comptées comme 0."
-                )
+            motif = "📉 Performance"
 
-            else:
+        lignes.append({
+            "🐐 Bouc": bouc,
+            "Motif": motif,
+            "⚖️ Poids": texte_poids,
+            "📉 Performance": texte_performance,
+        })
 
-                st.info(
-                    "📈 Pas d'alerte performance"
-                )
+    # =========================
+    # AFFICHAGE
+    # =========================
 
-        st.divider()
+    tableau = pd.DataFrame(
+        lignes
+    )
+
+    st.dataframe(
+        tableau,
+        use_container_width=True,
+        hide_index=True,
+        height=420,
+    )
