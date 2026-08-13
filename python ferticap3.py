@@ -172,6 +172,7 @@ else:
         "Variables physiologiques",
         "🏆 Ranking boucs",
         "📅 Calendrier",
+        "Rations",
         "Bouc TV"
     ]
 )
