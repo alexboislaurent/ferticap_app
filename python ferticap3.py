@@ -246,14 +246,15 @@ selected_boucs = afficher_selection_boucs(
 )
 if mode_tv:
 
-    bouc_manuel = None
+bouc_manuel = None
 
-else:
+if not mode_tv:
 
-    bouc_manuel = choisir_bouc_manuel(
-        boucs
-    )
-
+    bouc_manuel = st.sidebar.selectbox(
+        "🐐 Bouc à afficher",
+        boucs,
+        key="bouc_manuel"
+    )    
 # =========================
 # PARAMÈTRES
 # =========================
