@@ -115,8 +115,6 @@ def calculer_alerte_performance(data_historique):
         )
     )
 
-    # Alerte uniquement si les 5 dernières collectes
-    # sont toutes insuffisantes
     if performances["Performance insuffisante"].all():
 
         return {
@@ -294,13 +292,11 @@ def afficher_bouc_tv(
         df_historique["Code animal"] == bouc
     ].copy()
 
-    # Calcul des tendances APRÈS création
-    # de data_historique
     tendances = calculer_tendances(
         data_historique
     )
 
-    # La période est déjà filtrée
+    # La période sélectionnée
     data_periode = data_bouc.copy()
 
     # =================================================
@@ -402,10 +398,52 @@ def afficher_bouc_tv(
     )
 
     # =================================================
+    # FORMATAGE
+    # =================================================
+
+    volume_txt = (
+        f"{volume_moyen:.1f} ml"
+        if pd.notna(volume_moyen)
+        else "—"
+    )
+
+    concentration_txt = (
+        f"{concentration_moyenne:.1f} B/ml"
+        if pd.notna(concentration_moyenne)
+        else "—"
+    )
+
+    mobilite_txt = (
+        f"{mobilite_moyenne:.1f} %"
+        if pd.notna(mobilite_moyenne)
+        else "—"
+    )
+
+    motilite_txt = (
+        f"{motilite_moyenne:.1f}"
+        if pd.notna(motilite_moyenne)
+        else "—"
+    )
+
+    poids_txt = (
+        f"{float(dernier_poids):.1f} kg"
+        if dernier_poids is not None
+        else "—"
+    )
+
+    cs_txt = (
+        f"{float(derniere_cs):.1f} cm"
+        if derniere_cs is not None
+        else "—"
+    )
+
+    # =================================================
     # PHOTO
     # =================================================
 
-    photo = f"images/bouc_{bouc}.jpg"
+    photo = (
+        f"images/bouc_{bouc}.jpg"
+    )
 
     # =================================================
     # TITRE
@@ -420,7 +458,7 @@ def afficher_bouc_tv(
     )
 
     # =================================================
-    # COLONNES
+    # COLONNES PRINCIPALES
     # =================================================
 
     col_photo, col_stats = st.columns(
@@ -448,7 +486,7 @@ def afficher_bouc_tv(
             )
 
     # =================================================
-    # STATISTIQUES
+    # STATISTIQUES COMPACTES
     # =================================================
 
     with col_stats:
@@ -457,44 +495,38 @@ def afficher_bouc_tv(
             "📊 Performances"
         )
 
-        volume_txt = (
-            f"{volume_moyen:.1f} ml"
-            if pd.notna(volume_moyen)
-            else "—"
-        )
+        donnees = pd.DataFrame({
+            "Indicateur": [
+                "🦘 Sauts",
+                "📅 Collectes",
+                "💧 Volume moyen",
+                "🔬 Concentration",
+                "🏃 Mobilité",
+                "🦘 Motilité",
+                "⚖️ Dernier poids",
+                "📏 Dernière CS",
+            ],
+            "Valeur": [
+                str(nb_sauts),
+                str(nb_collectes),
+                volume_txt,
+                concentration_txt,
+                mobilite_txt,
+                motilite_txt,
+                poids_txt,
+                cs_txt,
+            ]
+        })
 
-        concentration_txt = (
-            f"{concentration_moyenne:.1f} B/ml"
-            if pd.notna(concentration_moyenne)
-            else "—"
-        )
-
-        mobilite_txt = (
-            f"{mobilite_moyenne:.1f} %"
-            if pd.notna(mobilite_moyenne)
-            else "—"
-        )
-
-        motilite_txt = (
-            f"{motilite_moyenne:.1f}"
-            if pd.notna(motilite_moyenne)
-            else "—"
-        )
-
-        poids_txt = (
-            f"{float(dernier_poids):.1f} kg"
-            if dernier_poids is not None
-            else "—"
-        )
-
-        cs_txt = (
-            f"{float(derniere_cs):.1f} cm"
-            if derniere_cs is not None
-            else "—"
+        st.dataframe(
+            donnees,
+            hide_index=True,
+            use_container_width=True,
+            height=300,
         )
 
         # =================================================
-        # TENDANCES RÉCENTES
+        # TENDANCES COMPACTES
         # =================================================
 
         if tendances:
@@ -512,23 +544,12 @@ def afficher_bouc_tv(
                 "Motiles": "🦘 Motilité",
             }
 
-            variables_tendances = list(
-                tendances.keys()
-            )
+            lignes_tendance = []
 
-            # -------------------------
-            # LIGNE 1
-            # -------------------------
-
-            t1, t2 = st.columns(2)
-
-            for col, variable in zip(
-                [t1, t2],
-                variables_tendances[:2]
-            ):
+            for variable, valeur in tendances.items():
 
                 variation = (
-                    tendances[variable]["variation"]
+                    valeur["variation"]
                 )
 
                 if variation > 5:
@@ -540,133 +561,19 @@ def afficher_bouc_tv(
                 else:
                     symbole = "🟡 →"
 
-                with col:
-
-                    st.metric(
-                        noms[variable],
-                        f"{symbole} {variation:+.1f} %"
+                lignes_tendance.append({
+                    "Variable": noms[variable],
+                    "Évolution": (
+                        f"{symbole} "
+                        f"{variation:+.1f} %"
                     )
+                })
 
-            # -------------------------
-            # LIGNE 2
-            # -------------------------
-
-            if len(variables_tendances) > 2:
-
-                t3, t4 = st.columns(2)
-
-                for col, variable in zip(
-                    [t3, t4],
-                    variables_tendances[2:4]
-                ):
-
-                    variation = (
-                        tendances[variable]["variation"]
-                    )
-
-                    if variation > 5:
-                        symbole = "🟢 ↑"
-
-                    elif variation < -5:
-                        symbole = "🔴 ↓"
-
-                    else:
-                        symbole = "🟡 →"
-
-                    with col:
-
-                        st.metric(
-                            noms[variable],
-                            f"{symbole} "
-                            f"{variation:+.1f} %"
-                        )
-
-        # =================================================
-        # LIGNE 1
-        # =================================================
-
-        c1, c2 = st.columns(2)
-
-        with c1:
-
-            st.metric(
-                "🦘 Nombre de sauts",
-                nb_sauts
-            )
-
-        with c2:
-
-            st.metric(
-                "📅 Nombre de collectes",
-                nb_collectes
-            )
-
-        # =================================================
-        # LIGNE 2
-        # =================================================
-
-        c3, c4 = st.columns(2)
-
-        with c3:
-
-            st.metric(
-                "💧 Volume moyen",
-                volume_txt
-            )
-
-        with c4:
-
-            st.metric(
-                "🔬 Concentration moyenne",
-                concentration_txt
-            )
-
-        # =================================================
-        # LIGNE 3
-        # =================================================
-
-        c5, c6 = st.columns(2)
-
-        with c5:
-
-            st.metric(
-                "🏃 Mobilité moyenne",
-                mobilite_txt
-            )
-
-        with c6:
-
-            st.metric(
-                "🦘 Motilité moyenne",
-                motilite_txt
-            )
-
-        # =================================================
-        # LIGNE 4
-        # =================================================
-
-        c7, c8 = st.columns(2)
-
-        with c7:
-
-            st.metric(
-                "⚖️ Dernier poids",
-                poids_txt,
-                delta=(
-                    f"{date_dernier_poids:%d/%m/%Y}"
-                    if date_dernier_poids is not None
-                    else None
-                )
-            )
-
-        with c8:
-
-            st.metric(
-                "📏 Dernière CS",
-                cs_txt,
-                delta=(
-                    f"{date_derniere_cs:%d/%m/%Y}"
-                    if date_derniere_cs is not None
-                    else None
-                )
+            st.dataframe(
+                pd.DataFrame(
+                    lignes_tendance
+                ),
+                hide_index=True,
+                use_container_width=True,
+                height=180,
             )
