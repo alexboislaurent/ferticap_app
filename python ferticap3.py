@@ -164,8 +164,8 @@ else:
         "Variables biologiques",
         "Variables physiologiques",
         "🏆 Ranking boucs",
-        "📅 Calendrier"
-        "Bouc TV",
+        "📅 Calendrier",
+        "Bouc TV"
     ]
 )
 
