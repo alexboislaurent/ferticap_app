@@ -3,15 +3,182 @@ import pandas as pd
 import streamlit as st
 
 
-def afficher_bouc_tv(df, bouc):
+# =====================================================
+# ALERTES
+# =====================================================
+
+def calculer_alerte_poids(data_historique):
+
+    if "Valeure Pesée" not in data_historique.columns:
+        return None
+
+    poids = (
+        data_historique[
+            data_historique["Valeure Pesée"].notna()
+        ][
+            ["Date", "Valeure Pesée"]
+        ]
+        .sort_values("Date")
+        .copy()
+    )
+
+    if poids.empty:
+        return None
+
+    dernier = poids.iloc[-1]
+
+    date_limite = (
+        dernier["Date"] - pd.Timedelta(days=30)
+    )
+
+    anciens = poids[
+        poids["Date"] <= date_limite
+    ]
+
+    if anciens.empty:
+        return None
+
+    reference = anciens.iloc[-1]
+
+    poids_reference = float(
+        reference["Valeure Pesée"]
+    )
+
+    poids_dernier = float(
+        dernier["Valeure Pesée"]
+    )
+
+    if poids_reference <= 0:
+        return None
+
+    perte_pourcentage = (
+        (poids_reference - poids_dernier)
+        / poids_reference
+        * 100
+    )
+
+    if perte_pourcentage >= 10:
+
+        return {
+            "perte": perte_pourcentage,
+            "poids_reference": poids_reference,
+            "poids_dernier": poids_dernier,
+            "date_reference": reference["Date"],
+            "date_dernier": dernier["Date"],
+        }
+
+    return None
+
+
+def calculer_alerte_performance(data_historique):
+
+    colonnes = [
+        "Date",
+        "Volume semence (ml)",
+        "Concentration spz (B/ml)",
+    ]
+
+    if not all(
+        col in data_historique.columns
+        for col in colonnes
+    ):
+        return None
+
+    performances = (
+        data_historique[
+            colonnes
+        ]
+        .sort_values("Date")
+        .tail(5)
+        .copy()
+    )
+
+    if len(performances) < 5:
+        return None
+
+    # Absence de donnée = 0
+    performances["Volume semence (ml)"] = pd.to_numeric(
+        performances["Volume semence (ml)"],
+        errors="coerce"
+    ).fillna(0)
+
+    performances["Concentration spz (B/ml)"] = pd.to_numeric(
+        performances["Concentration spz (B/ml)"],
+        errors="coerce"
+    ).fillna(0)
+
+    performances["Performance insuffisante"] = (
+        (performances["Volume semence (ml)"] < 0.5)
+        |
+        (performances["Concentration spz (B/ml)"] < 3)
+    )
+
+    if performances["Performance insuffisante"].all():
+
+        return {
+            "collectes": performances
+        }
+
+    return None
+
+
+def afficher_alertes(data_historique):
+
+    alerte_poids = calculer_alerte_poids(
+        data_historique
+    )
+
+    alerte_performance = calculer_alerte_performance(
+        data_historique
+    )
+
+    if (
+        alerte_poids is None
+        and alerte_performance is None
+    ):
+        return
+
+    st.error("🚨 ALERTES SUR LE BOUC")
+
+    if alerte_poids is not None:
+
+        st.warning(
+            f"⚖️ **Perte de poids de "
+            f"{alerte_poids['perte']:.1f} %** "
+            f"entre le "
+            f"{alerte_poids['date_reference']:%d/%m/%Y} "
+            f"({alerte_poids['poids_reference']:.1f} kg) "
+            f"et le "
+            f"{alerte_poids['date_dernier']:%d/%m/%Y} "
+            f"({alerte_poids['poids_dernier']:.1f} kg)."
+        )
+
+    if alerte_performance is not None:
+
+        st.warning(
+            "📉 **Baisse de performance détectée :** "
+            "volume < 0,5 ml ou concentration < 3 B/ml "
+            "sur les 5 dernières collectes."
+        )
+
+
+# =====================================================
+# FICHE BOUC TV
+# =====================================================
+
+def afficher_bouc_tv(
+    df,
+    bouc,
+    df_historique=None
+):
 
     if bouc is None:
         st.warning("Aucun bouc disponible.")
         return
 
-    # =========================
-    # DONNEES DU BOUC
-    # =========================
+    # =================================================
+    # DONNÉES DU BOUC
+    # =================================================
 
     data_bouc = df[
         df["Code animal"] == bouc
@@ -23,12 +190,28 @@ def afficher_bouc_tv(df, bouc):
         )
         return
 
+    # Historique complet pour les alertes
+    if df_historique is None:
+        df_historique = df
+
+    data_historique = df_historique[
+        df_historique["Code animal"] == bouc
+    ].copy()
+
     # La période est déjà filtrée
     data_periode = data_bouc.copy()
 
-    # =========================
+    # =================================================
+    # ALERTES
+    # =================================================
+
+    afficher_alertes(
+        data_historique
+    )
+
+    # =================================================
     # TRI PAR DATE
-    # =========================
+    # =================================================
 
     data_mesures = (
         data_bouc
@@ -36,9 +219,9 @@ def afficher_bouc_tv(df, bouc):
         .copy()
     )
 
-    # =========================
+    # =================================================
     # DERNIER POIDS
-    # =========================
+    # =================================================
 
     dernier_poids = None
     date_dernier_poids = None
@@ -50,16 +233,18 @@ def afficher_bouc_tv(df, bouc):
         ]
 
         if not poids_data.empty:
+
             dernier_poids = (
                 poids_data.iloc[-1]["Valeure Pesée"]
             )
+
             date_dernier_poids = (
                 poids_data.iloc[-1]["Date"]
             )
 
-    # =========================
+    # =================================================
     # DERNIÈRE CS
-    # =========================
+    # =================================================
 
     derniere_cs = None
     date_derniere_cs = None
@@ -71,16 +256,18 @@ def afficher_bouc_tv(df, bouc):
         ]
 
         if not cs_data.empty:
+
             derniere_cs = (
                 cs_data.iloc[-1]["Valeur CS"]
             )
+
             date_derniere_cs = (
                 cs_data.iloc[-1]["Date"]
             )
 
-    # =========================
+    # =================================================
     # PERFORMANCES
-    # =========================
+    # =================================================
 
     nb_sauts = (
         data_periode["Comportement"]
@@ -110,32 +297,35 @@ def afficher_bouc_tv(df, bouc):
 
     nb_collectes = len(data_periode)
 
-    # =========================
+    # =================================================
     # PHOTO
-    # =========================
+    # =================================================
 
     photo = f"images/bouc_{bouc}.jpg"
 
-    # =========================
+    # =================================================
     # TITRE
-    # =========================
+    # =================================================
 
-    st.title(f"🐐 Bouc {bouc}")
+    st.title(
+        f"🐐 Bouc {bouc}"
+    )
+
     st.caption(
         "Performances sur la période sélectionnée"
     )
 
-    # =========================
+    # =================================================
     # COLONNES
-    # =========================
+    # =================================================
 
     col_photo, col_stats = st.columns(
         [1.3, 1]
     )
 
-    # =========================
+    # =================================================
     # PHOTO
-    # =========================
+    # =================================================
 
     with col_photo:
 
@@ -149,16 +339,19 @@ def afficher_bouc_tv(df, bouc):
         else:
 
             st.warning(
-                f"📷 Photo non disponible pour le bouc {bouc}"
+                f"📷 Photo non disponible "
+                f"pour le bouc {bouc}"
             )
 
-    # =========================
+    # =================================================
     # STATISTIQUES
-    # =========================
+    # =================================================
 
     with col_stats:
 
-        st.subheader("📊 Performances")
+        st.subheader(
+            "📊 Performances"
+        )
 
         volume_txt = (
             f"{volume_moyen:.1f} ml"
@@ -196,9 +389,9 @@ def afficher_bouc_tv(df, bouc):
             else "—"
         )
 
-        # =========================
+        # =================================================
         # LIGNE 1
-        # =========================
+        # =================================================
 
         c1, c2 = st.columns(2)
 
@@ -214,9 +407,9 @@ def afficher_bouc_tv(df, bouc):
                 nb_collectes
             )
 
-        # =========================
+        # =================================================
         # LIGNE 2
-        # =========================
+        # =================================================
 
         c3, c4 = st.columns(2)
 
@@ -232,9 +425,9 @@ def afficher_bouc_tv(df, bouc):
                 concentration_txt
             )
 
-        # =========================
+        # =================================================
         # LIGNE 3
-        # =========================
+        # =================================================
 
         c5, c6 = st.columns(2)
 
@@ -250,9 +443,9 @@ def afficher_bouc_tv(df, bouc):
                 motilite_txt
             )
 
-        # =========================
+        # =================================================
         # LIGNE 4
-        # =========================
+        # =================================================
 
         c7, c8 = st.columns(2)
 
