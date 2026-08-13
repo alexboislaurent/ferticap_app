@@ -115,6 +115,8 @@ def calculer_alerte_performance(data_historique):
         )
     )
 
+    # Alerte uniquement si les 5 dernières
+    # collectes sont toutes insuffisantes
     if performances["Performance insuffisante"].all():
 
         return {
@@ -445,16 +447,12 @@ def afficher_bouc_tv(
     )
 
     # =================================================
-    # TITRE
+    # TITRE COMPACT
     # =================================================
 
-       st.markdown(
+    st.markdown(
         f"### 🐐 Bouc {bouc}"
-        )
-
-        st.write(
-        "Performances sur la période sélectionnée"
-        )
+    )
 
     # =================================================
     # COLONNES PRINCIPALES
@@ -494,9 +492,9 @@ def afficher_bouc_tv(
             "📊 Performances"
         )
 
-        # =========================
+        # =================================================
         # LIGNE 1
-        # =========================
+        # =================================================
 
         c1, c2 = st.columns(2)
 
@@ -512,9 +510,9 @@ def afficher_bouc_tv(
                 f"## {nb_collectes}"
             )
 
-        # =========================
+        # =================================================
         # LIGNE 2
-        # =========================
+        # =================================================
 
         c3, c4 = st.columns(2)
 
@@ -530,9 +528,9 @@ def afficher_bouc_tv(
                 f"## {concentration_txt}"
             )
 
-        # =========================
+        # =================================================
         # LIGNE 3
-        # =========================
+        # =================================================
 
         c5, c6 = st.columns(2)
 
@@ -548,9 +546,9 @@ def afficher_bouc_tv(
                 f"## {motilite_txt}"
             )
 
-        # =========================
+        # =================================================
         # LIGNE 4
-        # =========================
+        # =================================================
 
         c7, c8 = st.columns(2)
 
