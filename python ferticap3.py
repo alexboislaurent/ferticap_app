@@ -587,118 +587,118 @@ def afficher_bouc_tv(df, bouc):
     st.caption("Performances sur la période sélectionnée")
     
     # =========================
-# COLONNES
-# =========================
+    # COLONNES
+    # =========================
 
-col_photo, col_stats = st.columns([1.3, 1])
-
-
-# =========================
-# PHOTO
-# =========================
-
-with col_photo:
-
-    if os.path.exists(photo):
-
-        st.image(
-            photo,
-            width=550
-        )
-
-    else:
-
-        st.warning(
-            f"📷 Photo non disponible pour le bouc {bouc}"
-        )
+    col_photo, col_stats = st.columns([1.3, 1])
 
 
-# =========================
-# STATISTIQUES
-# =========================
+    # =========================
+    # PHOTO
+    # =========================
 
-with col_stats:
+    with col_photo:
 
-    st.subheader("📊 Performances")
+        if os.path.exists(photo):
 
-    volume_txt = (
-        f"{volume_moyen:.1f} ml"
-        if pd.notna(volume_moyen)
-        else "—"
-    )
-
-    concentration_txt = (
-        f"{concentration_moyenne:.1f} B/ml"
-        if pd.notna(concentration_moyenne)
-        else "—"
-    )
-
-    poids_txt = (
-        f"{float(dernier_poids):.1f} kg"
-        if dernier_poids is not None
-        else "—"
-    )
-
-    cs_txt = (
-        f"{float(derniere_cs):.1f} cm"
-        if derniere_cs is not None
-        else "—"
-    )
-
-    # Ligne 1
-    c1, c2 = st.columns(2)
-
-    with c1:
-        st.metric(
-            "🦘 Nombre de sauts",
-            nb_sauts
-        )
-
-    with c2:
-        st.metric(
-            "📅 Nombre de collectes",
-            nb_collectes
-        )
-
-    # Ligne 2
-    c3, c4 = st.columns(2)
-
-    with c3:
-        st.metric(
-            "💧 Volume moyen",
-            volume_txt
-        )
-
-    with c4:
-        st.metric(
-            "🔬 Concentration moyenne",
-            concentration_txt
-        )
-
-    # Ligne 3
-    c5, c6 = st.columns(2)
-
-    with c5:
-        st.metric(
-            "⚖️ Dernier poids",
-            poids_txt,
-            delta=(
-                f"{date_dernier_poids:%d/%m/%Y}"
-                if date_dernier_poids is not None
-                else None
+            st.image(
+                photo,
+                width=550
             )
+
+        else:
+
+            st.warning(
+                f"📷 Photo non disponible pour le bouc {bouc}"
+            )
+
+
+    # =========================
+    # STATISTIQUES
+    # =========================
+
+    with col_stats:
+
+        st.subheader("📊 Performances")
+
+        volume_txt = (
+            f"{volume_moyen:.1f} ml"
+            if pd.notna(volume_moyen)
+            else "—"
         )
 
-    with c6:
-        st.metric(
-            "📏 Dernière CS",
-            cs_txt,
-            delta=(
-                f"{date_derniere_cs:%d/%m/%Y}"
-                if date_derniere_cs is not None
-                else None
-            )
+        concentration_txt = (
+            f"{concentration_moyenne:.1f} B/ml"
+            if pd.notna(concentration_moyenne)
+            else "—"
         )
+
+        poids_txt = (
+            f"{float(dernier_poids):.1f} kg"
+            if dernier_poids is not None
+            else "—"
+        )
+
+        cs_txt = (
+            f"{float(derniere_cs):.1f} cm"
+            if derniere_cs is not None
+            else "—"
+        )
+
+        # Ligne 1
+        c1, c2 = st.columns(2)
+
+        with c1:
+            st.metric(
+                "🦘 Nombre de sauts",
+                nb_sauts
+            )    
+
+        with c2:
+            st.metric(
+                "📅 Nombre de collectes",
+                nb_collectes
+            )
+
+        # Ligne 2
+        c3, c4 = st.columns(2)
+
+        with c3:
+            st.metric(
+                "💧 Volume moyen",
+                volume_txt
+            )
+
+        with c4:
+            st.metric(
+                "🔬 Concentration moyenne",
+                concentration_txt
+            )
+
+        # Ligne 3
+        c5, c6 = st.columns(2)
+
+        with c5:
+            st.metric(
+                "⚖️ Dernier poids",
+                poids_txt,
+                delta=(
+                    f"{date_dernier_poids:%d/%m/%Y}"
+                    if date_dernier_poids is not None
+                    else None
+                )
+            )
+
+        with c6:
+            st.metric(
+                "📏 Dernière CS",
+                cs_txt,
+                delta=(
+                    f"{date_derniere_cs:%d/%m/%Y}"
+                    if date_derniere_cs is not None
+                    else None
+                )
+            )
 # =========================
 # AFFICHAGE
 # =========================
