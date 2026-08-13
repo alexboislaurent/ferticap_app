@@ -2,13 +2,11 @@ import pandas as pd
 import streamlit as st
 
 
-def afficher_rations(worksheet):
-
+def afficher_rations(all_values):
+    
     # =========================
     # LECTURE GOOGLE SHEETS
     # =========================
-
-    all_values = worksheet.get_all_values()
 
     if len(all_values) < 2:
         st.warning(
