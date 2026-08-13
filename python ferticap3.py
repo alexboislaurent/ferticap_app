@@ -403,7 +403,8 @@ elif mode == "Score global":
 elif mode == "🚨 Boucs à surveiller":
 
     afficher_boucs_surveillance(
-        df
+        df,
+        boucs_derniere_collecte
     )
 
 
