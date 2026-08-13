@@ -1,20 +1,17 @@
-import streamlit as st
-import gspread
-from google.oauth2.service_account import Credentials
 import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
-import calendar
-import numpy as np
-import random
-import os
+import streamlit as st
+
+from streamlit_autorefresh import st_autorefresh
+
 from analysis.ranking import calc_ranking_with_success
+
+from data.google_sheet import load_google_sheet
+from data.cleaning import clean_data
+
 from plots.heatmap import create_heatmap
 from plots.scores import create_score_global
 from plots.score_bouc import create_score_bouc
 from plots.ranking import show_ranking
-from streamlit_autorefresh import st_autorefresh
 from plots.calendrier import afficher_calendrier
 from plots.variables_biologiques import afficher_variables_biologiques
 from plots.variables_physio import afficher_variables_physio
@@ -83,16 +80,11 @@ with col2:
 # CONNEXION GOOGLE SHEETS
 # =========================
 
-from data.google_sheet import load_google_sheet
-
 worksheet = load_google_sheet()
-
 
 # =========================
 # DATA
 # =========================
-from data.cleaning import clean_data
-
 
 all_values = worksheet.get_all_values()
 
@@ -198,35 +190,6 @@ Le score est calculé à partir d’un éjaculat selon la formule suivante :
 
 df = df.dropna(subset=["Date"])
 
-# =========================
-# PREPARATION  SUIVIS
-# =========================
-
-suivi_cols = ["Suivi 1", "Suivi 2", "Suivi 3", "Suivi 4"]
-existing_cols = [c for c in suivi_cols if c in df.columns]
-
-df_suivi = df.melt(
-    id_vars=["Date"],
-    value_vars=existing_cols,
-    value_name="Suivi"
-)
-
-daily = (
-    df_suivi.dropna(subset=["Suivi"])
-    .groupby("Date")["Suivi"]
-    .apply(list)
-    .reset_index()
-)
-
-df_suivi = df_suivi.dropna(subset=["Suivi"])
-df_suivi = df_suivi[df_suivi["Suivi"].astype(str).str.strip() != ""]
-
-# =========================
-# FILTRE DATES
-# =========================
-
-df = df.dropna(subset=["Date"])
-
 min_date = df["Date"].min().date()
 max_date = df["Date"].max().date()
 
@@ -254,25 +217,6 @@ df_filtered = df[
     (df["Date"] >= pd.to_datetime(start_date)) &
     (df["Date"] <= pd.to_datetime(end_date))
 ]
-
-# =========================
-# RANKING BOUCS (10 DERNIÈRES COLLECTES) ✔ FIXÉ
-# =========================
-
-last_10_dates = sorted(df_filtered["Date"].dropna().unique())[-10:]
-
-df_last10 = df_filtered[df_filtered["Date"].isin(last_10_dates)]
-
-ranking_df = (
-    df_last10.groupby("Code animal", as_index=False)["Score"]
-    .mean()
-    .sort_values("Score", ascending=False)
-)
-
-ranking_df = ranking_df.rename(columns={
-    "Code animal": "Boucs",
-    "Score": "Score moyen (10 dernières)"
-})
 
 # =========================
 # BOUCS AUTO DERNIÈRE COLLECTE
@@ -402,15 +346,6 @@ score_par_bouc = df_filtered.pivot_table(
     values="Score",
     aggfunc="mean"
 ).sort_index()
-
-# 10 dernières collectes
-last_10_dates = sorted(
-    df_filtered["Date"].dropna().unique()
-)[-10:]
-
-df_last10 = df_filtered[
-    df_filtered["Date"].isin(last_10_dates)
-]
 
 # Année en cours
 current_year = pd.Timestamp.today().year
