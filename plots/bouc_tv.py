@@ -96,6 +96,7 @@ def calculer_alerte_performance(data_historique):
     if len(performances) < 5:
         return None
 
+    # Absence de donnée = 0
     performances["Volume semence (ml)"] = pd.to_numeric(
         performances["Volume semence (ml)"],
         errors="coerce"
@@ -196,6 +197,7 @@ def calculer_tendances(data_historique):
         .copy()
     )
 
+    # 10 dernières collectes
     data = data.tail(10)
 
     if len(data) < 10:
@@ -488,71 +490,91 @@ def afficher_bouc_tv(
 
     with col_stats:
 
-        st.markdown(
-            """
-            <h2 style="
-                margin-top:-25px;
-                margin-bottom:8px;
-            ">
-                📊 Performances
-            </h2>
-            """,
-            unsafe_allow_html=True
+        st.subheader(
+            "📊 Performances"
         )
 
-        donnees = [
-            ("🦘 Sauts", str(nb_sauts)),
-            ("📅 Collectes", str(nb_collectes)),
-            ("💧 Volume moyen", volume_txt),
-            ("🔬 Concentration", concentration_txt),
-            ("🏃 Mobilité", mobilite_txt),
-            ("🦘 Motilité", motilite_txt),
-            ("⚖️ Dernier poids", poids_txt),
-            ("📏 Dernière CS", cs_txt),
-        ]
+        # =========================
+        # LIGNE 1
+        # =========================
 
-        html_indicateurs = """
-        <div style="
-            margin-top:-5px;
-            margin-bottom:10px;
-            width:100%;
-        ">
-        """
+        c1, c2 = st.columns(2)
 
-        for nom, valeur in donnees:
+        with c1:
+            st.markdown(
+                f"**🦘 Sauts**  \n"
+                f"## {nb_sauts}"
+            )
 
-            html_indicateurs += f"""
-            <div style="
-                display:flex;
-                justify-content:space-between;
-                align-items:center;
-                padding:5px 10px;
-                border-bottom:1px solid rgba(128,128,128,0.25);
-                font-size:17px;
-            ">
-                <span style="
-                    font-weight:700;
-                ">
-                    {nom}
-                </span>
+        with c2:
+            st.markdown(
+                f"**📅 Collectes**  \n"
+                f"## {nb_collectes}"
+            )
 
-                <span style="
-                    font-weight:700;
-                    font-size:18px;
-                ">
-                    {valeur}
-                </span>
-            </div>
-            """
+        # =========================
+        # LIGNE 2
+        # =========================
 
-        html_indicateurs += """
-        </div>
-        """
+        c3, c4 = st.columns(2)
 
-        st.markdown(
-            html_indicateurs,
-            unsafe_allow_html=True
-        )
+        with c3:
+            st.markdown(
+                f"**💧 Volume moyen**  \n"
+                f"## {volume_txt}"
+            )
+
+        with c4:
+            st.markdown(
+                f"**🔬 Concentration**  \n"
+                f"## {concentration_txt}"
+            )
+
+        # =========================
+        # LIGNE 3
+        # =========================
+
+        c5, c6 = st.columns(2)
+
+        with c5:
+            st.markdown(
+                f"**🏃 Mobilité**  \n"
+                f"## {mobilite_txt}"
+            )
+
+        with c6:
+            st.markdown(
+                f"**🦘 Motilité**  \n"
+                f"## {motilite_txt}"
+            )
+
+        # =========================
+        # LIGNE 4
+        # =========================
+
+        c7, c8 = st.columns(2)
+
+        with c7:
+            st.markdown(
+                f"**⚖️ Dernier poids**  \n"
+                f"## {poids_txt}"
+            )
+
+            if date_dernier_poids is not None:
+                st.caption(
+                    f"{date_dernier_poids:%d/%m/%Y}"
+                )
+
+        with c8:
+            st.markdown(
+                f"**📏 Dernière CS**  \n"
+                f"## {cs_txt}"
+            )
+
+            if date_derniere_cs is not None:
+                st.caption(
+                    f"{date_derniere_cs:%d/%m/%Y}"
+                )
 
         # =================================================
         # TENDANCES
@@ -560,33 +582,34 @@ def afficher_bouc_tv(
 
         if tendances:
 
-            st.markdown(
-                """
-                <h2 style="
-                    margin-top:4px;
-                    margin-bottom:6px;
-                ">
-                    📈 Tendances récentes
-                </h2>
-                """,
-                unsafe_allow_html=True
+            st.subheader(
+                "📈 Tendances récentes"
             )
 
             noms = {
                 "Volume semence (ml)": "💧 Volume",
-                "Concentration spz (B/ml)": (
-                    "🔬 Concentration"
-                ),
+                "Concentration spz (B/ml)": "🔬 Concentration",
                 "% Mobiles": "🏃 Mobilité",
                 "Motiles": "🦘 Motilité",
             }
 
-            lignes_tendance = []
+            variables_tendances = list(
+                tendances.keys()
+            )
 
-            for variable, valeur in tendances.items():
+            # =========================
+            # LIGNE 1
+            # =========================
+
+            t1, t2 = st.columns(2)
+
+            for col, variable in zip(
+                [t1, t2],
+                variables_tendances[:2]
+            ):
 
                 variation = (
-                    valeur["variation"]
+                    tendances[variable]["variation"]
                 )
 
                 if variation > 5:
@@ -598,53 +621,40 @@ def afficher_bouc_tv(
                 else:
                     symbole = "🟡 →"
 
-                lignes_tendance.append({
-                    "variable": noms[variable],
-                    "evolution": (
-                        f"{symbole} "
-                        f"{variation:+.1f} %"
+                with col:
+                    st.markdown(
+                        f"**{noms[variable]}**  \n"
+                        f"**{symbole} {variation:+.1f} %**"
                     )
-                })
 
-            html_tendances = """
-            <div style="
-                display:grid;
-                grid-template-columns:1fr 1fr;
-                gap:6px;
-                margin-top:-2px;
-            ">
-            """
+            # =========================
+            # LIGNE 2
+            # =========================
 
-            for ligne in lignes_tendance:
+            if len(variables_tendances) > 2:
 
-                html_tendances += f"""
-                <div style="
-                    padding:7px 10px;
-                    border-radius:6px;
-                    border:1px solid rgba(128,128,128,0.3);
-                    font-size:16px;
-                ">
-                    <div style="
-                        font-weight:700;
-                        margin-bottom:2px;
-                    ">
-                        {ligne["variable"]}
-                    </div>
+                t3, t4 = st.columns(2)
 
-                    <div style="
-                        font-weight:700;
-                        font-size:17px;
-                    ">
-                        {ligne["evolution"]}
-                    </div>
-                </div>
-                """
+                for col, variable in zip(
+                    [t3, t4],
+                    variables_tendances[2:4]
+                ):
 
-            html_tendances += """
-            </div>
-            """
+                    variation = (
+                        tendances[variable]["variation"]
+                    )
 
-            st.markdown(
-                html_tendances,
-                unsafe_allow_html=True
-            )
+                    if variation > 5:
+                        symbole = "🟢 ↑"
+
+                    elif variation < -5:
+                        symbole = "🔴 ↓"
+
+                    else:
+                        symbole = "🟡 →"
+
+                    with col:
+                        st.markdown(
+                            f"**{noms[variable]}**  \n"
+                            f"**{symbole} {variation:+.1f} %**"
+                        )
