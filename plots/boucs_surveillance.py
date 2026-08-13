@@ -2,7 +2,7 @@ import pandas as pd
 import streamlit as st
 
 
-SEUIL_PERTE_POIDS = 8
+SEUIL_PERTE_POIDS = 7
 SEUIL_VOLUME = 0.5
 SEUIL_CONCENTRATION = 3
 NB_COLLECTES_PERFORMANCE = 5
