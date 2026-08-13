@@ -91,11 +91,6 @@ from data.cleaning import clean_data
 
 all_values = worksheet.get_all_values()
 
-st.write("Nombre de lignes :", len(all_values))
-st.write("Ligne 1 :", all_values[0])
-st.write("Ligne 2 :", all_values[1])
-st.write("Ligne 3 :", all_values[2] if len(all_values) > 2 else [])
-
 df = clean_data(all_values)
 # =========================
 # VARIABLE SUIVI DES SAUTS
