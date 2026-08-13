@@ -120,9 +120,7 @@ variables_map = {
     "Nb spz éjaculat (B)": "Nb spz éjaculat (B)",
     "% Mobiles": "% Mobiles",
     "Motiles": "Motiles",
-    "Suivi des sauts": "Suivi des sauts",
-    "Poids (kg)": "Valeure Pesée",
-    "CS (cm)": "Valeur CS"
+    "Suivi des sauts": "Suivi des sauts"
 }
 
 for col in variables_map.values():
@@ -993,8 +991,35 @@ elif mode == "Variables biologiques":
     st.pyplot(fig)
     
 elif mode == "Variables physiologiques":
-    
-        st.subheader("🫀 Variables physiologiques")
+
+    # =====================================================
+    # VARIABLES PHYSIOLOGIQUES
+    # =====================================================
+
+    st.subheader("🫀 Variables physiologiques")
+
+    variables_physio_map = {
+        "Poids (kg)": "Valeure Pesée",
+        "CS (cm)": "Valeur CS"
+    }
+
+    # =========================
+    # VARIABLES
+    # =========================
+
+    selected_physio = st.sidebar.multiselect(
+        "Variables physiologiques",
+        list(variables_physio_map.keys()),
+        default=[
+            "Poids (kg)",
+            "CS (cm)"
+        ],
+        key="selected_physio"
+    )
+
+    # =========================
+    # REGROUPEMENT
+    # =========================
 
     periode_physio = st.sidebar.selectbox(
         "Regroupement physiologique",
@@ -1007,6 +1032,188 @@ elif mode == "Variables physiologiques":
         index=0,
         key="periode_physio"
     )
+
+    # =========================
+    # FILTRE BOUCS
+    # =========================
+
+    filtrer_boucs_physio = st.sidebar.checkbox(
+        "Filtrer par boucs sélectionnés",
+        value=False,
+        key="filtrer_boucs_physio"
+    )
+
+    afficher_individuels_physio = st.sidebar.checkbox(
+        "Afficher une courbe par bouc",
+        value=False,
+        key="afficher_individuels_physio"
+    )
+
+    # =========================
+    # VÉRIFICATION VARIABLES
+    # =========================
+
+    if len(selected_physio) == 0:
+
+        st.info(
+            "Sélectionnez au moins une variable physiologique."
+        )
+
+        st.stop()
+
+    # =========================
+    # DONNÉES
+    # =========================
+
+    if filtrer_boucs_physio:
+
+        if len(selected_boucs) == 0:
+
+            st.warning(
+                "Aucun bouc sélectionné."
+            )
+
+            st.stop()
+
+        data_physio = df_filtered[
+            df_filtered["Code animal"].isin(selected_boucs)
+        ].copy()
+
+    else:
+
+        data_physio = df_filtered.copy()
+
+    if data_physio.empty:
+
+        st.warning(
+            "Aucune donnée physiologique disponible."
+        )
+
+        st.stop()
+
+    # =========================
+    # FIGURE
+    # =========================
+
+    fig, ax = plt.subplots(
+        figsize=(14, 6)
+    )
+
+    # =========================
+    # COURBES
+    # =========================
+
+    for var in selected_physio:
+
+        col = variables_physio_map[var]
+
+        if col not in data_physio.columns:
+
+            st.warning(
+                f"Variable absente : {col}"
+            )
+
+            continue
+
+        # Nettoyage numérique
+
+        data_physio[col] = (
+            data_physio[col]
+            .astype(str)
+            .str.strip()
+            .str.replace(",", ".", regex=False)
+        )
+
+        data_physio[col] = pd.to_numeric(
+            data_physio[col],
+            errors="coerce"
+        )
+
+        # =========================
+        # COURBE PAR BOUC
+        # =========================
+
+        if afficher_individuels_physio:
+
+            for b in selected_boucs:
+
+                data_bouc = data_physio[
+                    data_physio["Code animal"] == b
+                ].copy()
+
+                serie = (
+                    data_bouc
+                    .dropna(subset=[col])
+                    .groupby("Date")[col]
+                    .mean()
+                    .sort_index()
+                )
+
+                if len(serie) > 0:
+
+                    serie = resample_series_physio(serie)
+
+                    ax.plot(
+                        serie.index,
+                        serie.values,
+                        marker="o",
+                        label=f"{var} - {b}"
+                    )
+
+        # =========================
+        # COURBE GÉNÉRALE
+        # =========================
+
+        else:
+
+            serie = (
+                data_physio
+                .dropna(subset=[col])
+                .groupby("Date")[col]
+                .mean()
+                .sort_index()
+            )
+
+            if len(serie) > 0:
+
+                serie = resample_series_physio(serie)
+
+                ax.plot(
+                    serie.index,
+                    serie.values,
+                    marker="o",
+                    label=var
+                )
+
+    # =========================
+    # FORMAT
+    # =========================
+
+    ax.set_title(
+        "Évolution des variables physiologiques"
+    )
+
+    ax.set_ylabel(
+        "Valeur"
+    )
+
+    ax.grid(True)
+
+    ax.legend()
+
+    ax.xaxis.set_major_formatter(
+        mdates.DateFormatter("%d/%m/%y")
+    )
+
+    ax.xaxis.set_major_locator(
+        mdates.AutoDateLocator()
+    )
+
+    fig.autofmt_xdate(
+        rotation=45
+    )
+
+    st.pyplot(fig)
 
 elif mode == "🏆 Ranking boucs":
 
