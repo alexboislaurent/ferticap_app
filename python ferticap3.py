@@ -443,7 +443,7 @@ elif mode == "🏆 Ranking boucs":
 elif mode == "Rations":
 
     afficher_rations(
-        worksheet_rations
+        rations_values
     )
 
 
