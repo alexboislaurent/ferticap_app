@@ -6,8 +6,8 @@ from streamlit_autorefresh import st_autorefresh
 from analysis.ranking import calc_ranking_with_success
 
 from data.google_sheet import (
-    load_google_sheet,
-    load_rations_sheet,
+    load_google_data,
+    load_rations_data,
 )
 
 from data.cleaning import clean_data
@@ -91,8 +91,8 @@ with col2:
 # CONNEXION GOOGLE SHEETS
 # =========================
 
-worksheet = load_google_sheet()
-worksheet_rations = load_rations_sheet()
+all_values = load_google_data()
+rations_values = load_rations_data()
 
 # =========================
 # DATA
