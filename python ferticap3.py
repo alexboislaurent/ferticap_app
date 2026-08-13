@@ -38,6 +38,8 @@ MODES_TV = [
     "Bouc TV",
     "Variables biologiques",
     "Bouc TV",
+    "Variables physiologiques",
+    "Bouc TV",
     "🏆 Ranking boucs",
     "Bouc TV",
     "📅 Calendrier",
@@ -156,16 +158,17 @@ if mode_tv:
 else:
 
     mode = st.sidebar.radio(
-        "Graph à afficher",
-        [
-            "Heatmap",
-            "Score global",
-            "Score par bouc",
-            "Variables biologiques",
-            "🏆 Ranking boucs",
-            "📅 Calendrier"
-        ]
-    )
+    "Graph à afficher",
+    [
+        "Heatmap",
+        "Score global",
+        "Score par bouc",
+        "Variables biologiques",
+        "Variables physiologiques",
+        "🏆 Ranking boucs",
+        "📅 Calendrier"
+    ]
+)
 
 # =========================
 # INFO SCORE
@@ -438,6 +441,17 @@ def resample_series(series):
     if periode == "2 semaines":
         return series.resample("2W").mean()
     if periode == "Mois":
+        return series.resample("ME").mean()
+    return series
+    
+def resample_series_physio(series):
+    if periode_physio == "Jour":
+        return series
+    if periode_physio == "Semaine":
+        return series.resample("W").mean()
+    if periode_physio == "2 semaines":
+        return series.resample("2W").mean()
+    if periode_physio == "Mois":
         return series.resample("ME").mean()
     return series
 
@@ -977,7 +991,22 @@ elif mode == "Variables biologiques":
     )
 
     st.pyplot(fig)
+    
+elif mode == "Variables physiologiques":
+    
+        st.subheader("🫀 Variables physiologiques")
 
+    periode_physio = st.sidebar.selectbox(
+        "Regroupement physiologique",
+        [
+            "Jour",
+            "Semaine",
+            "2 semaines",
+            "Mois"
+        ],
+        index=0,
+        key="periode_physio"
+    )
 
 elif mode == "🏆 Ranking boucs":
 
