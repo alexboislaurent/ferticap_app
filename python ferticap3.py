@@ -645,7 +645,10 @@ with col_stats:
         else "—"
     )
 
-    # Ligne 1
+    # =========================
+    # LIGNE 1
+    # =========================
+
     c1, c2 = st.columns(2)
 
     with c1:
@@ -660,7 +663,10 @@ with col_stats:
             nb_collectes
         )
 
-    # Ligne 2
+    # =========================
+    # LIGNE 2
+    # =========================
+
     c3, c4 = st.columns(2)
 
     with c3:
@@ -675,30 +681,33 @@ with col_stats:
             concentration_txt
         )
 
-    # Ligne 3
+    # =========================
+    # LIGNE 3
+    # =========================
+
     c5, c6 = st.columns(2)
 
     with c5:
         st.metric(
             "⚖️ Dernier poids",
-            poids_txt,
-            delta=(
-                f"{date_dernier_poids:%d/%m/%Y}"
-                if date_dernier_poids is not None
-                else None
-            )
+            poids_txt
         )
+
+        if date_dernier_poids is not None:
+            st.caption(
+                f"Mesuré le {date_dernier_poids:%d/%m/%Y}"
+            )
 
     with c6:
         st.metric(
             "📏 Dernière CS",
-            cs_txt,
-            delta=(
-                f"{date_derniere_cs:%d/%m/%Y}"
-                if date_derniere_cs is not None
-                else None
-            )
+            cs_txt
         )
+
+        if date_derniere_cs is not None:
+            st.caption(
+                f"Mesurée le {date_derniere_cs:%d/%m/%Y}"
+            )
 # =========================
 # AFFICHAGE
 # =========================
