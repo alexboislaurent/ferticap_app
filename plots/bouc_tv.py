@@ -1,3 +1,252 @@
 import os
 import pandas as pd
 import streamlit as st
+def afficher_bouc_tv(df, bouc):
+
+    if bouc is None:
+        st.warning("Aucun bouc disponible.")
+        return
+
+    # =========================
+    # DONNEES DU BOUC
+    # =========================
+
+    data_bouc = df[
+        df["Code animal"] == bouc
+    ].copy()
+
+    if data_bouc.empty:
+        st.warning(f"Aucune donnée pour le bouc {bouc}.")
+        return
+
+    # La période est déjà filtrée
+    data_periode = data_bouc.copy()
+
+    # =========================
+    # TRI PAR DATE
+    # =========================
+
+    data_mesures = (
+        data_bouc
+        .sort_values("Date")
+        .copy()
+    )
+
+    # =========================
+    # DERNIER POIDS
+    # =========================
+
+    dernier_poids = None
+    date_dernier_poids = None
+
+    if "Valeure Pesée" in data_mesures.columns:
+
+        poids_data = data_mesures[
+            data_mesures["Valeure Pesée"].notna()
+        ]
+
+        if not poids_data.empty:
+
+            dernier_poids = poids_data.iloc[-1]["Valeure Pesée"]
+            date_dernier_poids = poids_data.iloc[-1]["Date"]
+
+    # =========================
+    # DERNIÈRE CS
+    # =========================
+
+    derniere_cs = None
+    date_derniere_cs = None
+
+    if "Valeur CS" in data_mesures.columns:
+
+        cs_data = data_mesures[
+            data_mesures["Valeur CS"].notna()
+        ]
+
+        if not cs_data.empty:
+
+            derniere_cs = cs_data.iloc[-1]["Valeur CS"]
+            date_derniere_cs = cs_data.iloc[-1]["Date"]
+
+    # =========================
+    # FORMAT POIDS
+    # =========================
+
+    if dernier_poids is not None:
+
+        poids_txt = (
+            f"{float(dernier_poids):.1f} kg"
+            f"<br><small>"
+            f"{date_dernier_poids:%d/%m/%Y}"
+            f"</small>"
+        )
+
+    else:
+
+        poids_txt = "—"
+
+    # =========================
+    # FORMAT CS
+    # =========================
+
+    if derniere_cs is not None:
+
+        cs_txt = (
+            f"{float(derniere_cs):.1f} cm"
+            f"<br><small>"
+            f"{date_derniere_cs:%d/%m/%Y}"
+            f"</small>"
+        )
+
+    else:
+
+        cs_txt = "—"
+
+    # =========================
+    # PERFORMANCES
+    # =========================
+
+    nb_sauts = (
+        data_periode["Comportement"]
+        .isin([2, 3, 4])
+        .sum()
+    )
+
+    volume_moyen = pd.to_numeric(
+        data_periode["Volume semence (ml)"],
+        errors="coerce"
+    ).mean()
+
+    concentration_moyenne = pd.to_numeric(
+        data_periode["Concentration spz (B/ml)"],
+        errors="coerce"
+    ).mean()
+
+    nb_collectes = len(data_periode)
+
+    # =========================
+    # PHOTO
+    # =========================
+
+    photo = f"images/bouc_{bouc}.jpg"
+
+    # =========================
+    # TITRE
+    # =========================
+
+    st.title(f"🐐 Bouc {bouc}")
+    st.caption("Performances sur la période sélectionnée")
+    
+    # =========================
+    # COLONNES
+    # =========================
+
+    col_photo, col_stats = st.columns([1.3, 1])
+
+
+    # =========================
+    # PHOTO
+    # =========================
+
+    with col_photo:
+
+        if os.path.exists(photo):
+
+            st.image(
+                photo,
+                width=550
+            )
+
+        else:
+
+            st.warning(
+                f"📷 Photo non disponible pour le bouc {bouc}"
+            )
+
+
+    # =========================
+    # STATISTIQUES
+    # =========================
+
+    with col_stats:
+
+        st.subheader("📊 Performances")
+
+        volume_txt = (
+            f"{volume_moyen:.1f} ml"
+            if pd.notna(volume_moyen)
+            else "—"
+        )
+
+        concentration_txt = (
+            f"{concentration_moyenne:.1f} B/ml"
+            if pd.notna(concentration_moyenne)
+            else "—"
+        )
+
+        poids_txt = (
+            f"{float(dernier_poids):.1f} kg"
+            if dernier_poids is not None
+            else "—"
+        )
+
+        cs_txt = (
+            f"{float(derniere_cs):.1f} cm"
+            if derniere_cs is not None
+            else "—"
+        )
+
+        # Ligne 1
+        c1, c2 = st.columns(2)
+
+        with c1:
+            st.metric(
+                "🦘 Nombre de sauts",
+                nb_sauts
+            )    
+
+        with c2:
+            st.metric(
+                "📅 Nombre de collectes",
+                nb_collectes
+            )
+
+        # Ligne 2
+        c3, c4 = st.columns(2)
+
+        with c3:
+            st.metric(
+                "💧 Volume moyen",
+                volume_txt
+            )
+
+        with c4:
+            st.metric(
+                "🔬 Concentration moyenne",
+                concentration_txt
+            )
+
+        # Ligne 3
+        c5, c6 = st.columns(2)
+
+        with c5:
+            st.metric(
+                "⚖️ Dernier poids",
+                poids_txt,
+                delta=(
+                    f"{date_dernier_poids:%d/%m/%Y}"
+                    if date_dernier_poids is not None
+                    else None
+                )
+            )
+
+        with c6:
+            st.metric(
+                "📏 Dernière CS",
+                cs_txt,
+                delta=(
+                    f"{date_derniere_cs:%d/%m/%Y}"
+                    if date_derniere_cs is not None
+                    else None
+                )
+            )
