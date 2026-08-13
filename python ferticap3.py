@@ -7,6 +7,11 @@ from analysis.ranking import calc_ranking_with_success
 
 from data.google_sheet import load_google_sheet
 from data.cleaning import clean_data
+from data.boucs import (
+    preparer_boucs,
+    get_bouc_tv,
+    afficher_selection_boucs,
+)
 
 from plots.heatmap import create_heatmap
 from plots.scores import create_score_global
@@ -219,89 +224,25 @@ df_filtered = df[
 ]
 
 # =========================
-# BOUCS AUTO DERNIÈRE COLLECTE
+# BOUCS
 # =========================
 
-boucs = sorted(df["Code animal"].unique())
-
-last_date = df_filtered["Date"].max()
-
-boucs_derniere_collecte = (
-    df_filtered[df_filtered["Date"] == last_date]["Code animal"]
-    .dropna()
-    .unique()
-    .tolist()
+boucs, boucs_derniere_collecte = preparer_boucs(
+    df,
+    df_filtered,
 )
 
-# Sécurité si aucune collecte dans la période
-if len(boucs_derniere_collecte) == 0:
-    boucs_derniere_collecte = boucs.copy()
-
-# =========================
-# BOUC POUR L'AFFICHAGE TV
-# =========================
-
-bouc_tv = None
-
-if mode_tv and boucs_derniere_collecte:
-
-    # Nombre de passages sur "Bouc TV"
-    # avant le passage actuel
-    nb_passages_bouc = sum(
-        1
-        for i in range(compteur_tv + 1)
-        if MODES_TV[i % len(MODES_TV)] == "Bouc TV"
-    ) - 1
-
-    bouc_tv = boucs_derniere_collecte[
-        nb_passages_bouc % len(boucs_derniere_collecte)
-    ]
-
-# Boucs actuels en premier
-boucs = (
-    sorted(boucs_derniere_collecte)
-    + sorted([b for b in boucs if b not in boucs_derniere_collecte])
+bouc_tv = get_bouc_tv(
+    mode_tv,
+    compteur_tv if mode_tv else 0,
+    MODES_TV,
+    boucs_derniere_collecte,
 )
 
-st.sidebar.markdown("### 🐐 Sélection des boucs")
-
-# Case pour sélectionner automatiquement les boucs actuels
-if st.sidebar.button("🟢 Sélectionner les boucs actuels"):
-    for b in boucs:
-        st.session_state[f"bouc_{b}"] = b in boucs_derniere_collecte
-
-# Boutons rapides
-if st.sidebar.button("☑ Tout sélectionner"):
-    for b in boucs:
-        st.session_state[f"bouc_{b}"] = True
-
-if st.sidebar.button("☐ Tout désélectionner"):
-    for b in boucs:
-        st.session_state[f"bouc_{b}"] = False
-
-
-selected_boucs = []
-
-for b in boucs:
-
-    # Valeur par défaut au premier affichage
-    if f"bouc_{b}" not in st.session_state:
-        st.session_state[f"bouc_{b}"] = (
-            b in boucs_derniere_collecte
-        )
-
-    label = (
-        f"🟢 {b}"
-        if b in boucs_derniere_collecte
-        else f"⚪ {b}"
-    )
-
-    if st.sidebar.checkbox(
-        label,
-        key=f"bouc_{b}"
-    ):
-        selected_boucs.append(b)
-
+selected_boucs = afficher_selection_boucs(
+    boucs,
+    boucs_derniere_collecte,
+)
 
 # =========================
 # PARAMÈTRES
