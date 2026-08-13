@@ -165,6 +165,7 @@ else:
         "Variables physiologiques",
         "🏆 Ranking boucs",
         "📅 Calendrier"
+        "Bouc TV",
     ]
 )
 
@@ -243,6 +244,15 @@ selected_boucs = afficher_selection_boucs(
     boucs,
     boucs_derniere_collecte,
 )
+if mode_tv:
+
+    bouc_manuel = None
+
+else:
+
+    bouc_manuel = choisir_bouc_manuel(
+        boucs
+    )
 
 # =========================
 # PARAMÈTRES
