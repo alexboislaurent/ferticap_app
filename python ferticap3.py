@@ -42,6 +42,7 @@ DUREE_ECRAN_TV = 15  # secondes
 MODES_TV = [
     "Heatmap",
     "Bouc TV",
+    "Rations",
     "Score global",
     "Bouc TV",
     "Score par bouc",
