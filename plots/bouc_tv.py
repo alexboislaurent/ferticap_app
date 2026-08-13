@@ -448,13 +448,13 @@ def afficher_bouc_tv(
     # TITRE
     # =================================================
 
-    st.title(
-        f"🐐 Bouc {bouc}"
-    )
+       st.markdown(
+        f"### 🐐 Bouc {bouc}"
+        )
 
-    st.caption(
+        st.write(
         "Performances sur la période sélectionnée"
-    )
+        )
 
     # =================================================
     # COLONNES PRINCIPALES
