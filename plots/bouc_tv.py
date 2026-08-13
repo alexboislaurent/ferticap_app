@@ -669,10 +669,10 @@ def afficher_bouc_tv(
                     tendances[variable]["variation"]
                 )
 
-                if variation > 5:
+                if variation > 20:
                     symbole = "🟢 ↑"
 
-                elif variation < -5:
+                elif variation < -20:
                     symbole = "🔴 ↓"
 
                 else:
@@ -706,10 +706,10 @@ def afficher_bouc_tv(
                         tendances[variable]["variation"]
                     )
 
-                    if variation > 5:
+                    if variation > 20:
                         symbole = "🟢 ↑"
 
-                    elif variation < -5:
+                    elif variation < -20:
                         symbole = "🔴 ↓"
 
                     else:
