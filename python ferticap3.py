@@ -465,7 +465,12 @@ def get_color(suivis):
         return "blue"
     return "gray"
 
+elif mode == "Bouc TV":
 
+    afficher_bouc_tv(
+        df_filtered,
+        bouc_tv
+    )
 # =========================
 # AFFICHAGE
 # =========================
