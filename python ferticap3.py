@@ -98,9 +98,11 @@ rations_values = load_rations_data()
 # DATA
 # =========================
 
-all_values = worksheet.get_all_values()
+all_values = load_google_data()
+rations_values = load_rations_data()
 
 df = clean_data(all_values)
+
 # =========================
 # VARIABLE SUIVI DES SAUTS
 # =========================
