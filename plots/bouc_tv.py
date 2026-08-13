@@ -9,15 +9,26 @@ def afficher_bouc_tv(df, bouc):
         st.warning("Aucun bouc disponible.")
         return
 
+    # =========================
+    # DONNEES DU BOUC
+    # =========================
+
     data_bouc = df[
         df["Code animal"] == bouc
     ].copy()
 
     if data_bouc.empty:
-        st.warning(f"Aucune donnée pour le bouc {bouc}.")
+        st.warning(
+            f"Aucune donnée pour le bouc {bouc}."
+        )
         return
 
+    # La période est déjà filtrée
     data_periode = data_bouc.copy()
+
+    # =========================
+    # TRI PAR DATE
+    # =========================
 
     data_mesures = (
         data_bouc
@@ -39,8 +50,12 @@ def afficher_bouc_tv(df, bouc):
         ]
 
         if not poids_data.empty:
-            dernier_poids = poids_data.iloc[-1]["Valeure Pesée"]
-            date_dernier_poids = poids_data.iloc[-1]["Date"]
+            dernier_poids = (
+                poids_data.iloc[-1]["Valeure Pesée"]
+            )
+            date_dernier_poids = (
+                poids_data.iloc[-1]["Date"]
+            )
 
     # =========================
     # DERNIÈRE CS
@@ -56,8 +71,12 @@ def afficher_bouc_tv(df, bouc):
         ]
 
         if not cs_data.empty:
-            derniere_cs = cs_data.iloc[-1]["Valeur CS"]
-            date_derniere_cs = cs_data.iloc[-1]["Date"]
+            derniere_cs = (
+                cs_data.iloc[-1]["Valeur CS"]
+            )
+            date_derniere_cs = (
+                cs_data.iloc[-1]["Date"]
+            )
 
     # =========================
     # PERFORMANCES
@@ -79,8 +98,6 @@ def afficher_bouc_tv(df, bouc):
         errors="coerce"
     ).mean()
 
-    nb_collectes = len(data_periode)
-
     mobilite_moyenne = pd.to_numeric(
         data_periode["% Mobiles"],
         errors="coerce"
@@ -90,6 +107,8 @@ def afficher_bouc_tv(df, bouc):
         data_periode["Motiles"],
         errors="coerce"
     ).mean()
+
+    nb_collectes = len(data_periode)
 
     # =========================
     # PHOTO
@@ -102,14 +121,17 @@ def afficher_bouc_tv(df, bouc):
     # =========================
 
     st.title(f"🐐 Bouc {bouc}")
-    st.caption("Performances sur la période sélectionnée")
-    
+    st.caption(
+        "Performances sur la période sélectionnée"
+    )
+
     # =========================
     # COLONNES
     # =========================
 
-    col_photo, col_stats = st.columns([1.3, 1])
-
+    col_photo, col_stats = st.columns(
+        [1.3, 1]
+    )
 
     # =========================
     # PHOTO
@@ -130,7 +152,6 @@ def afficher_bouc_tv(df, bouc):
                 f"📷 Photo non disponible pour le bouc {bouc}"
             )
 
-
     # =========================
     # STATISTIQUES
     # =========================
@@ -150,10 +171,11 @@ def afficher_bouc_tv(df, bouc):
             if pd.notna(concentration_moyenne)
             else "—"
         )
+
         mobilite_txt = (
-        f"{mobilite_moyenne:.1f} %"
-        if pd.notna(mobilite_moyenne)
-        else "—"
+            f"{mobilite_moyenne:.1f} %"
+            if pd.notna(mobilite_moyenne)
+            else "—"
         )
 
         motilite_txt = (
@@ -174,72 +196,84 @@ def afficher_bouc_tv(df, bouc):
             else "—"
         )
 
-     # Ligne 1
-c1, c2 = st.columns(2)
+        # =========================
+        # LIGNE 1
+        # =========================
 
-with c1:
-    st.metric(
-        "🦘 Nombre de sauts",
-        nb_sauts
-    )
+        c1, c2 = st.columns(2)
 
-with c2:
-    st.metric(
-        "📅 Nombre de collectes",
-        nb_collectes
-    )
+        with c1:
+            st.metric(
+                "🦘 Nombre de sauts",
+                nb_sauts
+            )
 
-# Ligne 2
-c3, c4 = st.columns(2)
+        with c2:
+            st.metric(
+                "📅 Nombre de collectes",
+                nb_collectes
+            )
 
-with c3:
-    st.metric(
-        "💧 Volume moyen",
-        volume_txt
-    )
+        # =========================
+        # LIGNE 2
+        # =========================
 
-with c4:
-    st.metric(
-        "🔬 Concentration moyenne",
-        concentration_txt
-    )
+        c3, c4 = st.columns(2)
 
-# Ligne 3
-c5, c6 = st.columns(2)
+        with c3:
+            st.metric(
+                "💧 Volume moyen",
+                volume_txt
+            )
 
-with c5:
-    st.metric(
-        "🏃 Mobilité moyenne",
-        mobilite_txt
-    )
+        with c4:
+            st.metric(
+                "🔬 Concentration moyenne",
+                concentration_txt
+            )
 
-with c6:
-    st.metric(
-        "🦘 Motilité moyenne",
-        motilite_txt
-    )
+        # =========================
+        # LIGNE 3
+        # =========================
 
-# Ligne 4
-c7, c8 = st.columns(2)
+        c5, c6 = st.columns(2)
 
-with c7:
-    st.metric(
-        "⚖️ Dernier poids",
-        poids_txt,
-        delta=(
-            f"{date_dernier_poids:%d/%m/%Y}"
-            if date_dernier_poids is not None
-            else None
-        )
-    )
+        with c5:
+            st.metric(
+                "🏃 Mobilité moyenne",
+                mobilite_txt
+            )
 
-with c8:
-    st.metric(
-        "📏 Dernière CS",
-        cs_txt,
-        delta=(
-            f"{date_derniere_cs:%d/%m/%Y}"
-            if date_derniere_cs is not None
-            else None
-        )
-    )
+        with c6:
+            st.metric(
+                "🦘 Motilité moyenne",
+                motilite_txt
+            )
+
+        # =========================
+        # LIGNE 4
+        # =========================
+
+        c7, c8 = st.columns(2)
+
+        with c7:
+            st.metric(
+                "⚖️ Dernier poids",
+                poids_txt,
+                delta=(
+                    f"{date_dernier_poids:%d/%m/%Y}"
+                    if date_dernier_poids is not None
+                    else None
+                )
+            )
+
+        with c8:
+            st.metric(
+                "📏 Dernière CS",
+                cs_txt,
+                delta=(
+                    f"{date_derniere_cs:%d/%m/%Y}"
+                    if date_derniere_cs is not None
+                    else None
+                )
+            )
