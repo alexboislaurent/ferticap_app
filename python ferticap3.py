@@ -5,7 +5,11 @@ from streamlit_autorefresh import st_autorefresh
 
 from analysis.ranking import calc_ranking_with_success
 
-from data.google_sheet import load_google_sheet
+from data.google_sheet import (
+    load_google_sheet,
+    load_rations_sheet,
+)
+
 from data.cleaning import clean_data
 from data.boucs import (
     preparer_boucs,
@@ -21,6 +25,7 @@ from plots.calendrier import afficher_calendrier
 from plots.variables_biologiques import afficher_variables_biologiques
 from plots.variables_physio import afficher_variables_physio
 from plots.bouc_tv import afficher_bouc_tv
+from plots.rations import afficher_rations
 
 # =========================
 # CONFIG PAGE
@@ -86,6 +91,7 @@ with col2:
 # =========================
 
 worksheet = load_google_sheet()
+worksheet_rations = load_rations_sheet()
 
 # =========================
 # DATA
