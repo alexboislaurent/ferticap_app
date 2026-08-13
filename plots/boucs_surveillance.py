@@ -157,19 +157,16 @@ def analyser_bouc(data_bouc):
     }
 
 
-def afficher_boucs_surveillance(df):
+def afficher_boucs_surveillance(
+    df,
+    boucs_presents
+):
 
     st.title("🚨 Boucs à surveiller")
 
     resultats = []
 
-    boucs = sorted(
-        df["Code animal"]
-        .dropna()
-        .unique()
-    )
-
-    for bouc in boucs:
+    for bouc in boucs_presents:
 
         data_bouc = df[
             df["Code animal"] == bouc
