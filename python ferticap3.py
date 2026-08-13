@@ -583,24 +583,9 @@ def afficher_bouc_tv(df, bouc):
     # TITRE
     # =========================
 
-    st.markdown(
-        f"""
-        <div style="
-            text-align:center;
-            margin-bottom:20px;
-        ">
-
-            <h1>🐐 Bouc {bouc}</h1>
-
-            <h2>
-                Performances sur la période sélectionnée
-            </h2>
-
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
+    st.title(f"🐐 Bouc {bouc}")
+    st.caption("Performances sur la période sélectionnée")
+    
     # =========================
     # COLONNES
     # =========================
@@ -629,10 +614,12 @@ def afficher_bouc_tv(df, bouc):
             )
 
     # =========================
-    # STATISTIQUES
-    # =========================
+# STATISTIQUES
+# =========================
 
-    with col_stats:
+with col_stats:
+
+    st.subheader("📊 Performances")
 
     volume_txt = (
         f"{volume_moyen:.1f} ml"
@@ -658,119 +645,60 @@ def afficher_bouc_tv(df, bouc):
         else "—"
     )
 
-    st.markdown(
-        f"""
-        <div class="bouc-stats">
+    # Ligne 1
+    c1, c2 = st.columns(2)
 
-            <div class="stats-title">
-                📊 Performances
-            </div>
+    with c1:
+        st.metric(
+            "🦘 Nombre de sauts",
+            nb_sauts
+        )
 
-            <div class="stats-grid">
+    with c2:
+        st.metric(
+            "📅 Nombre de collectes",
+            nb_collectes
+        )
 
-                <div class="stat-card">
-                    <div class="stat-icon">🦘</div>
-                    <div class="stat-label">Nombre de sauts</div>
-                    <div class="stat-value">{nb_sauts}</div>
-                </div>
+    # Ligne 2
+    c3, c4 = st.columns(2)
 
-                <div class="stat-card">
-                    <div class="stat-icon">💧</div>
-                    <div class="stat-label">Volume moyen</div>
-                    <div class="stat-value">{volume_txt}</div>
-                </div>
+    with c3:
+        st.metric(
+            "💧 Volume moyen",
+            volume_txt
+        )
 
-                <div class="stat-card">
-                    <div class="stat-icon">🔬</div>
-                    <div class="stat-label">Concentration moyenne</div>
-                    <div class="stat-value">{concentration_txt}</div>
-                </div>
+    with c4:
+        st.metric(
+            "🔬 Concentration moyenne",
+            concentration_txt
+        )
 
-                <div class="stat-card">
-                    <div class="stat-icon">⚖️</div>
-                    <div class="stat-label">Dernier poids</div>
-                    <div class="stat-value">{poids_txt}</div>
-                    {
-                        f'<div class="stat-date">{date_dernier_poids:%d/%m/%Y}</div>'
-                        if date_dernier_poids is not None
-                        else ''
-                    }
-                </div>
+    # Ligne 3
+    c5, c6 = st.columns(2)
 
-                <div class="stat-card">
-                    <div class="stat-icon">📏</div>
-                    <div class="stat-label">Dernière CS</div>
-                    <div class="stat-value">{cs_txt}</div>
-                    {
-                        f'<div class="stat-date">{date_derniere_cs:%d/%m/%Y}</div>'
-                        if date_derniere_cs is not None
-                        else ''
-                    }
-                </div>
+    with c5:
+        st.metric(
+            "⚖️ Dernier poids",
+            poids_txt,
+            delta=(
+                f"{date_dernier_poids:%d/%m/%Y}"
+                if date_dernier_poids is not None
+                else None
+            )
+        )
 
-                <div class="stat-card">
-                    <div class="stat-icon">📅</div>
-                    <div class="stat-label">Nombre de collectes</div>
-                    <div class="stat-value">{nb_collectes}</div>
-                </div>
-
-            </div>
-
-        </div>
-
-        <style>
-
-            .bouc-stats {{
-                padding: 20px;
-            }}
-
-            .stats-title {{
-                text-align: center;
-                font-size: 28px;
-                font-weight: 700;
-                margin-bottom: 20px;
-            }}
-
-            .stats-grid {{
-                display: grid;
-                grid-template-columns: repeat(2, 1fr);
-                gap: 14px;
-            }}
-
-            .stat-card {{
-                background: rgba(128, 128, 128, 0.08);
-                border: 1px solid rgba(128, 128, 128, 0.25);
-                border-radius: 16px;
-                padding: 18px 12px;
-                text-align: center;
-            }}
-
-            .stat-icon {{
-                font-size: 28px;
-                margin-bottom: 5px;
-            }}
-
-            .stat-label {{
-                font-size: 14px;
-                opacity: 0.75;
-                margin-bottom: 8px;
-            }}
-
-            .stat-value {{
-                font-size: 26px;
-                font-weight: 700;
-            }}
-
-            .stat-date {{
-                font-size: 12px;
-                opacity: 0.6;
-                margin-top: 4px;
-            }}
-
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
+    with c6:
+        st.metric(
+            "📏 Dernière CS",
+            cs_txt,
+            delta=(
+                f"{date_derniere_cs:%d/%m/%Y}"
+                if date_derniere_cs is not None
+                else None
+            )
+        )
 # =========================
 # AFFICHAGE
 # =========================
