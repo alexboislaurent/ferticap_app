@@ -1,15 +1,13 @@
 import os
 import pandas as pd
 import streamlit as st
+
+
 def afficher_bouc_tv(df, bouc):
 
     if bouc is None:
         st.warning("Aucun bouc disponible.")
         return
-
-    # =========================
-    # DONNEES DU BOUC
-    # =========================
 
     data_bouc = df[
         df["Code animal"] == bouc
@@ -19,12 +17,7 @@ def afficher_bouc_tv(df, bouc):
         st.warning(f"Aucune donnée pour le bouc {bouc}.")
         return
 
-    # La période est déjà filtrée
     data_periode = data_bouc.copy()
-
-    # =========================
-    # TRI PAR DATE
-    # =========================
 
     data_mesures = (
         data_bouc
@@ -46,7 +39,6 @@ def afficher_bouc_tv(df, bouc):
         ]
 
         if not poids_data.empty:
-
             dernier_poids = poids_data.iloc[-1]["Valeure Pesée"]
             date_dernier_poids = poids_data.iloc[-1]["Date"]
 
@@ -64,43 +56,8 @@ def afficher_bouc_tv(df, bouc):
         ]
 
         if not cs_data.empty:
-
             derniere_cs = cs_data.iloc[-1]["Valeur CS"]
             date_derniere_cs = cs_data.iloc[-1]["Date"]
-
-    # =========================
-    # FORMAT POIDS
-    # =========================
-
-    if dernier_poids is not None:
-
-        poids_txt = (
-            f"{float(dernier_poids):.1f} kg"
-            f"<br><small>"
-            f"{date_dernier_poids:%d/%m/%Y}"
-            f"</small>"
-        )
-
-    else:
-
-        poids_txt = "—"
-
-    # =========================
-    # FORMAT CS
-    # =========================
-
-    if derniere_cs is not None:
-
-        cs_txt = (
-            f"{float(derniere_cs):.1f} cm"
-            f"<br><small>"
-            f"{date_derniere_cs:%d/%m/%Y}"
-            f"</small>"
-        )
-
-    else:
-
-        cs_txt = "—"
 
     # =========================
     # PERFORMANCES
