@@ -844,7 +844,6 @@ elif mode == "Variables biologiques":
             data_bio[col],
             errors="coerce"
         )
-        st.write("COLONNES DATA_BIO :", data_bio.columns.tolist())
 
         # =========================
         # COURBES INDIVIDUELLES
