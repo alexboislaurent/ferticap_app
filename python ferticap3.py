@@ -347,7 +347,18 @@ score_par_bouc = df_filtered.pivot_table(
     aggfunc="mean"
 ).sort_index()
 
-# Année en cours
+# =========================
+# RANKING
+# =========================
+
+last_10_dates = sorted(
+    df_filtered["Date"].dropna().unique()
+)[-10:]
+
+df_last10 = df_filtered[
+    df_filtered["Date"].isin(last_10_dates)
+]
+
 current_year = pd.Timestamp.today().year
 
 df_year = df_filtered[
