@@ -634,53 +634,143 @@ def afficher_bouc_tv(df, bouc):
 
     with col_stats:
 
-        volume_txt = (
-            f"{volume_moyen:.1f} ml"
-            if pd.notna(volume_moyen)
-            else "—"
-        )
+    volume_txt = (
+        f"{volume_moyen:.1f} ml"
+        if pd.notna(volume_moyen)
+        else "—"
+    )
 
-        concentration_txt = (
-            f"{concentration_moyenne:.1f} B/ml"
-            if pd.notna(concentration_moyenne)
-            else "—"
-        )
+    concentration_txt = (
+        f"{concentration_moyenne:.1f} B/ml"
+        if pd.notna(concentration_moyenne)
+        else "—"
+    )
 
-        st.markdown(
-            f"""
-            <div style="
-                padding:30px;
-                border-radius:20px;
-                border:2px solid #ddd;
-                text-align:center;
-                margin-top:20px;
-            ">
+    poids_txt = (
+        f"{float(dernier_poids):.1f} kg"
+        if dernier_poids is not None
+        else "—"
+    )
 
-                <h2>📊 Performances</h2>
+    cs_txt = (
+        f"{float(derniere_cs):.1f} cm"
+        if derniere_cs is not None
+        else "—"
+    )
 
-                <h3>🦘 Nombre de sauts</h3>
-                <h1>{nb_sauts}</h1>
+    st.markdown(
+        f"""
+        <div class="bouc-stats">
 
-                <h3>💧 Volume moyen</h3>
-                <h1>{volume_txt}</h1>
+            <div class="stats-title">
+                📊 Performances
+            </div>
 
-                <h3>🔬 Concentration moyenne</h3>
-                <h1>{concentration_txt}</h1>
+            <div class="stats-grid">
 
-                <h3>⚖️ Dernier poids</h3>
-                <h1>{poids_txt}</h1>
+                <div class="stat-card">
+                    <div class="stat-icon">🦘</div>
+                    <div class="stat-label">Nombre de sauts</div>
+                    <div class="stat-value">{nb_sauts}</div>
+                </div>
 
-                <h3>📏 Dernière CS</h3>
-                <h1>{cs_txt}</h1>
+                <div class="stat-card">
+                    <div class="stat-icon">💧</div>
+                    <div class="stat-label">Volume moyen</div>
+                    <div class="stat-value">{volume_txt}</div>
+                </div>
 
-                <h3>📅 Nombre de collectes</h3>
-                <h1>{nb_collectes}</h1>
+                <div class="stat-card">
+                    <div class="stat-icon">🔬</div>
+                    <div class="stat-label">Concentration moyenne</div>
+                    <div class="stat-value">{concentration_txt}</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">⚖️</div>
+                    <div class="stat-label">Dernier poids</div>
+                    <div class="stat-value">{poids_txt}</div>
+                    {
+                        f'<div class="stat-date">{date_dernier_poids:%d/%m/%Y}</div>'
+                        if date_dernier_poids is not None
+                        else ''
+                    }
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">📏</div>
+                    <div class="stat-label">Dernière CS</div>
+                    <div class="stat-value">{cs_txt}</div>
+                    {
+                        f'<div class="stat-date">{date_derniere_cs:%d/%m/%Y}</div>'
+                        if date_derniere_cs is not None
+                        else ''
+                    }
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">📅</div>
+                    <div class="stat-label">Nombre de collectes</div>
+                    <div class="stat-value">{nb_collectes}</div>
+                </div>
 
             </div>
-            """,
-            unsafe_allow_html=True
-        )
 
+        </div>
+
+        <style>
+
+            .bouc-stats {{
+                padding: 20px;
+            }}
+
+            .stats-title {{
+                text-align: center;
+                font-size: 28px;
+                font-weight: 700;
+                margin-bottom: 20px;
+            }}
+
+            .stats-grid {{
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 14px;
+            }}
+
+            .stat-card {{
+                background: rgba(128, 128, 128, 0.08);
+                border: 1px solid rgba(128, 128, 128, 0.25);
+                border-radius: 16px;
+                padding: 18px 12px;
+                text-align: center;
+            }}
+
+            .stat-icon {{
+                font-size: 28px;
+                margin-bottom: 5px;
+            }}
+
+            .stat-label {{
+                font-size: 14px;
+                opacity: 0.75;
+                margin-bottom: 8px;
+            }}
+
+            .stat-value {{
+                font-size: 26px;
+                font-weight: 700;
+            }}
+
+            .stat-date {{
+                font-size: 12px;
+                opacity: 0.6;
+                margin-top: 4px;
+            }}
+
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
 # =========================
 # AFFICHAGE
 # =========================
