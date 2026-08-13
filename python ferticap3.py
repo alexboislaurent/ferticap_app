@@ -250,7 +250,6 @@ df_filtered = df[
     (df["Date"] >= pd.to_datetime(start_date)) &
     (df["Date"] <= pd.to_datetime(end_date))
 ]
-st.write("COLONNES DF_FILTERED :", df_filtered.columns.tolist())
 
 start_date, end_date = date_range
 
