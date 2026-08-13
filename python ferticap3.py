@@ -587,31 +587,31 @@ def afficher_bouc_tv(df, bouc):
     st.caption("Performances sur la période sélectionnée")
     
     # =========================
-    # COLONNES
-    # =========================
+# COLONNES
+# =========================
 
-    col_photo, col_stats = st.columns(
-        [1.3, 1]
-    )
+col_photo, col_stats = st.columns([1.3, 1])
 
-    # =========================
-    # PHOTO
-    # =========================
 
-    with col_photo:
+# =========================
+# PHOTO
+# =========================
 
-        if os.path.exists(photo):
+with col_photo:
 
-            st.image(
-                photo,
-                width=550
-            )
+    if os.path.exists(photo):
 
-        else:
+        st.image(
+            photo,
+            width=550
+        )
 
-            st.warning(
-                f"📷 Photo non disponible pour le bouc {bouc}"
-            )
+    else:
+
+        st.warning(
+            f"📷 Photo non disponible pour le bouc {bouc}"
+        )
+
 
 # =========================
 # STATISTIQUES
@@ -645,10 +645,7 @@ with col_stats:
         else "—"
     )
 
-    # =========================
-    # LIGNE 1
-    # =========================
-
+    # Ligne 1
     c1, c2 = st.columns(2)
 
     with c1:
@@ -663,10 +660,7 @@ with col_stats:
             nb_collectes
         )
 
-    # =========================
-    # LIGNE 2
-    # =========================
-
+    # Ligne 2
     c3, c4 = st.columns(2)
 
     with c3:
@@ -681,33 +675,30 @@ with col_stats:
             concentration_txt
         )
 
-    # =========================
-    # LIGNE 3
-    # =========================
-
+    # Ligne 3
     c5, c6 = st.columns(2)
 
     with c5:
         st.metric(
             "⚖️ Dernier poids",
-            poids_txt
-        )
-
-        if date_dernier_poids is not None:
-            st.caption(
-                f"Mesuré le {date_dernier_poids:%d/%m/%Y}"
+            poids_txt,
+            delta=(
+                f"{date_dernier_poids:%d/%m/%Y}"
+                if date_dernier_poids is not None
+                else None
             )
+        )
 
     with c6:
         st.metric(
             "📏 Dernière CS",
-            cs_txt
-        )
-
-        if date_derniere_cs is not None:
-            st.caption(
-                f"Mesurée le {date_derniere_cs:%d/%m/%Y}"
+            cs_txt,
+            delta=(
+                f"{date_derniere_cs:%d/%m/%Y}"
+                if date_derniere_cs is not None
+                else None
             )
+        )
 # =========================
 # AFFICHAGE
 # =========================
