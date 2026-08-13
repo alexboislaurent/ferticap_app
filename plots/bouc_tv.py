@@ -505,38 +505,73 @@ def afficher_bouc_tv(
 
         if tendances:
 
-            st.subheader(
-                "📈 Tendances récentes"
+    st.subheader(
+        "📈 Tendances récentes"
+    )
+
+    noms = {
+        "Volume semence (ml)": "💧 Volume",
+        "Concentration spz (B/ml)": "🔬 Concentration",
+        "% Mobiles": "🏃 Mobilité",
+        "Motiles": "🦘 Motilité",
+    }
+
+    variables_tendances = list(tendances.keys())
+
+    # Ligne 1
+    t1, t2 = st.columns(2)
+
+    for col, variable in zip(
+        [t1, t2],
+        variables_tendances[:2]
+    ):
+
+        variation = tendances[
+            variable
+        ]["variation"]
+
+        if variation > 5:
+            symbole = "🟢 ↑"
+
+        elif variation < -5:
+            symbole = "🔴 ↓"
+
+        else:
+            symbole = "🟡 →"
+
+        with col:
+            st.metric(
+                noms[variable],
+                f"{symbole} {variation:+.1f} %"
             )
 
-            noms = {
-                "Volume semence (ml)": "💧 Volume",
-                "Concentration spz (B/ml)": (
-                    "🔬 Concentration"
-                ),
-                "% Mobiles": "🏃 Mobilité",
-                "Motiles": "🦘 Motilité",
-            }
+    # Ligne 2
+    if len(variables_tendances) > 2:
 
-            for variable, valeur in tendances.items():
+        t3, t4 = st.columns(2)
 
-                variation = (
-                    valeur["variation"]
-                )
+        for col, variable in zip(
+            [t3, t4],
+            variables_tendances[2:4]
+        ):
 
-                if variation > 5:
-                    symbole = "🟢 ↑"
+            variation = tendances[
+                variable
+            ]["variation"]
 
-                elif variation < -5:
-                    symbole = "🔴 ↓"
+            if variation > 5:
+                symbole = "🟢 ↑"
 
-                else:
-                    symbole = "🟡 →"
+            elif variation < -5:
+                symbole = "🔴 ↓"
 
-                st.write(
-                    f"**{noms[variable]} :** "
-                    f"{symbole} "
-                    f"{variation:+.1f} %"
+            else:
+                symbole = "🟡 →"
+
+            with col:
+                st.metric(
+                    noms[variable],
+                    f"{symbole} {variation:+.1f} %"
                 )
 
         # =================================================
