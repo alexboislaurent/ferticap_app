@@ -128,7 +128,7 @@ def afficher_rations(worksheet):
                 + (
                     "Boucs"
                     if sexe == "♂"
-                    else "Chevrettes"
+                    else "Chèvres"
                 )
             )
 
