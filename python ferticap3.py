@@ -26,6 +26,7 @@ from plots.variables_biologiques import afficher_variables_biologiques
 from plots.variables_physio import afficher_variables_physio
 from plots.bouc_tv import afficher_bouc_tv
 from plots.rations import afficher_rations
+from plots.boucs_surveillance import afficher_boucs_surveillance
 
 # =========================
 # CONFIG PAGE
@@ -43,6 +44,7 @@ MODES_TV = [
     "Heatmap",
     "Bouc TV",
     "Rations",
+    "🚨 Boucs à surveiller",
     "Score global",
     "Bouc TV",
     "Score par bouc",
@@ -397,6 +399,12 @@ elif mode == "Score global":
     )
 
     st.pyplot(fig)
+
+elif mode == "🚨 Boucs à surveiller":
+
+    afficher_boucs_surveillance(
+        df
+    )
 
 
 elif mode == "Score par bouc":
